@@ -43,14 +43,26 @@ async def pick_model(client: AsyncOpenAI) -> str:
     return next((m for m in models if "nano" in m.lower()), models[0])
 
 
+class TokenBudgetExceeded(RuntimeError):
+    pass
+
+
 def llm_policy(client: AsyncOpenAI, model: str, retries: int = 2) -> Policy:
+    # Hard stop so a looping agent can never run up a bill. Shared by every replay in this process.
+    budget = int(os.getenv("REPLAY_TOKEN_BUDGET", "2000000"))
+    used = 0
+
     async def policy(ctx: dict) -> dict:
+        nonlocal used
         system, user = build_prompt(ctx)
         messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
         for attempt in range(retries + 1):
+            if used >= budget:
+                raise TokenBudgetExceeded(f"used {used} tokens, budget is {budget} (REPLAY_TOKEN_BUDGET)")
             resp = await client.chat.completions.create(
                 model=model, messages=messages, temperature=0.2, max_tokens=1500
             )
+            used += resp.usage.total_tokens if resp.usage else 0
             reply = resp.choices[0].message.content or ""
             try:
                 return parse_json(reply)["action"]
