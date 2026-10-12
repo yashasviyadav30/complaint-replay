@@ -7,6 +7,12 @@ document.querySelectorAll("[data-i18n]").forEach((el) => {
   el.textContent = t(el.dataset.i18n);
 });
 
+if (CFG.REPORT_WIDGET) {
+  const widget = document.createElement("script");
+  widget.src = CFG.REPORT_WIDGET;
+  document.head.append(widget);
+}
+
 const rupees = (n) => "₹" + n.toLocaleString("en-IN");
 const cartItems = () => [...state.cart].map(([id, qty]) => ({ id, qty }));
 

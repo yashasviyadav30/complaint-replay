@@ -3,23 +3,40 @@
 Run: uv run uvicorn server.app:app --port 8200
 """
 
+import asyncio
 import json
+import logging
+import os
+import random
 import re
 import time
 import uuid
 from collections import defaultdict, deque
+from contextlib import ExitStack, asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Literal
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
+
+from replay.bugs import BUGS, WORK_SHOP, Bug, inject, reset_workspace
+from replay.conditions import twin_condition
+from replay.investigate import investigate
+from replay.llm import Chat, make_client, pick_model
+from replay.shop import running_shop
 
 HERE = Path(__file__).resolve().parent
 STORE = HERE.parent / "results" / "complaints.jsonl"
+CASES_DIR = HERE.parent / "results" / "cases"
+DASHBOARD_DIST = HERE.parent / "dashboard" / "dist"
 RATE_LIMIT, RATE_WINDOW_S = 30, 60
+LIVE_PORT = int(os.getenv("LIVE_SHOP_PORT", "8100"))
+log = logging.getLogger("complaint-replay")
 
 # Personal data masked before a complaint is stored or shown to any model.
 PII_PATTERNS = (
@@ -61,7 +78,34 @@ class ComplaintIn(BaseModel):
     breadcrumbs: list[str] = Field(default_factory=list, max_length=20)
 
 
-app = FastAPI(title="Complaint Replay")
+live: dict = {"stack": None, "url": "", "bug": None}
+_tasks: set[asyncio.Task] = set()
+# ponytail: one investigation at a time (each drives a real browser); add a worker pool if demand grows.
+_investigation_lock = asyncio.Lock()
+
+
+def start_live(bug: Bug | None = None) -> None:
+    """(Re)start the live BadShop, optionally with one planted bug."""
+    if live["stack"]:
+        live["stack"].close()
+    shop = reset_workspace()
+    if bug:
+        inject(bug, shop)
+    stack = ExitStack()
+    live.update(url=stack.enter_context(running_shop(shop, LIVE_PORT)), stack=stack, bug=bug.id if bug else None)
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    load_dotenv()
+    if os.getenv("START_LIVE_SHOP", "1") == "1":
+        start_live()
+    yield
+    if live["stack"]:
+        live["stack"].close()
+
+
+app = FastAPI(title="Complaint Replay", lifespan=lifespan)
 # The widget runs on customers' sites, so complaints arrive cross-origin. No cookies are used.
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET", "POST"], allow_headers=["Content-Type"])
 _hits: dict[str, deque] = defaultdict(deque)
@@ -78,8 +122,31 @@ def rate_limited(ip: str) -> bool:
     return False
 
 
+def save_case(case: dict) -> None:
+    CASES_DIR.mkdir(parents=True, exist_ok=True)
+    (CASES_DIR / f"{case['id']}.json").write_text(json.dumps(case, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def complaint_for_model(record: dict) -> str:
+    said = record["text"] if record["kind"] == "spoken" else f"(The user typed nothing. Silent signal: {record['text']})"
+    trail = "; ".join(record["breadcrumbs"][-6:])
+    return f"{said}\nPage: {record['page']}." + (f" What the user did just before: {trail}." if trail else "")
+
+
+async def run_investigation(case: dict, env: dict) -> None:
+    async with _investigation_lock:
+        try:
+            client = make_client()
+            chat = Chat(client, await pick_model(client))
+            await investigate(case, twin_condition(env), live["url"], WORK_SHOP, client, chat, save_case)
+        except Exception as e:  # the case must show what went wrong instead of hanging in a stage
+            log.exception("investigation %s failed", case["id"])
+            case.update(stage="error", error=str(e)[:300])
+            save_case(case)
+
+
 @app.post("/api/complaints", status_code=201)
-def receive(complaint: ComplaintIn, request: Request) -> dict:
+async def receive(complaint: ComplaintIn, request: Request) -> dict:
     if rate_limited(request.client.host if request.client else "unknown"):
         raise HTTPException(429, "too many complaints, slow down")
     record = complaint.model_dump()
@@ -90,7 +157,41 @@ def receive(complaint: ComplaintIn, request: Request) -> dict:
     STORE.parent.mkdir(exist_ok=True)
     with STORE.open("a", encoding="utf-8") as f:
         f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    if live["url"]:
+        cond = twin_condition(record["env"])
+        case = {"id": record["id"], "created_at": record["received_at"], "kind": record["kind"],
+                "complaint": complaint_for_model(record), "said": record["text"],
+                "condition": {"label": cond.label, "persona": cond.persona}, "stage": "heard"}
+        save_case(case)
+        task = asyncio.create_task(run_investigation(case, record["env"]))
+        _tasks.add(task)
+        task.add_done_callback(_tasks.discard)
     return {"id": record["id"]}
+
+
+@app.get("/api/cases")
+def list_cases() -> list[dict]:
+    cases = [json.loads(p.read_text(encoding="utf-8")) for p in CASES_DIR.glob("*.json")] if CASES_DIR.exists() else []
+    return sorted(cases, key=lambda c: c.get("created_at", ""), reverse=True)
+
+
+@app.get("/api/live")
+def live_state() -> dict:
+    return {"url": live["url"], "broken": live["bug"] is not None}
+
+
+@app.post("/api/break")
+def break_it() -> dict:
+    """Plant a random bug in the live shop. The id stays secret: finding it is the tool's job."""
+    choices = [b for b in BUGS if b.id != live["bug"]]
+    start_live(random.choice(choices))
+    return {"broken": True}
+
+
+@app.post("/api/reset")
+def reset_live() -> dict:
+    start_live()
+    return {"broken": False}
 
 
 @app.get("/api/complaints")
@@ -103,3 +204,7 @@ def list_complaints() -> list[dict]:
 @app.get("/widget.js")
 def widget() -> FileResponse:
     return FileResponse(HERE / "widget.js", media_type="text/javascript")
+
+
+if DASHBOARD_DIST.exists():  # mounted last so /api routes win
+    app.mount("/", StaticFiles(directory=DASHBOARD_DIST, html=True), name="dashboard")

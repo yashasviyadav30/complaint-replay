@@ -18,6 +18,11 @@ AXE_JS = Path(__file__).resolve().parent.parent / "vendor" / "axe.min.js"
 DEVANAGARI = re.compile(r"[ऀ-ॿ]")
 MONEY_KEYS = ("total", "charged", "amount")
 SETTLE_TIMEOUT_S = 20
+OUR_PATHS = ("/widget.js", "/api/complaints")
+
+
+def is_ours(url: str) -> bool:
+    return urlparse(url).path in OUR_PATHS
 
 OBSERVE_JS = r"""
 () => {
@@ -89,8 +94,7 @@ class Session:
             await context.add_init_script(
                 f"addEventListener('DOMContentLoaded', () => document.documentElement.style.zoom = '{self.condition.zoom}')"
             )
-        if self.condition.network:
-            await context.route("**/*", self._delay)
+        await context.route("**/*", self._route)
         self.page = await context.new_page()
         self._listen()
         if self.condition.cpu_slowdown > 1:
@@ -103,10 +107,14 @@ class Session:
         await self._browser.close()
         await self._pw.stop()
 
-    async def _delay(self, route) -> None:
-        # CDP network throttling was silently ignored in tests (Playwright 1.63), so latency is
-        # added per request here. ponytail: latency only; add bandwidth limits if a bug needs them.
-        await asyncio.sleep(self.condition.network["latency"] / 1000)
+    async def _route(self, route) -> None:
+        if is_ours(route.request.url):  # the twin must never file complaints about itself
+            await route.fulfill(status=204, body="")
+            return
+        if self.condition.network:
+            # CDP network throttling was silently ignored in tests (Playwright 1.63), so latency is
+            # added per request here. ponytail: latency only; add bandwidth limits if a bug needs them.
+            await asyncio.sleep(self.condition.network["latency"] / 1000)
         await route.continue_()
 
     def _listen(self) -> None:
@@ -123,9 +131,13 @@ class Session:
 
     def _on_failed(self, request) -> None:
         self._track(-1)
+        if is_ours(request.url):
+            return
         self.add("request_failed", f"{request.method} {urlparse(request.url).path} failed ({request.failure})")
 
     async def _on_response(self, response) -> None:
+        if is_ours(response.url):
+            return
         path = urlparse(response.url).path
         if response.status >= 400:
             self.add("http_error", f"{response.request.method} {path} returned HTTP {response.status}")
