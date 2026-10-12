@@ -26,10 +26,11 @@ def make_client() -> AsyncOpenAI:
 def parse_json(text: str) -> dict:
     """Pull the JSON object out of a reply, ignoring reasoning blocks and stray prose."""
     text = THINK_BLOCK.sub("", text)
-    start, end = text.find("{"), text.rfind("}")
-    if start == -1 or end <= start:
+    start = text.find("{")
+    if start == -1:
         raise ValueError(f"no JSON object in model reply: {text[:200]!r}")
-    return json.loads(text[start : end + 1])
+    obj, _ = json.JSONDecoder().raw_decode(text[start:])  # first object only; models sometimes add a second
+    return obj
 
 
 async def nemotron_models(client: AsyncOpenAI) -> list[str]:
@@ -72,7 +73,8 @@ def llm_policy(client: AsyncOpenAI, model: str, retries: int = 2) -> Policy:
             used += resp.usage.total_tokens if resp.usage else 0
             reply = resp.choices[0].message.content or ""
             try:
-                return parse_json(reply)["action"]
+                data = parse_json(reply)
+                return {**data["action"], "why": str(data.get("thought", ""))[:200]}
             except (ValueError, KeyError) as e:
                 if attempt == retries:
                     return {"type": "verdict", "verdict": "not_reproduced", "summary": f"Model reply unreadable: {e}"}

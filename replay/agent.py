@@ -63,6 +63,7 @@ def scripted_policy(actions: list[dict]) -> Policy:
 SYSTEM_PROMPT = """You check whether a user's complaint about a website is real by replaying it in a real browser.
 The browser already runs under the user's real conditions (network, phone, language, assistive tech).
 Act like that user: try to do what they were trying to do. Test data: phone 9876543210; the OTP appears on screen after sending.
+If the complaint says what the user did (typed a wrong OTP, used a coupon code, opened the cart), do exactly that.
 
 Reply with ONE JSON object and nothing else: {"thought": "<one short sentence>", "action": {...}}
 Actions:
@@ -74,7 +75,8 @@ Rules:
 - "reproduced" MUST cite evidence ids from the Evidence list that match the complaint. Never invent evidence.
 - "ux_confusion": nothing is technically broken, but this user would get lost. Explain where.
 - "not_reproduced": you finished the user's task without hitting the problem.
-- Give the verdict as soon as matching evidence appears, or when you run out of ideas."""
+- The moment the Evidence list has an item that matches the complaint, give the "reproduced" verdict citing it.
+- If you finished the user's whole task and no matching evidence appeared, give "not_reproduced". Do not wander."""
 
 SIGHTED_ACTIONS = """{"type": "click", "target": <idx>}
 {"type": "fill", "target": <idx>, "text": "..."}"""

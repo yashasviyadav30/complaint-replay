@@ -27,7 +27,7 @@ async def run_one(bug, buggy: bool, policy) -> dict:
     with running_shop(shop) as url:
         r = await replay(url, bug.complaint, CONDITIONS[bug.condition], policy)
     return {
-        "verdict": r.verdict, "summary": r.summary, "cited": list(r.cited), "steps": len(r.steps),
+        "verdict": r.verdict, "summary": r.summary, "cited": list(r.cited), "steps": list(r.steps),
         "evidence": [{"id": e.id, "kind": e.kind, "detail": e.detail} for e in r.evidence],
     }
 

@@ -24,3 +24,8 @@ def test_unknown_verdict_becomes_not_reproduced() -> None:
 def test_parse_json_ignores_reasoning_and_prose() -> None:
     reply = '<think>{"not": "this"}</think>Sure! {"thought": "x", "action": {"type": "wait", "ms": 500}} done'
     assert parse_json(reply)["action"] == {"type": "wait", "ms": 500}
+
+
+def test_parse_json_takes_first_object_when_model_sends_two() -> None:
+    reply = '{"action": {"type": "click", "target": 1}} {"action": {"type": "wait"}}'
+    assert parse_json(reply)["action"] == {"type": "click", "target": 1}
