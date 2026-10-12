@@ -78,7 +78,7 @@ function productRow(p) {
   const name = LANG === "hi" ? p.name_hi : p.name;
   const li = document.createElement("li");
   const label = document.createElement("span");
-  label.textContent = `${name} — ${rupees(p.price)}`;
+  label.textContent = `${name} · ${rupees(p.price)}`;
   const add = document.createElement("button");
   add.textContent = t("add");
   add.setAttribute("aria-label", `${t("add")} ${name}`);

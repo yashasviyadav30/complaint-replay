@@ -101,10 +101,15 @@ def llm_policy(chat: Chat, retries: int = 2) -> Policy:
             reply = await chat(messages)
             try:
                 data = parse_json(reply)
-                return {**data["action"], "why": str(data.get("thought", ""))[:200]}
-            except (ValueError, KeyError) as e:
+                # Models sometimes drop the {"action": ...} wrapper; accept the bare action too.
+                action = data.get("action") if isinstance(data.get("action"), dict) else data
+                if "type" not in action:
+                    raise ValueError("reply has no action type")
+                return {**action, "why": str(data.get("thought", ""))[:200]}
+            except ValueError as e:
                 if attempt == retries:
-                    return {"type": "verdict", "verdict": "not_reproduced", "summary": f"Model reply unreadable: {e}"}
+                    # An unreadable reply must never decide the verdict: wait and let the next step retry.
+                    return {"type": "wait", "ms": 500, "why": f"model reply unreadable: {e}"}
                 messages += [
                     {"role": "assistant", "content": reply},
                     {"role": "user", "content": "Reply with only the JSON object described in the rules."},

@@ -1,0 +1,73 @@
+@import "tailwindcss";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+
+/* One accent (signal orange) for "a complaint needs attention". Green is reserved for the
+   real semantic state "fix proven". Everything else is neutral. */
+:root {
+  --bg: #f4f5f6;
+  --surface: #ffffff;
+  --surface-2: #eceef0;
+  --line: #d9dce0;
+  --text: #15171a;
+  --muted: #565c63;
+  --accent: #c2410c;
+  --accent-ink: #ffffff;
+  --ok: #17784b;
+  --ok-soft: #e3f3ea;
+  --add: #e3f3ea;
+  --del: #fbe7e1;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0c0d0f;
+    --surface: #141619;
+    --surface-2: #1b1e22;
+    --line: #2a2e34;
+    --text: #e9eaec;
+    --muted: #9ba1a8;
+    --accent: #ff7043;
+    --accent-ink: #1a0a04;
+    --ok: #46d394;
+    --ok-soft: #12291e;
+    --add: #10281c;
+    --del: #2e1610;
+  }
+}
+
+@theme {
+  --font-sans: "Geist Variable", system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, monospace;
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-ink: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-add: var(--add);
+  --color-del: var(--del);
+}
+
+html {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

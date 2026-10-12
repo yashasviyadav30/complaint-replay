@@ -94,6 +94,8 @@ The browser already runs under the user's real conditions (network, phone, langu
 Act like that user: try to do what they were trying to do. Test data: phone 9876543210; the OTP appears on screen after sending.
 If the complaint says what the user did (typed a wrong OTP, used a coupon code, opened the cart), do exactly that.
 Finish the whole flow the complaint is about: if it is about paying or being charged, actually press pay.
+If the complaint lists what the user did just before, repeat those steps in the same order (for example: type the
+coupon, then press Apply, then Pay) before any verdict. Skipping one of them can hide the bug.
 
 Reply with ONE JSON object and nothing else: {"thought": "<one short sentence>", "action": {...}}
 Actions:
@@ -105,7 +107,7 @@ Actions:
 Rules:
 - "reproduced" MUST cite evidence ids from the Evidence list that match the complaint. Never invent evidence.
 - "ux_confusion": nothing is technically broken, but this user would get lost. Explain where.
-- "not_reproduced": you finished the user's task without hitting the problem.
+- "not_reproduced": you repeated every step the user took and finished their task without hitting the problem.
 - The moment the Evidence list has an item that matches the complaint, give the "reproduced" verdict citing it.
 - If you finished the user's whole task and no matching evidence appeared, give "not_reproduced". Do not wander."""
 

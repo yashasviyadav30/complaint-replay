@@ -14,7 +14,8 @@
 
   const label = (el) => {
     const target = el.closest("button, a, [role=button], input, select, label") || el;
-    const text = target.getAttribute("aria-label") || target.innerText || target.placeholder || target.tagName;
+    const fieldLabel = target.labels && target.labels[0] && target.labels[0].innerText;
+    const text = target.getAttribute("aria-label") || fieldLabel || target.innerText || target.placeholder || target.tagName;
     return (text || "").trim().replace(/\s+/g, " ").slice(0, 60);
   };
 
