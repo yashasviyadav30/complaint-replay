@@ -40,7 +40,9 @@ CONDITIONS = {
             "A user on a cheap Android phone (360 px screen) with a slow 3G connection.",
             {"viewport": {"width": 360, "height": 740}, "is_mobile": True, "has_touch": True,
              "device_scale_factor": 2, "user_agent": ANDROID_UA},
-            network=SLOW_3G, cpu_slowdown=4,
+            # No CPU slowdown: Chrome's CPU throttling made page timers fire unpredictably late,
+            # so a real timeout bug reproduced only some of the time.
+            network=SLOW_3G,
         ),
         Condition(
             "hindi", "Hindi speaker", "A user whose phone is set to Hindi and who reads Hindi, not English.",

@@ -51,7 +51,7 @@ async def propose_fix(client: AsyncOpenAI, model: str, complaint: str, condition
         f"\n\nSource files:\n{read_sources(shop)}"
     )
     resp = await client.chat.completions.create(
-        model=model, temperature=0.1, max_tokens=4000,
+        model=model, temperature=0.1, max_tokens=12000,
         messages=[{"role": "system", "content": FIX_SYSTEM}, {"role": "user", "content": user}],
     )
     data = parse_json(resp.choices[0].message.content or "")
