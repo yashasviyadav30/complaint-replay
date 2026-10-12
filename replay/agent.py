@@ -69,7 +69,7 @@ async def replay(base_url: str, complaint: str, condition: Condition, policy: Po
             if action.get("type") == "verdict":
                 return judge(action, session.evidence, steps)
             last_result = await session.act(action)
-            steps.append({"action": action, "result": last_result})
+            steps.append({"action": action, "result": last_result, "target": session.last_target})
         await session.observe()
         if matcher and len(session.evidence) > judged:
             match = await matcher(complaint, list(session.evidence))

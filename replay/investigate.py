@@ -1,11 +1,11 @@
 """Investigate one complaint: reproduce on the live app, fix on a branch copy, then prove the fix.
 
 Stages, in order: heard -> reproducing -> reproduced | not_reproduced | ux_confusion
-                  -> fixing -> proving -> fixed | fix_unproven | fix_failed
+                  -> fixing -> proving -> fixed | fix_unproven | fix_failed -> guarded
 """
 
+import json
 import shutil
-import socket
 from collections.abc import Callable
 from pathlib import Path
 
@@ -15,6 +15,7 @@ from replay.agent import ReplayResult, replay
 from replay.bugs import ROOT
 from replay.conditions import Condition
 from replay.fix import apply_patch, pick_fix_model, propose_fix
+from replay.guard import build_guard, run_guard
 from replay.llm import Chat, llm_matcher, llm_policy
 from replay.shop import running_shop
 
@@ -34,12 +35,6 @@ def fix_proven(before: ReplayResult, after: ReplayResult) -> bool:
     """Proven = the same user no longer reproduces it, and the evidence kinds that proved the bug are gone."""
     proof_kinds = {e.kind for e in before.evidence if e.id in before.cited}
     return after.verdict != "reproduced" and not proof_kinds & {e.kind for e in after.evidence}
-
-
-def free_port() -> int:
-    with socket.socket() as s:
-        s.bind(("127.0.0.1", 0))
-        return s.getsockname()[1]
 
 
 async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
@@ -74,8 +69,28 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
     case["fix"] = {"model": fix_model, "explanation": patch.explanation, "diff": diff}
 
     stage("proving")
-    with running_shop(branch, port=free_port()) as url:
+    with running_shop(branch) as url:
         after = await replay(url, complaint, cond, policy, matcher)
     case["proof"] = as_dict(after)
-    stage("fixed" if fix_proven(before, after) else "fix_unproven")
+    if not fix_proven(before, after):
+        stage("fix_unproven")
+        return case
+    stage("fixed")
+
+    # Guard: the proof replay becomes a test. It must pass on the fix AND fail on the old code,
+    # otherwise it would not actually catch the bug coming back.
+    kinds = {e.kind for e in before.evidence if e.id in before.cited}
+    guard = build_guard(case["id"], complaint, cond, list(after.steps), kinds)
+    guard_file = branch / "guards" / f"{case['id']}.json"
+    guard_file.parent.mkdir(exist_ok=True)
+    guard_file.write_text(json.dumps(guard, ensure_ascii=False, indent=2), encoding="utf-8")
+    with running_shop(branch) as url:
+        on_fix = await run_guard(url, guard)
+    on_bug = await run_guard(live_url, guard)
+    case["guard"] = {"file": f"guards/{case['id']}.json", "steps": len(guard["steps"]),
+                     "passes_on_fix": on_fix["passed"], "catches_bug": not on_bug["passed"]}
+    if on_fix["passed"] and not on_bug["passed"]:
+        stage("guarded")
+    else:
+        update(case)
     return case

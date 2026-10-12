@@ -121,6 +121,23 @@ export function CaseDetail({ c, onClose }: { c: Case; onClose: () => void }) {
             </Section>
           )}
 
+          {c.guard && (
+            <Section title="The guard test">
+              <p className="mb-3 text-sm leading-relaxed text-ink">
+                The proven replay is saved as <code translate="no" className="font-mono text-[12px]">{c.guard.file}</code>,{" "}
+                {c.guard.steps} steps, no AI needed to run it.
+              </p>
+              <ul className="grid gap-1 text-sm">
+                <li className={c.guard.passes_on_fix ? "text-ok" : "text-accent"}>
+                  {c.guard.passes_on_fix ? "Passes on the fixed code" : "Does not pass on the fixed code"}
+                </li>
+                <li className={c.guard.catches_bug ? "text-ok" : "text-accent"}>
+                  {c.guard.catches_bug ? "Fails on the old code, so it catches the bug if it comes back" : "Does not catch the old bug"}
+                </li>
+              </ul>
+            </Section>
+          )}
+
           {c.replay && c.replay.steps.length > 0 && (
             <Section title="Every step the twin took">
               <Steps replay={c.replay} />

@@ -79,6 +79,8 @@ class Session:
         self._seen: set[tuple[str, str]] = set()
         self._inflight = 0
         self._amounts: list[tuple[str, str, float]] = []
+        self._labels: dict[int, str] = {}  # idx -> visible name, from the latest observe()
+        self.last_target: str | None = None  # name of the control the last action used
 
     def add(self, kind: str, detail: str) -> None:
         if (kind, detail) in self._seen:
@@ -170,6 +172,7 @@ class Session:
 
     async def observe(self) -> dict:
         obs = await self.page.evaluate(OBSERVE_JS)
+        self._labels = {e["idx"]: e["label"] for e in obs["elements"]}
         for o in obs["offscreen"]:
             self.add("offscreen_control", f"'{o['label']}' is outside the screen (left={o['left']}px, screen={o['vw']}px)")
         if self.condition.hindi:
@@ -191,6 +194,11 @@ class Session:
         """Run one action. Returns 'ok' or a short error the model can react to."""
         self.step += 1
         page, kind = self.page, action.get("type")
+        try:
+            idx = int(action.get("target", -1))
+        except (TypeError, ValueError):
+            idx = -1
+        self.last_target = self._labels.get(idx) if kind in ("click", "fill") else action.get("name")
         try:
             if kind == "click":
                 await page.locator(f'[data-bc-idx="{int(action["target"])}"]').click(timeout=5000)

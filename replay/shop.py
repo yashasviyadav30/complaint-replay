@@ -1,5 +1,6 @@
 """Start the BadShop working copy as a real server."""
 
+import socket
 import subprocess
 import sys
 import time
@@ -9,8 +10,16 @@ from contextlib import contextmanager
 from pathlib import Path
 
 
+def free_port() -> int:
+    with socket.socket() as s:
+        s.bind(("127.0.0.1", 0))
+        return s.getsockname()[1]
+
+
 @contextmanager
-def running_shop(shop_dir: Path, port: int = 8100) -> Iterator[str]:
+def running_shop(shop_dir: Path, port: int | None = None) -> Iterator[str]:
+    """A free port by default, so a test run never talks to the live shop by accident."""
+    port = port or free_port()
     url = f"http://127.0.0.1:{port}"
     proc = subprocess.Popen(
         [sys.executable, "-m", "uvicorn", "app:app", "--app-dir", str(shop_dir),
