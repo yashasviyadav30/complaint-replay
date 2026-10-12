@@ -31,14 +31,19 @@ uv run python risk_test.py                  # 5 bugs, buggy vs clean
 - Model ids that list but 404 on the free NVIDIA tier: llama-3.1-nemotron-ultra-253b-v1, nemotron-nano-3-30b-a3b.
   Working: nemotron-3-super-120b-a12b (navigator + fixer), nemotron-3.5-lightning, nemotron-3-ultra.
 
+- Dashboard (`dashboard/`, React + Vite + Tailwind v4, built into `dashboard/dist`, served by the service at /):
+  case board, case detail (evidence, fix diff, proof, steps), Break It / Reset. Guideline review done.
+- Real customer flow verified in Chrome (Oct 12): planted bug 15, used the shop, complained in the widget,
+  case went reproducing -> fixing -> proving -> fixed on its own.
+- Public repo: https://github.com/yashasviyadav30/complaint-replay (Apache 2.0 detected).
+
 ## Next, in order
 
-1. Dashboard (React + Vite + Tailwind, `dashboard/`): case board Heard -> Reproduced -> Fixed -> Guarded,
-   case detail with evidence cards, steps, diff, Break-it button.
+1. Guard: save each proven replay as a re-runnable test file (moves the case to "Guarded").
 2. Screenshots at evidence time (before/after) for the case detail and the video.
-3. Guard: save each proven replay as a re-runnable test file.
-4. Repeat-run success rates for the README (real numbers, not best run).
-5. GitHub public repo (Apache 2.0), deploy, README for judges, video, Devpost write-up.
+3. Repeat-run success rates for the README (real numbers, not best run).
+4. Deploy (dashboard + live shop must stay up through judging, Dec 1-15), README for judges,
+   video, Devpost write-up, feedback section.
 
 ## Blockers (user side)
 
