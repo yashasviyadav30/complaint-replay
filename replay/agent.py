@@ -8,7 +8,13 @@ from replay.browser import Evidence, Session
 from replay.conditions import Condition
 
 VERDICTS = ("reproduced", "ux_confusion", "not_reproduced")
+REPEAT_LIMIT = 3
 Policy = Callable[[dict], Awaitable[dict]]
+
+
+def page_signature(obs: dict) -> str:
+    """What a user would notice changing: visible text, controls, and accessibility tree."""
+    return json.dumps([obs["text"], [e["label"] for e in obs["elements"]], obs.get("aria", "")], ensure_ascii=False)
 
 
 @dataclass(frozen=True)
@@ -40,8 +46,17 @@ async def replay(base_url: str, complaint: str, condition: Condition, policy: Po
         steps: list[dict] = []
         last_result = "(page just opened)"
         judged = 0
+        prev_view = None
         for step in range(condition.max_steps):
             obs = await session.observe()
+            view = page_signature(obs)
+            if steps and view == prev_view:
+                last_result += " (nothing visible changed)"
+            recent = {json.dumps({k: v for k, v in s["action"].items() if k != "why"}, sort_keys=True)
+                      for s in steps[-REPEAT_LIMIT:]}
+            if len(steps) >= REPEAT_LIMIT and len(recent) == 1:
+                last_result += f" (you did the same action {REPEAT_LIMIT} times in a row; try something else)"
+            prev_view = view
             if matcher and len(session.evidence) > judged:
                 judged = len(session.evidence)
                 match = await matcher(complaint, list(session.evidence))

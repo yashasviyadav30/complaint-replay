@@ -27,9 +27,12 @@ OBSERVE_JS = r"""
     return s.display !== 'none' && s.visibility !== 'hidden' && r.width > 0 && r.height > 0
       && (el.offsetParent !== null || s.position === 'fixed');
   };
-  const name = (el) => (el.getAttribute('aria-label') || el.innerText || el.value
-    || el.placeholder || el.title || (el.labels && el.labels[0] && el.labels[0].innerText) || '')
-    .trim().replace(/\s+/g, ' ').slice(0, 60);
+  // aria-label plus visible text, so a sighted user's view of badges/counts ("Cart 3") is kept
+  const name = (el) => {
+    const parts = [el.getAttribute('aria-label'), el.innerText || el.value || el.placeholder || el.title
+      || (el.labels && el.labels[0] && el.labels[0].innerText)].map((s) => (s || '').trim()).filter(Boolean);
+    return [...new Set(parts)].join(' ').replace(/\s+/g, ' ').slice(0, 60);
+  };
   document.querySelectorAll('[data-bc-idx]').forEach((el) => el.removeAttribute('data-bc-idx'));
   const elements = [], offscreen = [];
   let i = 0;

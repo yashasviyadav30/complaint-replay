@@ -28,6 +28,30 @@ class Condition:
         return self.context.get("locale", "").startswith("hi")
 
 
+SLOW_TYPES = {"slow-2g": 3000, "2g": 3000, "3g": 1500}  # added latency (ms) when only the type is known
+MAX_TWIN_LATENCY_MS = 5000
+
+
+def twin_condition(env: dict) -> Condition:
+    """A browser setup that copies the conditions the widget captured from a real user."""
+    vp = env["viewport"]
+    mobile = bool(env.get("touch")) or "Mobile" in env.get("user_agent", "")
+    lang = env.get("language") or "en"
+    rtt = env.get("rtt_ms")
+    latency = min(rtt, MAX_TWIN_LATENCY_MS) if rtt else SLOW_TYPES.get(env.get("effective_type") or "", 0)
+    context = {"viewport": {"width": vp["width"], "height": vp["height"]}, "locale": lang,
+               "is_mobile": mobile, "has_touch": mobile}
+    if env.get("user_agent"):
+        context["user_agent"] = env["user_agent"]
+    parts = [f"{vp['width']}x{vp['height']} {'phone' if mobile else 'screen'}", f"language {lang}"]
+    if latency:
+        parts.append(f"{env.get('effective_type') or 'slow'} network (+{latency} ms per request)")
+    return Condition(
+        "twin", "Twin of the reporter", "The real user who reported this: " + ", ".join(parts) + ".",
+        context, network={"latency": latency} if latency else None,
+    )
+
+
 CONDITIONS = {
     c.key: c
     for c in (
