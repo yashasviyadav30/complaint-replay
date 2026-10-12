@@ -1,0 +1,105 @@
+"""The replay loop: observe -> policy picks one action -> act, until a verdict."""
+
+import json
+from collections.abc import Awaitable, Callable
+from dataclasses import dataclass
+
+from replay.browser import Evidence, Session
+from replay.conditions import Condition
+
+VERDICTS = ("reproduced", "ux_confusion", "not_reproduced")
+Policy = Callable[[dict], Awaitable[dict]]
+
+
+@dataclass(frozen=True)
+class ReplayResult:
+    verdict: str
+    summary: str
+    cited: tuple[str, ...]
+    evidence: tuple[Evidence, ...]
+    steps: tuple[dict, ...]
+
+
+def judge(action: dict, evidence: list[Evidence], steps: list[dict]) -> ReplayResult:
+    """No evidence, no verdict: 'reproduced' must cite evidence the browser really collected."""
+    known = {e.id for e in evidence}
+    cited = tuple(i for i in action.get("evidence", []) if i in known)
+    verdict = action.get("verdict") if action.get("verdict") in VERDICTS else "not_reproduced"
+    summary = str(action.get("summary", ""))
+    if verdict == "reproduced" and not cited:
+        verdict, summary = "not_reproduced", summary + " [Downgraded: no machine evidence was cited.]"
+    return ReplayResult(verdict, summary, cited, tuple(evidence), tuple(steps))
+
+
+async def replay(base_url: str, complaint: str, condition: Condition, policy: Policy) -> ReplayResult:
+    async with Session(base_url, condition) as session:
+        steps: list[dict] = []
+        last_result = "(page just opened)"
+        for step in range(condition.max_steps):
+            obs = await session.observe()
+            action = await policy({
+                "complaint": complaint, "condition": condition, "obs": obs, "step": step,
+                "evidence": list(session.evidence), "steps": steps, "last_result": last_result,
+            })
+            if action.get("type") == "verdict":
+                return judge(action, session.evidence, steps)
+            last_result = await session.act(action)
+            steps.append({"action": action, "result": last_result})
+        await session.observe()
+        stop = {"verdict": "not_reproduced", "summary": f"Stopped after {condition.max_steps} steps."}
+        return judge(stop, session.evidence, steps)
+
+
+def scripted_policy(actions: list[dict]) -> Policy:
+    """Replays fixed actions, then stops. Used by tests to check bugs without a model."""
+    queue = list(actions)
+
+    async def policy(_: dict) -> dict:
+        return queue.pop(0) if queue else {"type": "verdict", "verdict": "not_reproduced", "summary": "script done"}
+
+    return policy
+
+
+SYSTEM_PROMPT = """You check whether a user's complaint about a website is real by replaying it in a real browser.
+The browser already runs under the user's real conditions (network, phone, language, assistive tech).
+Act like that user: try to do what they were trying to do. Test data: phone 9876543210; the OTP appears on screen after sending.
+
+Reply with ONE JSON object and nothing else: {"thought": "<one short sentence>", "action": {...}}
+Actions:
+{ACTIONS}
+{"type": "wait", "ms": <up to 10000>}
+{"type": "verdict", "verdict": "reproduced" | "ux_confusion" | "not_reproduced", "evidence": ["E1", ...], "summary": "<2 sentences>"}
+
+Rules:
+- "reproduced" MUST cite evidence ids from the Evidence list that match the complaint. Never invent evidence.
+- "ux_confusion": nothing is technically broken, but this user would get lost. Explain where.
+- "not_reproduced": you finished the user's task without hitting the problem.
+- Give the verdict as soon as matching evidence appears, or when you run out of ideas."""
+
+SIGHTED_ACTIONS = """{"type": "click", "target": <idx>}
+{"type": "fill", "target": <idx>, "text": "..."}"""
+SCREEN_READER_ACTIONS = """{"type": "click_role", "role": "button", "name": "<exact accessible name>"}
+{"type": "fill_role", "role": "textbox", "name": "<exact accessible name>", "text": "..."}
+You can only use controls that have a name in the accessibility tree."""
+
+
+def build_prompt(ctx: dict) -> tuple[str, str]:
+    cond: Condition = ctx["condition"]
+    actions = SCREEN_READER_ACTIONS if cond.screen_reader else SIGHTED_ACTIONS
+    obs = ctx["obs"]
+    page = (
+        f"Accessibility tree (what the screen reader announces):\n{obs['aria']}"
+        if cond.screen_reader
+        else "Controls you can see:\n" + "\n".join(
+            f"[{e['idx']}] {e['tag']} '{e['label']}'" + (f" value='{e['value']}'" if e["value"] else "")
+            for e in obs["elements"]
+        ) + f"\n\nVisible text:\n{obs['text']}"
+    )
+    evidence = "\n".join(f"{e.id} [{e.kind}] {e.detail}" for e in ctx["evidence"]) or "(none yet)"
+    history = "\n".join(json.dumps(s["action"]) + " -> " + s["result"] for s in ctx["steps"][-6:]) or "(none)"
+    user = (
+        f"Complaint: {ctx['complaint']}\nUser: {cond.persona}\n"
+        f"Step {ctx['step'] + 1} of {cond.max_steps}. Last action result: {ctx['last_result']}\n\n"
+        f"Recent actions:\n{history}\n\n{page}\n\nEvidence collected by the browser:\n{evidence}"
+    )
+    return SYSTEM_PROMPT.replace("{ACTIONS}", actions), user

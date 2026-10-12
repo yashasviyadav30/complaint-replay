@@ -1,0 +1,3 @@
+window.BADSHOP_CONFIG = {
+  OTP_TIMEOUT_MS: 30000,
+};

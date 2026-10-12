@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BadShop</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="config.js"></script>
+  <script src="i18n.js"></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="top">
+    <h1 class="brand">BadShop</h1>
+    <button id="cart-btn" class="icon-btn" aria-label="Cart" hidden>
+      <svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM5.2 4H2V2h4.8l.9 2H22l-3.4 8.2a2 2 0 0 1-1.8 1.3H8.1l-1 1.8h12.4v2H4l2.6-4.6L5.2 4Z"/></svg>
+      <span id="cart-count" class="badge" aria-hidden="true">0</span>
+    </button>
+  </header>
+
+  <main>
+    <section id="login" class="card">
+      <h2 data-i18n="loginTitle"></h2>
+      <label for="phone" data-i18n="phoneLabel"></label>
+      <input id="phone" inputmode="numeric" autocomplete="tel" maxlength="10">
+      <button id="send-otp" class="primary" data-i18n="sendOtp"></button>
+      <div id="otp-step" hidden>
+        <label for="otp" data-i18n="otpLabel"></label>
+        <input id="otp" inputmode="numeric" maxlength="6" autocomplete="one-time-code">
+        <button id="verify-otp" class="primary" data-i18n="verify"></button>
+      </div>
+      <p id="login-status" class="status" role="status"></p>
+      <p id="login-error" class="error" role="alert"></p>
+    </section>
+
+    <section id="shop" class="card" hidden>
+      <h2 data-i18n="shopTitle"></h2>
+      <ul id="products" class="products"></ul>
+    </section>
+
+    <section id="cart" class="card" hidden>
+      <h2 data-i18n="cartTitle"></h2>
+      <ul id="cart-items" class="cart-items"></ul>
+      <label for="coupon" data-i18n="couponLabel"></label>
+      <div class="coupon-row">
+        <input id="coupon" autocomplete="off">
+        <button id="apply-coupon" data-i18n="apply"></button>
+      </div>
+      <div class="pay-row">
+        <p class="total"><span data-i18n="total"></span> <strong id="total">₹0</strong></p>
+        <button id="save-later" data-i18n="saveLater"></button>
+        <button id="pay" class="primary" data-i18n="pay"></button>
+      </div>
+      <p id="cart-error" class="error" role="alert"></p>
+    </section>
+
+    <section id="done" class="card" hidden>
+      <h2 data-i18n="thanks"></h2>
+      <p><span data-i18n="charged"></span> <strong id="charged"></strong></p>
+    </section>
+  </main>
+</body>
+</html>
