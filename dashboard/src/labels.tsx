@@ -38,10 +38,12 @@ export const whatTheySaid = (c: Case) => c.said || c.complaint;
 
 export const twinSummary = (c: Case) => c.condition.persona.replace(/^The real user who reported this:\s*/, "").replace(/\.$/, "");
 
+const RELATIVE = new Intl.RelativeTimeFormat(undefined, { style: "narrow", numeric: "auto" });
+
 export function timeAgo(iso: string, now = Date.now()): string {
   const s = Math.max(0, Math.round((now - new Date(iso).getTime()) / 1000));
-  if (s < 60) return `${s}s ago`;
-  if (s < 3600) return `${Math.round(s / 60)}m ago`;
-  if (s < 86400) return `${Math.round(s / 3600)}h ago`;
-  return new Date(iso).toLocaleDateString();
+  if (s < 60) return RELATIVE.format(-s, "second");
+  if (s < 3600) return RELATIVE.format(-Math.round(s / 60), "minute");
+  if (s < 86400) return RELATIVE.format(-Math.round(s / 3600), "hour");
+  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(iso));
 }

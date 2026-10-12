@@ -18,7 +18,7 @@ function EvidenceList({ replay }: { replay: Replay }) {
               <span className={cited ? "font-semibold text-accent" : "text-muted"}>{EVIDENCE[e.kind] ?? e.kind}</span>
               <span className="font-mono text-muted">{cited ? "cited as proof" : `step ${e.step}`}</span>
             </p>
-            <p className="mt-1 break-words font-mono text-[12px] text-ink">{e.detail}</p>
+            <p translate="no" className="mt-1 break-words font-mono text-[12px] text-ink">{e.detail}</p>
           </li>
         );
       })}
@@ -69,7 +69,7 @@ export function CaseDetail({ c, onClose }: { c: Case; onClose: () => void }) {
         initial={{ x: 40, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 32 }}
-        className="relative flex h-full w-full max-w-2xl flex-col overflow-y-auto border-l border-line bg-bg"
+        className="relative flex h-full w-full max-w-2xl flex-col overflow-y-auto overscroll-contain border-l border-line bg-bg"
       >
         <header className="sticky top-0 flex items-start justify-between gap-4 border-b border-line bg-bg/95 px-6 py-4 backdrop-blur">
           <div className="min-w-0">

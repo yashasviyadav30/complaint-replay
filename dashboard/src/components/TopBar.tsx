@@ -20,7 +20,7 @@ export function TopBar({ live, busy, onBreak, onReset }: Props) {
           {live?.url && (
             <a href={live.url} target="_blank" rel="noreferrer"
               className="hidden items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-muted hover:bg-surface-2 hover:text-ink sm:inline-flex">
-              Open the shop <ArrowSquareOut size={14} aria-hidden="true" />
+              Open Shop <ArrowSquareOut size={14} aria-hidden="true" />
             </a>
           )}
           {live?.broken && (
@@ -31,7 +31,7 @@ export function TopBar({ live, busy, onBreak, onReset }: Props) {
           )}
           <button type="button" onClick={onBreak} disabled={busy || !live}
             className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-accent px-3 py-2 text-sm font-semibold text-accent-ink transition-transform hover:brightness-110 active:scale-[0.98] disabled:opacity-50">
-            <DiceFive size={16} weight="bold" aria-hidden="true" /> Break it
+            <DiceFive size={16} weight="bold" aria-hidden="true" /> Break It
           </button>
         </div>
       </div>

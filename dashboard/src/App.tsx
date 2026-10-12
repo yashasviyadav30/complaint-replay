@@ -51,7 +51,7 @@ export default function App() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="min-h-[100dvh]">
+      <div className="min-h-[100dvh]" inert={!!open}>
         <TopBar
           live={live}
           busy={busy}
@@ -69,10 +69,15 @@ export default function App() {
 
           {cases === null && !error && <BoardSkeleton />}
           {cases?.length === 0 && <EmptyState shopUrl={live?.url} />}
-          {cases && cases.length > 0 && <Board cases={cases} now={now} onOpen={setOpenId} />}
+          {cases && cases.length > 0 && (
+            <>
+              <h1 className="sr-only">Cases</h1>
+              <Board cases={cases} now={now} onOpen={setOpenId} />
+            </>
+          )}
         </main>
-        {open && <CaseDetail c={open} onClose={() => setOpenId(null)} />}
       </div>
+      {open && <CaseDetail c={open} onClose={() => setOpenId(null)} />}
     </MotionConfig>
   );
 }
@@ -82,12 +87,12 @@ function EmptyState({ shopUrl }: { shopUrl?: string }) {
     <section className="max-w-xl py-16">
       <h1 className="text-3xl font-semibold tracking-tight text-ink md:text-4xl">No complaints yet.</h1>
       <p className="mt-3 text-base leading-relaxed text-muted">
-        Press Break it to plant a secret bug, then use the shop like a customer. Complain with the
+        Press Break It to plant a secret bug, then use the shop like a customer. Complain with the
         Report a problem button, or just get frustrated. Every case lands here.
       </p>
       {shopUrl && (
         <a href={shopUrl} target="_blank" rel="noreferrer" className="mt-6 inline-block text-sm font-semibold text-accent hover:underline">
-          Open the shop
+          Open Shop
         </a>
       )}
     </section>

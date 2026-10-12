@@ -1,7 +1,7 @@
 export function Diff({ text }: { text: string }) {
   const lines = text.replace(/\n$/, "").split("\n");
   return (
-    <pre className="overflow-x-auto rounded-lg border border-line bg-surface-2 py-2 font-mono text-[12px] leading-relaxed">
+    <pre translate="no" className="overflow-x-auto rounded-lg border border-line bg-surface-2 py-2 font-mono text-[12px] leading-relaxed">
       {lines.map((line, i) => {
         const tone =
           line.startsWith("+++") || line.startsWith("---") ? "text-muted"
