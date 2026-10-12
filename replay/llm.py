@@ -9,14 +9,18 @@ from openai import AsyncOpenAI
 from replay.agent import Policy, build_prompt
 
 DEFAULT_BASE_URL = "https://api.tokenfactory.nebius.com/v1/"
+# Free, card-less NVIDIA endpoint for development. The submission must use Token Factory.
+NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1"
 THINK_BLOCK = re.compile(r"<think>.*?</think>", re.DOTALL)
 
 
 def make_client() -> AsyncOpenAI:
-    return AsyncOpenAI(
-        base_url=os.getenv("NEBIUS_BASE_URL") or DEFAULT_BASE_URL,
-        api_key=os.environ["NEBIUS_API_KEY"],
-    )
+    if os.getenv("NEBIUS_API_KEY"):
+        return AsyncOpenAI(base_url=os.getenv("NEBIUS_BASE_URL") or DEFAULT_BASE_URL,
+                           api_key=os.environ["NEBIUS_API_KEY"])
+    if os.getenv("NVIDIA_API_KEY"):
+        return AsyncOpenAI(base_url=NVIDIA_BASE_URL, api_key=os.environ["NVIDIA_API_KEY"])
+    raise RuntimeError("set NEBIUS_API_KEY (Token Factory) or NVIDIA_API_KEY (build.nvidia.com) in .env")
 
 
 def parse_json(text: str) -> dict:
