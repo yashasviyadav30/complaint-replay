@@ -56,10 +56,13 @@ BUGS = (
 BUGS_BY_ID = {b.id: b for b in BUGS}
 
 
-def reset_workspace() -> Path:
-    shutil.rmtree(WORK_SHOP, ignore_errors=True)
-    shutil.copytree(CLEAN_SHOP, WORK_SHOP, ignore=shutil.ignore_patterns("__pycache__"))
-    return WORK_SHOP
+LIVE_SHOP = ROOT / "workspace" / "live" / "badshop"  # the live service's copy, never touched by CLI or tests
+
+
+def reset_workspace(dest: Path = WORK_SHOP) -> Path:
+    shutil.rmtree(dest, ignore_errors=True)
+    shutil.copytree(CLEAN_SHOP, dest, ignore=shutil.ignore_patterns("__pycache__"))
+    return dest
 
 
 def inject(bug: Bug, shop: Path = WORK_SHOP) -> None:

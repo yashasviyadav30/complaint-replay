@@ -24,7 +24,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from replay.bugs import BUGS, WORK_SHOP, Bug, inject, reset_workspace
+from replay.bugs import BUGS, LIVE_SHOP, Bug, inject, reset_workspace
 from replay.conditions import twin_condition
 from replay.investigate import investigate
 from replay.llm import Chat, make_client, pick_model
@@ -88,7 +88,7 @@ def start_live(bug: Bug | None = None) -> None:
     """(Re)start the live BadShop, optionally with one planted bug."""
     if live["stack"]:
         live["stack"].close()
-    shop = reset_workspace()
+    shop = reset_workspace(LIVE_SHOP)
     if bug:
         inject(bug, shop)
     stack = ExitStack()
@@ -138,7 +138,7 @@ async def run_investigation(case: dict, env: dict) -> None:
         try:
             client = make_client()
             chat = Chat(client, await pick_model(client))
-            await investigate(case, twin_condition(env), live["url"], WORK_SHOP, client, chat, save_case)
+            await investigate(case, twin_condition(env), live["url"], LIVE_SHOP, client, chat, save_case)
         except Exception as e:  # the case must show what went wrong instead of hanging in a stage
             log.exception("investigation %s failed", case["id"])
             case.update(stage="error", error=str(e)[:300])

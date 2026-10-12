@@ -37,11 +37,17 @@ uv run python risk_test.py                  # 5 bugs, buggy vs clean
   case went reproducing -> fixing -> proving -> fixed on its own.
 - Public repo: https://github.com/yashasviyadav30/complaint-replay (Apache 2.0 detected).
 
+- Guard step (`replay/guard.py`): proof replay saved as JSON test in the fix branch; must pass on the fix
+  AND fail on the old code -> stage "guarded". Verified on bug 15 (Oct 12).
+- Live service uses its own folder `workspace/live/badshop`; CLI/tests use `workspace/badshop`;
+  temp shops get free ports. Never run the bench while relying on a stale live process.
+- `bench.py N`: N runs per bug + clean-shop false-alarm check -> `results/bench.md` (first run started Oct 12).
+
 ## Next, in order
 
-1. Guard: save each proven replay as a re-runnable test file (moves the case to "Guarded").
+1. Put `results/bench.md` numbers in the README (real numbers, not best run).
 2. Screenshots at evidence time (before/after) for the case detail and the video.
-3. Repeat-run success rates for the README (real numbers, not best run).
+3. Two more silent-signal checks end to end (rage click on off-screen Pay, JS error).
 4. Deploy (dashboard + live shop must stay up through judging, Dec 1-15), README for judges,
    video, Devpost write-up, feedback section.
 
