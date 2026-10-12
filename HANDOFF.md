@@ -45,7 +45,7 @@ uv run python risk_test.py                  # 5 bugs, buggy vs clean
 
 ## Next, in order
 
-1. Put `results/bench.md` numbers in the README (real numbers, not best run).
+1. When the Token Factory key arrives: re-run `bench.py 3` on Token Factory and update the README results + model note.
 2. Screenshots at evidence time (before/after) for the case detail and the video.
 3. Two more silent-signal checks end to end (rage click on off-screen Pay, JS error).
 4. Deploy (dashboard + live shop must stay up through judging, Dec 1-15), README for judges,
