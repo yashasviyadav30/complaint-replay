@@ -31,12 +31,22 @@ def judge(action: dict, evidence: list[Evidence], steps: list[dict]) -> ReplayRe
     return ReplayResult(verdict, summary, cited, tuple(evidence), tuple(steps))
 
 
-async def replay(base_url: str, complaint: str, condition: Condition, policy: Policy) -> ReplayResult:
+Matcher = Callable[[str, list[Evidence]], Awaitable[dict]]
+
+
+async def replay(base_url: str, complaint: str, condition: Condition, policy: Policy,
+                 matcher: Matcher | None = None) -> ReplayResult:
     async with Session(base_url, condition) as session:
         steps: list[dict] = []
         last_result = "(page just opened)"
+        judged = 0
         for step in range(condition.max_steps):
             obs = await session.observe()
+            if matcher and len(session.evidence) > judged:
+                judged = len(session.evidence)
+                match = await matcher(complaint, list(session.evidence))
+                if match.get("evidence"):
+                    return judge({"verdict": "reproduced", **match}, session.evidence, steps)
             action = await policy({
                 "complaint": complaint, "condition": condition, "obs": obs, "step": step,
                 "evidence": list(session.evidence), "steps": steps, "last_result": last_result,
@@ -46,6 +56,10 @@ async def replay(base_url: str, complaint: str, condition: Condition, policy: Po
             last_result = await session.act(action)
             steps.append({"action": action, "result": last_result})
         await session.observe()
+        if matcher and len(session.evidence) > judged:
+            match = await matcher(complaint, list(session.evidence))
+            if match.get("evidence"):
+                return judge({"verdict": "reproduced", **match}, session.evidence, steps)
         stop = {"verdict": "not_reproduced", "summary": f"Stopped after {condition.max_steps} steps."}
         return judge(stop, session.evidence, steps)
 
@@ -64,11 +78,13 @@ SYSTEM_PROMPT = """You check whether a user's complaint about a website is real 
 The browser already runs under the user's real conditions (network, phone, language, assistive tech).
 Act like that user: try to do what they were trying to do. Test data: phone 9876543210; the OTP appears on screen after sending.
 If the complaint says what the user did (typed a wrong OTP, used a coupon code, opened the cart), do exactly that.
+Finish the whole flow the complaint is about: if it is about paying or being charged, actually press pay.
 
 Reply with ONE JSON object and nothing else: {"thought": "<one short sentence>", "action": {...}}
 Actions:
 {ACTIONS}
 {"type": "wait", "ms": <up to 10000>}
+{"type": "scroll", "direction": "down" | "up"}
 {"type": "verdict", "verdict": "reproduced" | "ux_confusion" | "not_reproduced", "evidence": ["E1", ...], "summary": "<2 sentences>"}
 
 Rules:

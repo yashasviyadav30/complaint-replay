@@ -13,19 +13,19 @@ from dotenv import load_dotenv
 from replay.agent import replay
 from replay.bugs import BUGS, inject, reset_workspace
 from replay.conditions import CONDITIONS
-from replay.llm import llm_policy, make_client, pick_model
+from replay.llm import Chat, llm_matcher, llm_policy, make_client, pick_model
 from replay.shop import running_shop
 
 RESULTS = Path(__file__).parent / "results" / "risk_test.json"
 PASS_MIN_REPRODUCED = 3
 
 
-async def run_one(bug, buggy: bool, policy) -> dict:
+async def run_one(bug, buggy: bool, policy, matcher) -> dict:
     shop = reset_workspace()
     if buggy:
         inject(bug, shop)
     with running_shop(shop) as url:
-        r = await replay(url, bug.complaint, CONDITIONS[bug.condition], policy)
+        r = await replay(url, bug.complaint, CONDITIONS[bug.condition], policy, matcher)
     return {
         "verdict": r.verdict, "summary": r.summary, "cited": list(r.cited), "steps": list(r.steps),
         "evidence": [{"id": e.id, "kind": e.kind, "detail": e.detail} for e in r.evidence],
@@ -36,12 +36,13 @@ async def main() -> None:
     load_dotenv()
     client = make_client()
     model = await pick_model(client)
-    policy = llm_policy(client, model)
+    chat = Chat(client, model)
+    policy, matcher = llm_policy(chat), llm_matcher(chat)
     print(f"Model: {model}\n")
     rows = []
     for bug in BUGS:
-        buggy = await run_one(bug, True, policy)
-        clean = await run_one(bug, False, policy)
+        buggy = await run_one(bug, True, policy, matcher)
+        clean = await run_one(bug, False, policy, matcher)
         rows.append({"bug": bug.id, "title": bug.title, "condition": bug.condition, "buggy": buggy, "clean": clean})
         print(f"Bug {bug.id:>2} [{bug.condition}] buggy={buggy['verdict']:<15} clean={clean['verdict']:<15} {bug.title}")
 

@@ -6,7 +6,7 @@ import re
 
 from openai import AsyncOpenAI
 
-from replay.agent import Policy, build_prompt
+from replay.agent import Matcher, Policy, build_prompt
 
 DEFAULT_BASE_URL = "https://api.tokenfactory.nebius.com/v1/"
 # Free, card-less NVIDIA endpoint for development. The submission must use Token Factory.
@@ -52,26 +52,53 @@ class TokenBudgetExceeded(RuntimeError):
     pass
 
 
-def llm_policy(client: AsyncOpenAI, model: str, retries: int = 2) -> Policy:
-    # Hard stop so a looping agent can never run up a bill. Shared by every replay in this process.
-    budget = int(os.getenv("REPLAY_TOKEN_BUDGET", "2000000"))
-    used = 0
+class Chat:
+    """One model plus a hard token budget, so a looping agent can never run up a bill."""
 
+    def __init__(self, client: AsyncOpenAI, model: str):
+        self.client, self.model = client, model
+        self.budget = int(os.getenv("REPLAY_TOKEN_BUDGET", "2000000"))
+        self.used = 0
+
+    async def __call__(self, messages: list[dict]) -> str:
+        if self.used >= self.budget:
+            raise TokenBudgetExceeded(f"used {self.used} tokens, budget is {self.budget} (REPLAY_TOKEN_BUDGET)")
+        # Thinking off: one step at a time doesn't need it, and long thinking used up
+        # max_tokens before any answer (empty replies in the first risk test).
+        resp = await self.client.chat.completions.create(
+            model=self.model, messages=messages, temperature=0.2, max_tokens=1500,
+            extra_body={"chat_template_kwargs": {"enable_thinking": False}},
+        )
+        self.used += resp.usage.total_tokens if resp.usage else 0
+        return resp.choices[0].message.content or ""
+
+
+MATCH_SYSTEM = """You decide whether machine evidence from a real browser proves a user's complaint.
+Reply with ONE JSON object and nothing else: {"evidence": ["E1", ...], "summary": "<two sentences>"}
+List only ids whose detail clearly shows the problem the user complained about.
+Unrelated errors do not count. If nothing matches, reply {"evidence": [], "summary": ""}."""
+
+
+def llm_matcher(chat: Chat) -> Matcher:
+    async def matcher(complaint: str, evidence: list) -> dict:
+        lines = "\n".join(f"{e.id} [{e.kind}] {e.detail}" for e in evidence)
+        reply = await chat([{"role": "system", "content": MATCH_SYSTEM},
+                            {"role": "user", "content": f"Complaint: {complaint}\n\nEvidence:\n{lines}"}])
+        try:
+            data = parse_json(reply)
+        except ValueError:
+            return {"evidence": []}
+        return {"evidence": list(data.get("evidence") or []), "summary": str(data.get("summary", ""))}
+
+    return matcher
+
+
+def llm_policy(chat: Chat, retries: int = 2) -> Policy:
     async def policy(ctx: dict) -> dict:
-        nonlocal used
         system, user = build_prompt(ctx)
         messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
         for attempt in range(retries + 1):
-            if used >= budget:
-                raise TokenBudgetExceeded(f"used {used} tokens, budget is {budget} (REPLAY_TOKEN_BUDGET)")
-            # Thinking off: one click at a time doesn't need it, and long thinking used up
-            # max_tokens before any answer (empty replies in the first risk test).
-            resp = await client.chat.completions.create(
-                model=model, messages=messages, temperature=0.2, max_tokens=1500,
-                extra_body={"chat_template_kwargs": {"enable_thinking": False}},
-            )
-            used += resp.usage.total_tokens if resp.usage else 0
-            reply = resp.choices[0].message.content or ""
+            reply = await chat(messages)
             try:
                 data = parse_json(reply)
                 return {**data["action"], "why": str(data.get("thought", ""))[:200]}

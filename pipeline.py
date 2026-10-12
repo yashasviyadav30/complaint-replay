@@ -15,7 +15,7 @@ from replay.agent import ReplayResult, replay
 from replay.bugs import BUGS_BY_ID, inject, reset_workspace
 from replay.conditions import CONDITIONS
 from replay.fix import apply_patch, pick_fix_model, propose_fix
-from replay.llm import llm_policy, make_client, pick_model
+from replay.llm import Chat, llm_matcher, llm_policy, make_client, pick_model
 from replay.shop import running_shop
 
 CASES_DIR = Path(__file__).parent / "results" / "cases"
@@ -39,13 +39,14 @@ async def run_case(bug_id: int) -> dict:
     bug = BUGS_BY_ID[bug_id]
     cond = CONDITIONS[bug.condition]
     client = make_client()
-    policy = llm_policy(client, await pick_model(client))
+    chat = Chat(client, await pick_model(client))
+    policy, matcher = llm_policy(chat), llm_matcher(chat)
     case = {"bug": bug_id, "complaint": bug.complaint, "condition": cond.label, "stage": "heard"}
 
     shop = reset_workspace()
     inject(bug, shop)
     with running_shop(shop) as url:
-        before = await replay(url, bug.complaint, cond, policy)
+        before = await replay(url, bug.complaint, cond, policy, matcher)
     case["replay"] = as_dict(before)
     if before.verdict != "reproduced":
         return case
@@ -61,7 +62,7 @@ async def run_case(bug_id: int) -> dict:
     case["fix"] = {"model": fix_model, "explanation": patch.explanation, "diff": diff}
 
     with running_shop(shop) as url:  # restart: backend fixes need a fresh server
-        after = await replay(url, bug.complaint, cond, policy)
+        after = await replay(url, bug.complaint, cond, policy, matcher)
     case["proof"] = as_dict(after)
     if fix_proven(before, after):
         case["stage"] = "fixed"

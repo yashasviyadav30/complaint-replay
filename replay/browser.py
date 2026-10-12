@@ -193,6 +193,8 @@ class Session:
                 await page.locator(action["selector"]).first.click(timeout=5000)
             elif kind == "fill_css":  # scripted tests only
                 await page.locator(action["selector"]).first.fill(str(action["text"]), timeout=5000)
+            elif kind in ("scroll", "swipe"):
+                await page.mouse.wheel(0, -600 if action.get("direction") == "up" else 600)
             elif kind == "wait":
                 await asyncio.sleep(min(int(action.get("ms", 1000)), 10_000) / 1000)
             else:
