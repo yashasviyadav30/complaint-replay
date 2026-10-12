@@ -63,8 +63,11 @@ def llm_policy(client: AsyncOpenAI, model: str, retries: int = 2) -> Policy:
         for attempt in range(retries + 1):
             if used >= budget:
                 raise TokenBudgetExceeded(f"used {used} tokens, budget is {budget} (REPLAY_TOKEN_BUDGET)")
+            # Thinking off: one click at a time doesn't need it, and long thinking used up
+            # max_tokens before any answer (empty replies in the first risk test).
             resp = await client.chat.completions.create(
-                model=model, messages=messages, temperature=0.2, max_tokens=1500
+                model=model, messages=messages, temperature=0.2, max_tokens=1500,
+                extra_body={"chat_template_kwargs": {"enable_thinking": False}},
             )
             used += resp.usage.total_tokens if resp.usage else 0
             reply = resp.choices[0].message.content or ""
