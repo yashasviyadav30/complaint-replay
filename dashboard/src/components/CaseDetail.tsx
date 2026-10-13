@@ -49,7 +49,7 @@ function Shot({ src, caption }: { src: string; caption: string }) {
     <figure className="min-w-0">
       <a href={shotUrl(src)} target="_blank" rel="noreferrer">
         <img src={shotUrl(src)} alt={caption} loading="lazy"
-          className="w-full rounded-lg border border-line bg-surface-2 object-cover object-top" style={{ aspectRatio: "4 / 3" }} />
+          className="max-h-96 w-full rounded-lg border border-line bg-surface-2 object-contain object-top" />
       </a>
       <figcaption className="mt-1.5 text-xs text-muted">{caption}</figcaption>
     </figure>
