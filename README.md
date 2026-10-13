@@ -15,6 +15,9 @@ Complaint Replay closes that gap:
 
 Built for the Nebius x NVIDIA Global AI Hackathon (Coding and Agentic Engineering track).
 
+- **Recorded demo (real cases, read-only):** https://yashasviyadav30.github.io/complaint-replay/
+- **Demo video:** recorded from one real, unscripted run; see `video/README.md` for exactly how it was cut.
+
 ## Results
 
 Five realistic bugs planted in a demo store, each tied to a different kind of user. Every bug was run through the whole chain three times, and each complaint was also replayed on the clean store to check for false alarms. Measured on Oct 12, 2026 with `uv run python bench.py 3`.
