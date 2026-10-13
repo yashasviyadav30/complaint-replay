@@ -62,6 +62,9 @@ uv run python risk_test.py                  # 5 bugs, buggy vs clean
   A one-off bug-7 test failure was seen once under load; tests now print the evidence if it recurs.
 - Guards are built from the reproduction steps (keeps the double tap). A rejected fix edit gets one retry with
   the reason. Previous 7-bug run (before the retry): 20/21 reproduced, 18/21 fixed, 18/21 guarded, 0 false alarms.
+- Oct 14 ~01:50: NVIDIA free tier rate-limited Nemotron 3 Super (HTTP 429, per model; Lightning still OK).
+  A background job polls Super every 5 min and then runs the final bench. If bench.log shows RateLimitError,
+  wait and re-run `uv run python bench.py 3`. The Token Factory key would remove this limit.
 - FINAL `bench.py 3` (7 bugs) started Oct 14 ~01:10 -> `results/bench.md`. When done: put its table and totals in
   README "Results", `submission/writeup.md` ("On five realistic bugs..." line, now 7), `submission/video-script.md`
   numbers, and the video results card (`video/film/index.html` #results) then re-render; redeploy demo
