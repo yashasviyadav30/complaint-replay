@@ -7,6 +7,7 @@ STEPS = [
     {"action": {"type": "click", "target": 1}, "result": "ok (nothing visible changed)", "target": "Send OTP"},
     {"action": {"type": "wait", "ms": 3000}, "result": "ok", "target": None},
     {"action": {"type": "click_role", "role": "button", "name": "Cart"}, "result": "ok", "target": "Cart"},
+    {"action": {"type": "click", "target": 5, "times": 2}, "result": "ok", "target": "Pay now"},
 ]
 
 
@@ -17,6 +18,7 @@ def test_guard_keeps_working_steps_by_name_and_drops_failures() -> None:
         {"do": "click", "label": "Send OTP"},
         {"do": "wait", "ms": 3000},
         {"do": "click_role", "role": "button", "name": "Cart"},
+        {"do": "click", "label": "Pay now", "times": 2},
     ]
     assert guard["must_not_see"] == ["request_failed"]
 

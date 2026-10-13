@@ -23,7 +23,8 @@ def build_guard(case_id: str, complaint: str, cond: Condition, steps: list[dict]
         if s["result"].startswith("error"):
             continue
         if a["type"] in ("click", "fill") and s.get("target"):
-            kept.append({"do": a["type"], "label": s["target"], **({"text": a["text"]} if a["type"] == "fill" else {})})
+            extra = {"text": a["text"]} if a["type"] == "fill" else ({"times": a["times"]} if a.get("times") else {})
+            kept.append({"do": a["type"], "label": s["target"], **extra})
         elif a["type"] in ("click_role", "fill_role"):
             kept.append({k: v for k, v in a.items() if k in ("role", "name", "text")} | {"do": a["type"]})
         elif a["type"] in ("wait", "scroll"):

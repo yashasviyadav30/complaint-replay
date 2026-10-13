@@ -21,14 +21,14 @@ That is not rare. Studies of real bug trackers find 13-24% of bug reports are ne
 
 ## What it does
 
-Complaint Replay turns a user's complaint into proof of the bug, a fix and a test. An AI twin replays the complaint in a real browser under that user's real conditions (slow network, small phone screen, Hindi, screen reader), proves the bug with machine evidence, has NVIDIA Nemotron write the fix, and saves the proven replay as a test so the bug can't silently come back.
+Complaint Replay turns a user's complaint into proof of the bug, a fix and a test. An AI twin replays the complaint in a real browser under that user's real conditions (slow network, small phone screen, Hindi, screen reader), proves the bug with machine evidence, has NVIDIA Nemotron write the fix, and saves the steps that triggered it as a test so the bug can't silently come back.
 
 How a case moves:
 
 1. **Heard.** A one-line widget adds a "Report a problem" button to any site. It also catches silent frustration: rage clicks, page errors, failed or very slow requests. With each complaint it records the user's real conditions, never what they typed into fields.
 2. **Reproduced.** The twin opens a real browser with those exact conditions and repeats what the user did. Evidence is collected by code watching the browser, not by the model: failed requests, controls pushed off screen, English-only errors shown to a Hindi user, accessibility violations, a cart total that disagrees with the amount charged.
 3. **Fixed.** Nemotron reads the evidence and the code and writes the smallest fix, on a separate branch copy. The same twin replays the complaint on the fixed code.
-4. **Guarded.** The proven replay becomes a test. It must pass on the fix and fail on the old code, or it isn't saved.
+4. **Guarded.** The steps that triggered the bug become a test. It must pass on the fix and fail on the old code, or it isn't marked guarded.
 
 On five realistic bugs, each run three times: 15/15 reproduced, 15/15 fixed and proven, 14/15 guarded, and 0 false alarms when the same complaints were replayed on the clean store.
 

@@ -158,7 +158,7 @@ export function CaseDetail({ c, onClose }: { c: Case; onClose: () => void }) {
           {c.guard && (
             <Section title="The guard test">
               <p className="mb-3 text-sm leading-relaxed text-ink">
-                The proven replay is saved as <code translate="no" className="font-mono text-[12px]">{c.guard.file}</code>,{" "}
+                The steps that triggered the bug are saved as <code translate="no" className="font-mono text-[12px]">{c.guard.file}</code>,{" "}
                 {c.guard.steps} steps, no AI needed to run it.
               </p>
               <ul className="grid gap-1 text-sm">

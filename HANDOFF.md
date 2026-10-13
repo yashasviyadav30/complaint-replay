@@ -54,6 +54,14 @@ uv run python risk_test.py                  # 5 bugs, buggy vs clean
 - Demo video: real run recorded with `scripts/record_demo.py`, cut per `video/README.md`, HyperFrames project in
   `video/film/`, render -> `video/complaint-replay-demo.mp4` (captions only, ~1:55).
 
+## Done Oct 13 (evening)
+
+- Tavily research before each fix (`replay/research.py`), sources shown in the case; needs `TAVILY_API_KEY`.
+- Bugs 3 (double tap -> two orders, `duplicate_request` evidence) and 13 (elderly 200% zoom hides Pay). 7 bugs total.
+- Fixed an intermittent shutdown hang: route handlers are released (`unroute_all`) before the browser closes.
+  A one-off bug-7 test failure was seen once under load; tests now print the evidence if it recurs.
+- `bench.py 3` re-run with 7 bugs started 23:45 -> `results/bench.md`; then update README, writeup, video card.
+
 ## Next, in order
 
 1. When the Token Factory key arrives: set `NEBIUS_API_KEY`, re-run `bench.py 3`, update README + writeup +

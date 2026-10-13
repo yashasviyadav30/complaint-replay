@@ -91,10 +91,11 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
         return case
     stage("fixed")
 
-    # Guard: the proof replay becomes a test. It must pass on the fix AND fail on the old code,
-    # otherwise it would not actually catch the bug coming back.
+    # Guard: the steps that triggered the bug become a test. It must pass on the fix AND fail on the old
+    # code, otherwise it would not catch the bug coming back. (Built from the proof replay at first, which
+    # missed bugs the fixed code gives no reason to repeat, such as an impatient double tap.)
     kinds = {e.kind for e in before.evidence if e.id in before.cited}
-    guard = build_guard(case["id"], complaint, cond, list(after.steps), kinds)
+    guard = build_guard(case["id"], complaint, cond, list(before.steps), kinds)
     guard_file = branch / "guards" / f"{case['id']}.json"
     guard_file.parent.mkdir(exist_ok=True)
     guard_file.write_text(json.dumps(guard, ensure_ascii=False, indent=2), encoding="utf-8")

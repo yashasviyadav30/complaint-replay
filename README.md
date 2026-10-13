@@ -11,7 +11,7 @@ Complaint Replay closes that gap:
 3. **Proves** it with machine evidence only. The AI is not allowed to say "reproduced" on its own word.
 4. **Fixes** it: NVIDIA Nemotron reads the evidence and the code and writes the smallest fix, on a separate branch copy.
 5. **Proves the fix**: the same twin replays the complaint on the fixed code.
-6. **Guards** it: the proven replay becomes a test that passes on the fix and fails on the old code.
+6. **Guards** it: the steps that triggered the bug become a test that must pass on the fix and fail on the old code.
 
 Built for the Nebius x NVIDIA Global AI Hackathon (Coding and Agentic Engineering track).
 
