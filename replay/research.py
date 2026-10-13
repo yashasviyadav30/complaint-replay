@@ -22,6 +22,7 @@ QUERIES = {
     "offscreen_control": "CSS flex row pushes button off screen on small mobile viewport, how to fix",
     "language_mismatch": "hard-coded English error message shown in a localized app, i18n fix",
     "amount_mismatch": "checkout charges full price although the cart shows the coupon discount, bug cause",
+    "duplicate_request": "prevent double submit of payment button, duplicate order on slow network",
 }
 Post = Callable[[str, dict, str], dict]
 

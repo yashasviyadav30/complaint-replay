@@ -122,7 +122,7 @@ Rules:
 - The moment the Evidence list has an item that matches the complaint, give the "reproduced" verdict citing it.
 - If you finished the user's whole task and no matching evidence appeared, give "not_reproduced". Do not wander."""
 
-SIGHTED_ACTIONS = """{"type": "click", "target": <idx>}
+SIGHTED_ACTIONS = """{"type": "click", "target": <idx>}   (add "times": 2 to tap twice quickly, like an impatient user)
 {"type": "fill", "target": <idx>, "text": "..."}"""
 SCREEN_READER_ACTIONS = """{"type": "click_role", "role": "button", "name": "<exact accessible name>"}
 {"type": "fill_role", "role": "textbox", "name": "<exact accessible name>", "text": "..."}

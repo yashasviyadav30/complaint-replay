@@ -27,6 +27,13 @@ BUGS = (
         "OTP never comes!! Tried 3 times on my phone, it just says something went wrong. Useless app",
     ),
     Bug(
+        3, "slow_3g_android", "Pay can be tapped twice while paying, charging twice",
+        "static/app.js",
+        '  if ($("pay").dataset.busy) return; // a second tap while paying must not create a second order\n',
+        "",
+        "I pressed Pay and nothing happened so I pressed it again. Now I see two orders and two charges!!",
+    ),
+    Bug(
         4, "slow_3g_android", "Pay button pushed off-screen on small phones",
         "static/style.css",
         ".pay-row { display: flex; flex-wrap: wrap;",
@@ -44,6 +51,13 @@ BUGS = (
         10, "screen_reader", "Cart button has no accessible name",
         "static/index.html", 'aria-label="Cart" hidden', "hidden",
         "I use a screen reader. After adding items I cannot find the cart anywhere, it just says 'button'.",
+    ),
+    Bug(
+        13, "elderly", "Pay button lost when text is zoomed to 200%",
+        "static/style.css",
+        ".pay-row { display: flex; flex-wrap: wrap;",
+        ".pay-row { display: flex; flex-wrap: nowrap; min-width: 280px;",
+        "I made the letters bigger on my phone because I cannot read small text. Now there is no pay button anywhere.",
     ),
     Bug(
         15, "fast_desktop", "Coupon shown in cart but not applied at payment",

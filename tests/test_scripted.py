@@ -19,13 +19,16 @@ LOGIN = [
     {"type": "fill_css", "selector": "#otp", "text": "123456"},
     {"type": "click_css", "selector": "#verify-otp"},
 ]
+LAST_EVIDENCE: list[str] = []  # shown when an assertion fails
 ADD_ITEM = {"type": "click_css", "selector": "#products button"}
 OPEN_CART = {"type": "click_css", "selector": "#cart-btn"}
 
 # bug id -> (script, evidence kind that must appear only when the bug is present)
 CASES = {
     1: (LOGIN[:2], "request_failed"),
+    3: ([*LOGIN, ADD_ITEM, OPEN_CART, {"type": "click_css", "selector": "#pay", "times": 2}], "duplicate_request"),
     4: ([*LOGIN, ADD_ITEM, OPEN_CART], "offscreen_control"),
+    13: ([*LOGIN, ADD_ITEM, OPEN_CART], "offscreen_control"),
     7: ([*LOGIN[:2], {"type": "fill_css", "selector": "#otp", "text": "000000"},
          {"type": "click_css", "selector": "#verify-otp"}], "language_mismatch"),
     10: ([*LOGIN, ADD_ITEM], "a11y_violation"),
@@ -44,14 +47,15 @@ def evidence_kinds(bug_id: int, buggy: bool, condition: str | None = None) -> se
     cond = CONDITIONS[condition or bug.condition]
     with running_shop(shop) as url:
         result = asyncio.run(replay(url, bug.complaint, cond, scripted_policy(script)))
+    LAST_EVIDENCE[:] = [f"{e.kind}: {e.detail}" for e in result.evidence]
     return {e.kind for e in result.evidence}
 
 
 @pytest.mark.parametrize("bug_id", sorted(CASES))
 def test_bug_leaves_evidence_only_when_present(bug_id: int) -> None:
     _, kind = CASES[bug_id]
-    assert kind in evidence_kinds(bug_id, buggy=True)
-    assert kind not in evidence_kinds(bug_id, buggy=False)
+    assert kind in evidence_kinds(bug_id, buggy=True), LAST_EVIDENCE
+    assert kind not in evidence_kinds(bug_id, buggy=False), LAST_EVIDENCE
 
 
 def test_otp_bug_works_for_me_on_a_fast_laptop() -> None:

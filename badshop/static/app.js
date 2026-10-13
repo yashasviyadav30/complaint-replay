@@ -125,7 +125,10 @@ $("apply-coupon").addEventListener("click", () => {
 $("pay").addEventListener("click", async () => {
   $("cart-error").textContent = "";
   if (!state.cart.size) return ($("cart-error").textContent = t("emptyCart"));
+  if ($("pay").dataset.busy) return; // a second tap while paying must not create a second order
+  $("pay").dataset.busy = "1";
   const { ok, data } = await postJson("/api/checkout", { items: cartItems(), coupon: state.coupon });
+  delete $("pay").dataset.busy;
   if (!ok) return ($("cart-error").textContent = t("otpFailed"));
   $("shop").hidden = true;
   $("cart").hidden = true;

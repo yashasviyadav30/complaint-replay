@@ -32,6 +32,7 @@ export const EVIDENCE: Record<string, string> = {
   language_mismatch: "Wrong language",
   a11y_violation: "Accessibility",
   amount_mismatch: "Money mismatch",
+  duplicate_request: "Duplicate payment",
 };
 
 export const whatTheySaid = (c: Case) => c.said || c.complaint;

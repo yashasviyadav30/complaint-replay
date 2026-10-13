@@ -6,6 +6,7 @@ That is the "no evidence, no verdict" rule.
 
 import asyncio
 import re
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urlparse
@@ -18,6 +19,10 @@ AXE_JS = Path(__file__).resolve().parent.parent / "vendor" / "axe.min.js"
 DEVANAGARI = re.compile(r"[ऀ-ॿ]")
 MONEY_KEYS = ("total", "charged", "amount")
 SETTLE_TIMEOUT_S = 20
+# ponytail: payment-like paths by name; a per-app list of non-idempotent endpoints is the upgrade.
+PAYMENT_PATH = re.compile(r"checkout|order|pay|purchase", re.I)
+DUPLICATE_WINDOW_S = 5
+DOUBLE_TAP_GAP_MS = 300
 OUR_PATHS = ("/widget.js", "/api/complaints")
 
 
@@ -60,6 +65,15 @@ async () => (await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a'
 """
 
 
+
+async def tap(locator, action: dict) -> None:
+    """Click once, or twice in quick succession ("times": 2) the way an impatient user taps."""
+    for i in range(min(int(action.get("times", 1)), 2)):
+        if i:
+            await asyncio.sleep(DOUBLE_TAP_GAP_MS / 1000)
+        await locator.click(timeout=5000)
+
+
 @dataclass(frozen=True)
 class Evidence:
     id: str
@@ -81,6 +95,7 @@ class Session:
         self._amounts: list[tuple[str, str, float]] = []
         self._labels: dict[int, str] = {}  # idx -> visible name, from the latest observe()
         self.last_target: str | None = None  # name of the control the last action used
+        self._payments: list[tuple[float, str, str]] = []  # (time, path, body) of payment-like POSTs
 
     def add(self, kind: str, detail: str) -> None:
         if (kind, detail) in self._seen:
@@ -91,7 +106,7 @@ class Session:
     async def __aenter__(self) -> "Session":
         self._pw = await async_playwright().start()
         self._browser = await self._pw.chromium.launch()
-        context = await self._browser.new_context(**self.condition.context)
+        context = self._context = await self._browser.new_context(**self.condition.context)
         if self.condition.zoom != 1.0:
             await context.add_init_script(
                 f"addEventListener('DOMContentLoaded', () => document.documentElement.style.zoom = '{self.condition.zoom}')"
@@ -106,6 +121,9 @@ class Session:
         return self
 
     async def __aexit__(self, *exc) -> None:
+        # Release in-flight route handlers first: a handler still inside its latency sleep when the browser
+        # closed left asyncio.run() waiting forever at shutdown (seen as an intermittent test hang).
+        await self._context.unroute_all(behavior="ignoreErrors")
         await self._browser.close()
         await self._pw.stop()
 
@@ -121,12 +139,24 @@ class Session:
 
     def _listen(self) -> None:
         page = self.page
-        page.on("request", lambda r: self._track(+1))
+        page.on("request", self._on_request)
         page.on("requestfinished", lambda r: self._track(-1))
         page.on("requestfailed", self._on_failed)
         page.on("response", self._on_response)
         page.on("console", lambda m: m.type == "error" and self.add("console_error", m.text[:200]))
         page.on("pageerror", lambda e: self.add("console_error", str(e)[:200]))
+
+    def _on_request(self, request) -> None:
+        self._track(+1)
+        path = urlparse(request.url).path
+        if request.method != "POST" or is_ours(request.url) or not PAYMENT_PATH.search(path):
+            return
+        now, body = time.monotonic(), request.post_data or ""
+        for at, seen_path, seen_body in self._payments:
+            if seen_path == path and seen_body == body and now - at < DUPLICATE_WINDOW_S:
+                self.add("duplicate_request", f"POST {path} was sent twice within {now - at:.1f} s with the same "
+                                              "data (the user would be charged twice)")
+        self._payments.append((now, path, body))
 
     def _track(self, delta: int) -> None:
         self._inflight = max(0, self._inflight + delta)
@@ -201,7 +231,7 @@ class Session:
         self.last_target = self._labels.get(idx) if kind in ("click", "fill") else action.get("name")
         try:
             if kind == "click":
-                await page.locator(f'[data-bc-idx="{int(action["target"])}"]').click(timeout=5000)
+                await tap(page.locator(f'[data-bc-idx="{int(action["target"])}"]'), action)
             elif kind == "fill":
                 await page.locator(f'[data-bc-idx="{int(action["target"])}"]').fill(str(action["text"]), timeout=5000)
             elif kind in ("click_role", "fill_role"):
@@ -213,7 +243,7 @@ class Session:
                 else:
                     await target.fill(str(action["text"]), timeout=5000)
             elif kind == "click_css":  # scripted tests only
-                await page.locator(action["selector"]).first.click(timeout=5000)
+                await tap(page.locator(action["selector"]).first, action)
             elif kind == "fill_css":  # scripted tests only
                 await page.locator(action["selector"]).first.fill(str(action["text"]), timeout=5000)
             elif kind in ("scroll", "swipe"):
