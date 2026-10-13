@@ -99,7 +99,7 @@ export function CaseDetail({ c, onClose }: { c: Case; onClose: () => void }) {
           </button>
         </header>
 
-        <div className="grid gap-6 px-6 py-6">
+        <div className="grid grid-cols-1 gap-6 px-6 py-6">
           <div className="grid gap-2">
             <StageLabel stage={c.stage} />
             <p className="text-sm text-muted">
