@@ -4,7 +4,8 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 uv run python scripts/export_demo.py
-(cd dashboard && VITE_DEMO=1 npx vite build --base=/complaint-replay/ --outDir dist-demo --emptyOutDir)
+# MSYS_NO_PATHCONV: Git Bash on Windows otherwise rewrites /complaint-replay/ into a Windows path.
+(cd dashboard && MSYS_NO_PATHCONV=1 VITE_DEMO=1 npx vite build --base=/complaint-replay/ --outDir dist-demo --emptyOutDir)
 rm -rf dashboard/public/demo
 
 out="$(mktemp -d)"
