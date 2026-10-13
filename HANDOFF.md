@@ -43,13 +43,24 @@ uv run python risk_test.py                  # 5 bugs, buggy vs clean
   temp shops get free ports. Never run the bench while relying on a stale live process.
 - `bench.py N`: N runs per bug + clean-shop false-alarm check -> `results/bench.md` (first run started Oct 12).
 
+## Done Oct 13
+
+- Before/after screenshots per case (`results/cases/shots/`), shown in the case detail.
+- Proof is decided by the evidence that proved the bug (`fix_proven`), not the proof run's verdict; judge ignores
+  errors the twin caused itself. 26 tests.
+- Read-only recorded demo on GitHub Pages: https://yashasviyadav30.github.io/complaint-replay/
+  (`bash scripts/deploy_demo.sh` re-exports `results/cases` and redeploys).
+- Submission materials in `submission/`: writeup, video script, criteria map, feedback, checklist.
+- Demo video: real run recorded with `scripts/record_demo.py`, cut per `video/README.md`, HyperFrames project in
+  `video/film/`, render -> `video/complaint-replay-demo.mp4` (captions only, ~1:55).
+
 ## Next, in order
 
-1. When the Token Factory key arrives: re-run `bench.py 3` on Token Factory and update the README results + model note.
-2. Screenshots at evidence time (before/after) for the case detail and the video.
-3. Two more silent-signal checks end to end (rage click on off-screen Pay, JS error).
-4. Deploy (dashboard + live shop must stay up through judging, Dec 1-15), README for judges,
-   video, Devpost write-up, feedback section.
+1. When the Token Factory key arrives: set `NEBIUS_API_KEY`, re-run `bench.py 3`, update README + writeup +
+   video results card and add "on Nebius Token Factory" to the video captions; re-render.
+2. Upload the video to YouTube (user's account) and add the link to README and Devpost.
+3. Optional: voiceover in the user's voice (needs a 1-2 min sample), live hosting (needs a host account).
+4. Paste `submission/writeup.md` + `feedback.md` into Devpost; final checklist; user clicks Submit.
 
 ## Blockers (user side)
 

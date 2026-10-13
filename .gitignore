@@ -6,3 +6,10 @@ workspace/
 results/
 node_modules/
 dist/
+video/raw/
+video/frames/
+video/*.mp4
+video/record.log
+video/film/snaps/
+video/film/.hyperframes/
+video/film/renders/
