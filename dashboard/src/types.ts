@@ -27,6 +27,7 @@ export interface Case {
   replay?: Replay;
   fix?: { model: string; explanation: string; diff?: string; error?: string };
   proof?: Replay;
+  shots?: { before?: string; after?: string };
   guard?: { file: string; steps: number; passes_on_fix: boolean; catches_bug: boolean };
   error?: string;
 }

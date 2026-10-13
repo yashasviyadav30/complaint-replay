@@ -3,6 +3,7 @@
 import json
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
+from pathlib import Path
 
 from replay.browser import Evidence, Session
 from replay.conditions import Condition
@@ -41,42 +42,52 @@ Matcher = Callable[[str, list[Evidence]], Awaitable[dict]]
 
 
 async def replay(base_url: str, complaint: str, condition: Condition, policy: Policy,
-                 matcher: Matcher | None = None) -> ReplayResult:
+                 matcher: Matcher | None = None, screenshot: Path | None = None) -> ReplayResult:
+    """Replay a complaint. If `screenshot` is given, save what the user sees at the moment of the verdict."""
     async with Session(base_url, condition) as session:
-        steps: list[dict] = []
-        last_result = "(page just opened)"
-        judged = 0
-        prev_view = None
-        for step in range(condition.max_steps):
-            obs = await session.observe()
-            view = page_signature(obs)
-            if steps and view == prev_view:
-                last_result += " (nothing visible changed)"
-            recent = {json.dumps({k: v for k, v in s["action"].items() if k != "why"}, sort_keys=True)
-                      for s in steps[-REPEAT_LIMIT:]}
-            if len(steps) >= REPEAT_LIMIT and len(recent) == 1:
-                last_result += f" (you did the same action {REPEAT_LIMIT} times in a row; try something else)"
-            prev_view = view
-            if matcher and len(session.evidence) > judged:
-                judged = len(session.evidence)
-                match = await matcher(complaint, list(session.evidence))
-                if match.get("evidence"):
-                    return judge({"verdict": "reproduced", **match}, session.evidence, steps)
-            action = await policy({
-                "complaint": complaint, "condition": condition, "obs": obs, "step": step,
-                "evidence": list(session.evidence), "steps": steps, "last_result": last_result,
-            })
-            if action.get("type") == "verdict":
-                return judge(action, session.evidence, steps)
-            last_result = await session.act(action)
-            steps.append({"action": action, "result": last_result, "target": session.last_target})
-        await session.observe()
+        result = await _drive(session, complaint, condition, policy, matcher)
+        if screenshot:
+            screenshot.parent.mkdir(parents=True, exist_ok=True)
+            await session.page.screenshot(path=str(screenshot))
+        return result
+
+
+async def _drive(session: Session, complaint: str, condition: Condition, policy: Policy,
+                 matcher: Matcher | None) -> ReplayResult:
+    steps: list[dict] = []
+    last_result = "(page just opened)"
+    judged = 0
+    prev_view = None
+    for step in range(condition.max_steps):
+        obs = await session.observe()
+        view = page_signature(obs)
+        if steps and view == prev_view:
+            last_result += " (nothing visible changed)"
+        recent = {json.dumps({k: v for k, v in s["action"].items() if k != "why"}, sort_keys=True)
+                  for s in steps[-REPEAT_LIMIT:]}
+        if len(steps) >= REPEAT_LIMIT and len(recent) == 1:
+            last_result += f" (you did the same action {REPEAT_LIMIT} times in a row; try something else)"
+        prev_view = view
         if matcher and len(session.evidence) > judged:
+            judged = len(session.evidence)
             match = await matcher(complaint, list(session.evidence))
             if match.get("evidence"):
                 return judge({"verdict": "reproduced", **match}, session.evidence, steps)
-        stop = {"verdict": "not_reproduced", "summary": f"Stopped after {condition.max_steps} steps."}
-        return judge(stop, session.evidence, steps)
+        action = await policy({
+            "complaint": complaint, "condition": condition, "obs": obs, "step": step,
+            "evidence": list(session.evidence), "steps": steps, "last_result": last_result,
+        })
+        if action.get("type") == "verdict":
+            return judge(action, session.evidence, steps)
+        last_result = await session.act(action)
+        steps.append({"action": action, "result": last_result, "target": session.last_target})
+    await session.observe()
+    if matcher and len(session.evidence) > judged:
+        match = await matcher(complaint, list(session.evidence))
+        if match.get("evidence"):
+            return judge({"verdict": "reproduced", **match}, session.evidence, steps)
+    stop = {"verdict": "not_reproduced", "summary": f"Stopped after {condition.max_steps} steps."}
+    return judge(stop, session.evidence, steps)
 
 
 def scripted_policy(actions: list[dict]) -> Policy:

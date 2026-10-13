@@ -32,13 +32,18 @@ def as_dict(r: ReplayResult) -> dict:
 
 
 def fix_proven(before: ReplayResult, after: ReplayResult) -> bool:
-    """Proven = the same user no longer reproduces it, and the evidence kinds that proved the bug are gone."""
+    """Proven = replaying the same user on the fixed code, the evidence that proved the bug never appears.
+
+    The proof run's own verdict is not used: in testing, the twin once typed a wrong OTP during the proof,
+    got an unrelated HTTP 400, and a loose verdict blocked a correct fix. Unrelated evidence stays visible
+    in the case for a human to read, it just does not decide.
+    """
     proof_kinds = {e.kind for e in before.evidence if e.id in before.cited}
-    return after.verdict != "reproduced" and not proof_kinds & {e.kind for e in after.evidence}
+    return bool(proof_kinds) and not proof_kinds & {e.kind for e in after.evidence}
 
 
 async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
-                      client: AsyncOpenAI, chat: Chat, update: Update) -> dict:
+                      client: AsyncOpenAI, chat: Chat, update: Update, shots: Path | None = None) -> dict:
     def stage(name: str) -> None:
         case["stage"] = name
         update(case)
@@ -46,8 +51,14 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
     complaint = case["complaint"]
     policy, matcher = llm_policy(chat), llm_matcher(chat)
 
+    def shot(name: str) -> Path | None:
+        if not shots:
+            return None
+        case.setdefault("shots", {})[name] = f"{case['id']}-{name}.png"
+        return shots / case["shots"][name]
+
     stage("reproducing")
-    before = await replay(live_url, complaint, cond, policy, matcher)
+    before = await replay(live_url, complaint, cond, policy, matcher, shot("before"))
     case["replay"] = as_dict(before)
     if before.verdict != "reproduced":
         stage(before.verdict)
@@ -70,7 +81,7 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
 
     stage("proving")
     with running_shop(branch) as url:
-        after = await replay(url, complaint, cond, policy, matcher)
+        after = await replay(url, complaint, cond, policy, matcher, shot("after"))
     case["proof"] = as_dict(after)
     if not fix_proven(before, after):
         stage("fix_unproven")

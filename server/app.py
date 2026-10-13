@@ -138,7 +138,8 @@ async def run_investigation(case: dict, env: dict) -> None:
         try:
             client = make_client()
             chat = Chat(client, await pick_model(client))
-            await investigate(case, twin_condition(env), live["url"], LIVE_SHOP, client, chat, save_case)
+            await investigate(case, twin_condition(env), live["url"], LIVE_SHOP, client, chat, save_case,
+                              CASES_DIR / "shots")
         except Exception as e:  # the case must show what went wrong instead of hanging in a stage
             log.exception("investigation %s failed", case["id"])
             case.update(stage="error", error=str(e)[:300])
@@ -206,5 +207,6 @@ def widget() -> FileResponse:
     return FileResponse(HERE / "widget.js", media_type="text/javascript")
 
 
+app.mount("/shots", StaticFiles(directory=CASES_DIR / "shots", check_dir=False), name="shots")
 if DASHBOARD_DIST.exists():  # mounted last so /api routes win
     app.mount("/", StaticFiles(directory=DASHBOARD_DIST, html=True), name="dashboard")

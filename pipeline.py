@@ -36,7 +36,7 @@ async def run_bug(bug_id: int) -> dict:
     shop = reset_workspace()
     inject(bug, shop)
     with running_shop(shop) as url:
-        return await investigate(case, cond, url, shop, client, chat, save)
+        return await investigate(case, cond, url, shop, client, chat, save, CASES_DIR / "shots")
 
 
 def main() -> None:

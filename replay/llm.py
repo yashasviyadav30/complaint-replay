@@ -76,7 +76,8 @@ class Chat:
 MATCH_SYSTEM = """You decide whether machine evidence from a real browser proves a user's complaint.
 Reply with ONE JSON object and nothing else: {"evidence": ["E1", ...], "summary": "<two sentences>"}
 List only ids whose detail clearly shows the problem the user complained about.
-Unrelated errors do not count. If nothing matches, reply {"evidence": [], "summary": ""}."""
+Unrelated errors do not count, and neither do errors the replay caused itself by doing something the user
+never described (for example typing a wrong code). If nothing matches, reply {"evidence": [], "summary": ""}."""
 
 
 def llm_matcher(chat: Chat) -> Matcher:

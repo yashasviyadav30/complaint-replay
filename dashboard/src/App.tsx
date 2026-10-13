@@ -1,6 +1,6 @@
 import { MotionConfig } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
-import { breakShop, getCases, getLive, resetShop, type Live } from "./api";
+import { DEMO, breakShop, getCases, getLive, resetShop, type Live } from "./api";
 import { Board } from "./components/Board";
 import { CaseDetail } from "./components/CaseDetail";
 import { TopBar } from "./components/TopBar";
@@ -13,7 +13,9 @@ export default function App() {
   const [live, setLive] = useState<Live | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(
+    DEMO ? "These are real cases recorded from the engine, not a mock-up. To run it live on your machine, follow the README on GitHub." : null,
+  );
   const [busy, setBusy] = useState(false);
   const [now, setNow] = useState(Date.now());
 
@@ -31,6 +33,7 @@ export default function App() {
 
   useEffect(() => {
     refresh();
+    if (DEMO) return; // recorded data never changes
     const timer = setInterval(refresh, POLL_MS);
     return () => clearInterval(timer);
   }, [refresh]);

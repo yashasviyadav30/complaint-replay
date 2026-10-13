@@ -1,6 +1,7 @@
 import { X } from "@phosphor-icons/react";
 import { motion } from "motion/react";
 import { useEffect, useRef } from "react";
+import { shotUrl } from "../api";
 import { EVIDENCE, KIND, twinSummary, whatTheySaid } from "../labels";
 import type { Case, Replay } from "../types";
 import { Diff } from "./Diff";
@@ -40,6 +41,18 @@ function Steps({ replay }: { replay: Replay }) {
         </li>
       ))}
     </ol>
+  );
+}
+
+function Shot({ src, caption }: { src: string; caption: string }) {
+  return (
+    <figure className="min-w-0">
+      <a href={shotUrl(src)} target="_blank" rel="noreferrer">
+        <img src={shotUrl(src)} alt={caption} loading="lazy"
+          className="w-full rounded-lg border border-line bg-surface-2 object-cover object-top" style={{ aspectRatio: "4 / 3" }} />
+      </a>
+      <figcaption className="mt-1.5 text-xs text-muted">{caption}</figcaption>
+    </figure>
   );
 }
 
@@ -94,6 +107,15 @@ export function CaseDetail({ c, onClose }: { c: Case; onClose: () => void }) {
             </p>
             {c.error && <p className="text-sm text-accent">{c.error}</p>}
           </div>
+
+          {c.shots?.before && (
+            <Section title="What the user saw">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Shot src={c.shots.before} caption="When the bug was proven" />
+                {c.shots.after && c.stage !== "fix_unproven" && <Shot src={c.shots.after} caption="Same user, on the fixed code" />}
+              </div>
+            </Section>
+          )}
 
           {c.replay && (
             <Section title="What the twin found">

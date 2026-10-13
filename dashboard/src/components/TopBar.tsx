@@ -1,5 +1,5 @@
 import { ArrowCounterClockwise, ArrowSquareOut, DiceFive, Detective } from "@phosphor-icons/react";
-import type { Live } from "../api";
+import { DEMO, type Live } from "../api";
 
 interface Props {
   live: Live | null;
@@ -29,10 +29,16 @@ export function TopBar({ live, busy, onBreak, onReset }: Props) {
               <ArrowCounterClockwise size={14} aria-hidden="true" /> Reset
             </button>
           )}
-          <button type="button" onClick={onBreak} disabled={busy || !live}
+          {DEMO && (
+            <a href="https://github.com/yashasviyadav30/complaint-replay" target="_blank" rel="noreferrer"
+              className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-accent px-3 py-2 text-sm font-semibold text-accent-ink hover:brightness-110">
+              Run It Live <ArrowSquareOut size={14} aria-hidden="true" />
+            </a>
+          )}
+          {!DEMO && <button type="button" onClick={onBreak} disabled={busy || !live}
             className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-accent px-3 py-2 text-sm font-semibold text-accent-ink transition-transform hover:brightness-110 active:scale-[0.98] disabled:opacity-50">
             <DiceFive size={16} weight="bold" aria-hidden="true" /> Break It
-          </button>
+          </button>}
         </div>
       </div>
     </header>
