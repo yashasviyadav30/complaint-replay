@@ -14,12 +14,17 @@ NVIDIA_BASE_URL = "https://integrate.api.nvidia.com/v1"
 THINK_BLOCK = re.compile(r"<think>.*?</think>", re.DOTALL)
 
 
+# Retries back off and respect Retry-After; the default (2) was not enough for a long benchmark on a
+# rate-limited endpoint (HTTP 429 mid-run).
+MAX_RETRIES = 8
+
+
 def make_client() -> AsyncOpenAI:
     if os.getenv("NEBIUS_API_KEY"):
         return AsyncOpenAI(base_url=os.getenv("NEBIUS_BASE_URL") or DEFAULT_BASE_URL,
-                           api_key=os.environ["NEBIUS_API_KEY"])
+                           api_key=os.environ["NEBIUS_API_KEY"], max_retries=MAX_RETRIES)
     if os.getenv("NVIDIA_API_KEY"):
-        return AsyncOpenAI(base_url=NVIDIA_BASE_URL, api_key=os.environ["NVIDIA_API_KEY"])
+        return AsyncOpenAI(base_url=NVIDIA_BASE_URL, api_key=os.environ["NVIDIA_API_KEY"], max_retries=MAX_RETRIES)
     raise RuntimeError("set NEBIUS_API_KEY (Token Factory) or NVIDIA_API_KEY (build.nvidia.com) in .env")
 
 
