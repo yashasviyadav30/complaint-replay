@@ -51,14 +51,17 @@ def background(sources: list[dict]) -> str:
 
 
 async def propose_fix(client: AsyncOpenAI, model: str, complaint: str, condition: Condition,
-                      result: ReplayResult, shop: Path, sources: list[dict] | None = None) -> Patch:
+                      result: ReplayResult, shop: Path, sources: list[dict] | None = None,
+                      rejected: str | None = None) -> Patch:
     cited = [e for e in result.evidence if e.id in result.cited] or list(result.evidence)
     user = (
         f"Complaint: {complaint}\nUser conditions: {condition.persona}\n"
         f"Replay summary: {result.summary}\n"
         "Evidence:\n" + "\n".join(f"- [{e.kind}] {e.detail}" for e in cited) +
         background(sources or []) +
-        f"\n\nSource files:\n{read_sources(shop)}"
+        f"\n\nSource files:\n{read_sources(shop)}" +
+        (f"\n\nYour previous patch was rejected: {rejected}. Copy each 'find' text exactly from the file and include "
+         "enough surrounding lines that it appears exactly once." if rejected else "")
     )
     resp = await client.chat.completions.create(
         model=model, temperature=0.1, max_tokens=12000,
@@ -80,8 +83,9 @@ def apply_patch(patch: Patch, shop: Path) -> str:
         if path not in current:
             original[path] = current[path] = path.read_text(encoding="utf-8")
         find, replace = str(edit.get("find", "")), str(edit.get("replace", ""))
-        if not find or current[path].count(find) != 1:
-            raise ValueError(f"'find' text must appear exactly once in {edit.get('file')}")
+        count = current[path].count(find) if find else 0
+        if count != 1:
+            raise ValueError(f"'find' text must appear exactly once in {edit.get('file')}, but it appears {count} times")
         current[path] = current[path].replace(find, replace)
     diff = []
     for path, after in current.items():

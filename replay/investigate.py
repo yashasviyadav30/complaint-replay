@@ -21,6 +21,7 @@ from replay.llm import Chat, llm_matcher, llm_policy
 from replay.shop import running_shop
 
 BRANCHES = ROOT / "workspace" / "branches"
+FIX_ATTEMPTS = 2
 Update = Callable[[dict], None]
 
 
@@ -72,11 +73,16 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
     stage("fixing")
     fix_model = await pick_fix_model(client)
     sources = await research([e for e in before.evidence if e.id in before.cited])
-    patch = await propose_fix(client, fix_model, complaint, cond, before, branch, sources)
-    try:
-        diff = apply_patch(patch, branch)
-    except ValueError as e:
-        case["fix"] = {"model": fix_model, "explanation": patch.explanation, "error": str(e)}
+    rejected = None
+    for _ in range(FIX_ATTEMPTS):  # a rejected (ambiguous or unsafe) edit gets one retry with the reason
+        patch = await propose_fix(client, fix_model, complaint, cond, before, branch, sources, rejected)
+        try:
+            diff = apply_patch(patch, branch)
+            break
+        except ValueError as e:
+            rejected = str(e)
+    else:
+        case["fix"] = {"model": fix_model, "explanation": patch.explanation, "error": rejected}
         stage("fix_failed")
         return case
     case["fix"] = {"model": fix_model, "explanation": patch.explanation, "diff": diff,

@@ -60,7 +60,12 @@ uv run python risk_test.py                  # 5 bugs, buggy vs clean
 - Bugs 3 (double tap -> two orders, `duplicate_request` evidence) and 13 (elderly 200% zoom hides Pay). 7 bugs total.
 - Fixed an intermittent shutdown hang: route handlers are released (`unroute_all`) before the browser closes.
   A one-off bug-7 test failure was seen once under load; tests now print the evidence if it recurs.
-- `bench.py 3` re-run with 7 bugs started 23:45 -> `results/bench.md`; then update README, writeup, video card.
+- Guards are built from the reproduction steps (keeps the double tap). A rejected fix edit gets one retry with
+  the reason. Previous 7-bug run (before the retry): 20/21 reproduced, 18/21 fixed, 18/21 guarded, 0 false alarms.
+- FINAL `bench.py 3` (7 bugs) started Oct 14 ~01:10 -> `results/bench.md`. When done: put its table and totals in
+  README "Results", `submission/writeup.md` ("On five realistic bugs..." line, now 7), `submission/video-script.md`
+  numbers, and the video results card (`video/film/index.html` #results) then re-render; redeploy demo
+  (`bash scripts/deploy_demo.sh`).
 
 ## Next, in order
 
