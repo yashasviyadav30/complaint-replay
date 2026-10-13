@@ -9,7 +9,7 @@ from openai import AsyncOpenAI
 
 from replay.agent import ReplayResult
 from replay.conditions import Condition
-from replay.llm import parse_json
+from replay.llm import parse_json, throttle
 
 SOURCE_SUFFIXES = (".py", ".js", ".html", ".css")
 FIX_SYSTEM = """You fix one bug in a small web app.
@@ -63,6 +63,7 @@ async def propose_fix(client: AsyncOpenAI, model: str, complaint: str, condition
         (f"\n\nYour previous patch was rejected: {rejected}. Copy each 'find' text exactly from the file and include "
          "enough surrounding lines that it appears exactly once." if rejected else "")
     )
+    await throttle()
     resp = await client.chat.completions.create(
         model=model, temperature=0.1, max_tokens=12000,
         messages=[{"role": "system", "content": FIX_SYSTEM}, {"role": "user", "content": user}],

@@ -1,6 +1,9 @@
 """NVIDIA Nemotron models on Nebius Token Factory (OpenAI-compatible API)."""
 
+import asyncio
 import json
+import time
+from collections import deque
 import os
 import re
 
@@ -53,6 +56,29 @@ async def pick_model(client: AsyncOpenAI) -> str:
     return next((m for m in models if "nano" in m.lower()), models[0])
 
 
+_calls: deque[float] = deque()  # start times of recent model requests, process-wide
+FREE_TIER_RPM = 30  # NVIDIA's free endpoint allows about 40 requests a minute; stay under it
+
+
+def max_rpm() -> int:
+    if os.getenv("REPLAY_MAX_RPM"):
+        return int(os.environ["REPLAY_MAX_RPM"])
+    return FREE_TIER_RPM if not os.getenv("NEBIUS_API_KEY") and os.getenv("NVIDIA_API_KEY") else 0
+
+
+async def throttle(now=time.monotonic, sleep=asyncio.sleep) -> None:
+    """Keep under the endpoint's per-minute limit instead of hitting it: retries alone all land in the same minute."""
+    rpm = max_rpm()
+    while rpm:
+        t = now()
+        while _calls and t - _calls[0] >= 60:
+            _calls.popleft()
+        if len(_calls) < rpm:
+            _calls.append(t)
+            return
+        await sleep(60 - (t - _calls[0]) + 0.05)
+
+
 class TokenBudgetExceeded(RuntimeError):
     pass
 
@@ -70,6 +96,7 @@ class Chat:
             raise TokenBudgetExceeded(f"used {self.used} tokens, budget is {self.budget} (REPLAY_TOKEN_BUDGET)")
         # Thinking off: one step at a time doesn't need it, and long thinking used up
         # max_tokens before any answer (empty replies in the first risk test).
+        await throttle()
         resp = await self.client.chat.completions.create(
             model=self.model, messages=messages, temperature=0.2, max_tokens=1500,
             extra_body={"chat_template_kwargs": {"enable_thinking": False}},
