@@ -41,6 +41,7 @@ Be clear about what this does and does not show. These are five bugs we planted 
 | Navigator: picks one click or keystroke at a time | Nemotron 3 Super (thinking off) | Fast and cheap per step; thinking adds nothing to "click Pay" |
 | Judge: does this machine evidence match the complaint? | Nemotron 3 Super (thinking off) | A narrow yes/no question, kept separate from navigation |
 | Fixer: reads evidence + source, writes the patch | Nemotron 3 Super (reasoning on) | Root-cause reasoning is where thinking pays off |
+| Research: finds the documented cause of the evidence before the fix | Tavily search API | The fix can cite a real source (for example the axe rule page) instead of guessing |
 
 All model calls go through one OpenAI-compatible client (`replay/llm.py`). With `NEBIUS_API_KEY` set it calls **Nebius Token Factory**; with only `NVIDIA_API_KEY` it calls NVIDIA's API catalog. The results table above was measured on NVIDIA's API catalog endpoint with the same Nemotron 3 Super model. A hard token budget per run (`REPLAY_TOKEN_BUDGET`) stops a looping agent from running up a bill.
 

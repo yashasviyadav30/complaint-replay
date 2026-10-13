@@ -25,7 +25,7 @@ export interface Case {
   condition: { label: string; persona: string };
   stage: Stage;
   replay?: Replay;
-  fix?: { model: string; explanation: string; diff?: string; error?: string };
+  fix?: { model: string; explanation: string; diff?: string; error?: string; sources?: { title: string; url: string }[] };
   proof?: Replay;
   shots?: { before?: string; after?: string };
   guard?: { file: string; steps: number; passes_on_fix: boolean; catches_bug: boolean };

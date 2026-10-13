@@ -41,13 +41,23 @@ async def pick_fix_model(client: AsyncOpenAI) -> str:
     return next((m for m in ids if "nemotron" in m.lower() and "super" in m.lower()), os.getenv("REPLAY_MODEL", ""))
 
 
+def background(sources: list[dict]) -> str:
+    """Web research (Tavily) about the evidence; the model cites a URL only if it actually relied on it."""
+    if not sources:
+        return ""
+    lines = "\n".join(f"- {s['title']} ({s['url']}): {s['content']}" for s in sources)
+    return ("\n\nBackground found on the web. Use it only if relevant; if you rely on one, name its URL in the "
+            f"explanation:\n{lines}")
+
+
 async def propose_fix(client: AsyncOpenAI, model: str, complaint: str, condition: Condition,
-                      result: ReplayResult, shop: Path) -> Patch:
+                      result: ReplayResult, shop: Path, sources: list[dict] | None = None) -> Patch:
     cited = [e for e in result.evidence if e.id in result.cited] or list(result.evidence)
     user = (
         f"Complaint: {complaint}\nUser conditions: {condition.persona}\n"
         f"Replay summary: {result.summary}\n"
         "Evidence:\n" + "\n".join(f"- [{e.kind}] {e.detail}" for e in cited) +
+        background(sources or []) +
         f"\n\nSource files:\n{read_sources(shop)}"
     )
     resp = await client.chat.completions.create(

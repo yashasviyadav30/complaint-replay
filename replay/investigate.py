@@ -16,6 +16,7 @@ from replay.bugs import ROOT
 from replay.conditions import Condition
 from replay.fix import apply_patch, pick_fix_model, propose_fix
 from replay.guard import build_guard, run_guard
+from replay.research import research
 from replay.llm import Chat, llm_matcher, llm_policy
 from replay.shop import running_shop
 
@@ -70,14 +71,16 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
     shutil.copytree(source, branch, ignore=shutil.ignore_patterns("__pycache__"))
     stage("fixing")
     fix_model = await pick_fix_model(client)
-    patch = await propose_fix(client, fix_model, complaint, cond, before, branch)
+    sources = await research([e for e in before.evidence if e.id in before.cited])
+    patch = await propose_fix(client, fix_model, complaint, cond, before, branch, sources)
     try:
         diff = apply_patch(patch, branch)
     except ValueError as e:
         case["fix"] = {"model": fix_model, "explanation": patch.explanation, "error": str(e)}
         stage("fix_failed")
         return case
-    case["fix"] = {"model": fix_model, "explanation": patch.explanation, "diff": diff}
+    case["fix"] = {"model": fix_model, "explanation": patch.explanation, "diff": diff,
+                   "sources": [{"title": s["title"], "url": s["url"]} for s in sources]}
 
     stage("proving")
     with running_shop(branch) as url:
