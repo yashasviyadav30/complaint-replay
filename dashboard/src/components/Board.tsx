@@ -14,7 +14,10 @@ export function Board({ cases, now, onOpen }: { cases: Case[]; now: number; onOp
     <LayoutGroup>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
         {COLUMNS.map((col) => {
-          const items = cases.filter((c) => columnOf(c.stage) === col.id);
+          // Most-reported first: one bug hurting 40 people outranks one hurting 1.
+          const items = cases
+            .filter((c) => columnOf(c.stage) === col.id)
+            .sort((a, b) => (b.reports ?? 1) - (a.reports ?? 1) || b.created_at.localeCompare(a.created_at));
           return (
             <section key={col.id} aria-labelledby={`col-${col.id}`} className="min-w-0">
               <header className="mb-3 flex items-baseline justify-between gap-2 border-b border-line pb-2">

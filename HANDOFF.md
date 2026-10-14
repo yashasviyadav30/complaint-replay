@@ -70,6 +70,23 @@ uv run python risk_test.py                  # 5 bugs, buggy vs clean
   numbers, and the video results card (`video/film/index.html` #results) then re-render; redeploy demo
   (`bash scripts/deploy_demo.sh`).
 
+## Oct 14: duplicate-complaint grouping (IN PROGRESS, uncommitted until calibration finishes)
+
+- Why: one bug, many complaints in many languages -> one investigation + "xN reports"; board sorts by reports.
+- No NVIDIA GPU on this laptop (AMD 780M, 20 GB) -> no on-device LLM training; fine-tuning would belong on Nebius
+  post-training (needs the Token Factory key). Instead: data-fitted settings, measured on a held-out half.
+- Data: `data/complaints_labeled.json` (57 hand-written complaints, 7 bugs + unrelated, EN/Hinglish/Hindi).
+- Measured so far (test half): embedding cut only P0.61/R0.71; embedding cut + Nemotron verifier P0.86/R0.75 (F1 0.80);
+  normalise-then-embed with a cut: worse (F1 0.56). Fixed cuts are fragile (Hinglish vs English sim 0.20).
+- Current design: `replay/grouping.py` find_duplicate = embed (raw or normalised, per settings) -> verify top-k
+  nearest open cases with Nemotron 3.5 Lightning. `scripts/calibrate_grouping.py` simulates arrival order, picks
+  embed_text/top_k on the fit half, reports test P/R into `replay/grouping.json`.
+- Server: `group_into_existing()` in `server/app.py`; vectors in `results/vectors.json`; dashboard shows
+  "xN reports", sorts by reports, lists "Also reported by" in the case detail (built).
+- TODO after calibration: delete now-unused fit_threshold/shortlist_threshold/best_match/threshold from
+  grouping.py and update tests/test_grouping.py; restart service and re-run the A/B/C live check (A Hinglish OTP,
+  B English OTP -> must join A; C delivery -> separate); add the grouping numbers to README; commit + push.
+
 ## Next, in order
 
 1. When the Token Factory key arrives: set `NEBIUS_API_KEY`, re-run `bench.py 3`, update README + writeup +

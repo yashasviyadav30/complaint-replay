@@ -1,0 +1,17 @@
+from replay.grouping import cosine, scores, settings
+
+
+def test_cosine() -> None:
+    assert cosine([1, 0], [1, 0]) == 1.0
+    assert cosine([1, 0], [0, 1]) == 0.0
+
+
+def test_scores_count_merges_against_labels() -> None:
+    pairs = [(1.0, True), (1.0, False), (0.0, True), (0.0, False)]  # (merged?, really the same bug?)
+    assert scores(pairs, 0.5) == {"precision": 0.5, "recall": 0.5, "f1": 0.5, "pairs": 4}
+
+
+def test_settings_have_safe_defaults(tmp_path, monkeypatch) -> None:
+    import replay.grouping as g
+    monkeypatch.setattr(g, "SETTINGS", tmp_path / "missing.json")
+    assert settings() == {"embed_text": "raw", "top_k": 3}

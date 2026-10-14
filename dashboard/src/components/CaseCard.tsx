@@ -20,7 +20,14 @@ export function CaseCard({ c, now, onOpen }: { c: Case; now: number; onOpen: (id
           <Icon size={14} weight="bold" aria-hidden="true" />
           {kind.label}
         </span>
-        <time dateTime={c.created_at} className="tabular-nums">{timeAgo(c.created_at, now)}</time>
+        <span className="inline-flex items-center gap-2">
+          {(c.reports ?? 1) > 1 && (
+            <span className="rounded-full bg-accent px-2 py-0.5 font-mono text-[11px] font-semibold text-accent-ink tabular-nums">
+              ×{c.reports} reports
+            </span>
+          )}
+          <time dateTime={c.created_at} className="tabular-nums">{timeAgo(c.created_at, now)}</time>
+        </span>
       </div>
       <p className="mt-2 line-clamp-3 text-sm leading-snug text-ink">{whatTheySaid(c)}</p>
       <p className="mt-3 truncate font-mono text-[11px] text-muted" title={twinSummary(c)}>

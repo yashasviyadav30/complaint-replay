@@ -26,6 +26,7 @@ from pydantic import BaseModel, Field
 
 from replay.bugs import BUGS, LIVE_SHOP, Bug, inject, reset_workspace
 from replay.conditions import twin_condition
+from replay.grouping import find_duplicate
 from replay.investigate import investigate
 from replay.llm import Chat, make_client, pick_model
 from replay.shop import running_shop
@@ -33,6 +34,7 @@ from replay.shop import running_shop
 HERE = Path(__file__).resolve().parent
 STORE = HERE.parent / "results" / "complaints.jsonl"
 CASES_DIR = HERE.parent / "results" / "cases"
+VECTORS = CASES_DIR.parent / "vectors.json"  # case id -> embedding of its first complaint (not a case file)
 DASHBOARD_DIST = HERE.parent / "dashboard" / "dist"
 RATE_LIMIT, RATE_WINDOW_S = 30, 60
 LIVE_PORT = int(os.getenv("LIVE_SHOP_PORT", "8100"))
@@ -146,6 +148,29 @@ async def run_investigation(case: dict, env: dict) -> None:
             save_case(case)
 
 
+def load_vectors() -> dict[str, list[float]]:
+    return json.loads(VECTORS.read_text(encoding="utf-8")) if VECTORS.exists() else {}
+
+
+async def group_into_existing(record: dict, cond) -> tuple[str | None, list[float] | None]:
+    """Attach a complaint to the open case it duplicates, so one bug gets one investigation and a count."""
+    text = record["text"] or record["kind"]
+    try:
+        cases = {c["id"]: c for c in list_cases()}
+        said = {cid: c.get("said") or c["complaint"] for cid, c in cases.items()}
+        cid, vec = await find_duplicate(make_client(), text, load_vectors(), said)
+    except Exception:  # grouping is an optimisation: if it fails, investigate the complaint on its own
+        log.exception("duplicate check failed")
+        return None, None
+    if cid:
+        case = cases[cid]
+        case["reports"] = case.get("reports", 1) + 1
+        case.setdefault("also_reported", []).append(
+            {"said": record["text"], "kind": record["kind"], "condition": cond.label, "at": record["received_at"]})
+        save_case(case)
+    return cid, vec
+
+
 @app.post("/api/complaints", status_code=201)
 async def receive(complaint: ComplaintIn, request: Request) -> dict:
     if rate_limited(request.client.host if request.client else "unknown"):
@@ -160,10 +185,17 @@ async def receive(complaint: ComplaintIn, request: Request) -> dict:
         f.write(json.dumps(record, ensure_ascii=False) + "\n")
     if live["url"]:
         cond = twin_condition(record["env"])
+        duplicate, vec = await group_into_existing(record, cond)
+        if duplicate:
+            return {"id": record["id"], "grouped_into": duplicate}
         case = {"id": record["id"], "created_at": record["received_at"], "kind": record["kind"],
                 "complaint": complaint_for_model(record), "said": record["text"],
                 "condition": {"label": cond.label, "persona": cond.persona}, "stage": "heard"}
         save_case(case)
+        if vec:
+            vectors = load_vectors()
+            vectors[case["id"]] = vec
+            VECTORS.write_text(json.dumps(vectors), encoding="utf-8")
         task = asyncio.create_task(run_investigation(case, record["env"]))
         _tasks.add(task)
         task.add_done_callback(_tasks.discard)

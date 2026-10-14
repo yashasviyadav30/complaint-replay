@@ -108,6 +108,20 @@ export function CaseDetail({ c, onClose }: { c: Case; onClose: () => void }) {
             {c.error && <p className="text-sm text-accent">{c.error}</p>}
           </div>
 
+          {c.also_reported && c.also_reported.length > 0 && (
+            <Section title={`Also reported by ${c.also_reported.length} more ${c.also_reported.length === 1 ? "person" : "people"}`}>
+              <p className="mb-3 text-xs text-muted">Grouped by Nemotron Embed and confirmed by a Nemotron check, so this bug is investigated once.</p>
+              <ul className="grid gap-2">
+                {c.also_reported.map((r, i) => (
+                  <li key={i} className="rounded-lg border border-line bg-surface-2 p-3 text-sm">
+                    <p className="text-ink">"{r.said || KIND[r.kind].label}"</p>
+                    <p className="mt-1 font-mono text-[11px] text-muted">{r.condition}</p>
+                  </li>
+                ))}
+              </ul>
+            </Section>
+          )}
+
           {c.shots?.before && (
             <Section title="What the user saw">
               <div className="grid gap-3 sm:grid-cols-2">

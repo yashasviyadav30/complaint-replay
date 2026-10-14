@@ -30,6 +30,8 @@ export interface Case {
   shots?: { before?: string; after?: string };
   guard?: { file: string; steps: number; passes_on_fix: boolean; catches_bug: boolean };
   error?: string;
+  reports?: number;
+  also_reported?: { said: string; kind: Kind; condition: string; at: string }[];
 }
 
 export type Column = "heard" | "reproduced" | "fixed" | "guarded";

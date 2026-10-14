@@ -34,6 +34,26 @@ Five realistic bugs planted in a demo store, each tied to a different kind of us
 
 Be clear about what this does and does not show. These are five bugs we planted ourselves, so it is a working demonstration, not a broad benchmark. The OTP bug, for example, never shows up on a fast laptop, which is exactly the "works for me" trap: the scripted test `test_otp_bug_works_for_me_on_a_fast_laptop` checks that.
 
+## Duplicate complaints: one bug, one investigation
+
+Forty people describe one bug forty ways ("otp nahi aa raha", "never got the code"). A new complaint is embedded
+with **NVIDIA Nemotron Embed** (`nemotron-3-embed-1b`); the 3 most similar open cases are each checked by
+**Nemotron 3.5 Lightning** ("same problem?"), and on a yes it joins that case instead of starting another
+investigation. The board then sorts by how many people a bug hurts ("x12 reports").
+
+The settings were tuned, not guessed: `scripts/calibrate_grouping.py` replays 57 hand-written complaints
+(English, Hinglish, Hindi; `data/complaints_labeled.json`) in arrival order, picks the setting on one half and
+measures it on the other half:
+
+| Held-out half | Precision | Recall | F1 |
+|---|---|---|---|
+| Embedding similarity alone | 0.61 | 0.71 | 0.65 |
+| Top-3 nearest cases + Nemotron check (in use) | 0.82 | 0.58 | 0.68 |
+
+Read this plainly: when it merges, it is right about 4 times in 5; it would rather miss a duplicate (an extra
+investigation) than merge two different bugs (hiding one). The test set is small (27 complaints), so treat the
+numbers as a first measurement, not a benchmark. Every merged report stays visible in the case for a human to check.
+
 ## How NVIDIA Nemotron and Nebius are used
 
 | Job | Model | Why this one |

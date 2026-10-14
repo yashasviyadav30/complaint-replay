@@ -37,6 +37,7 @@ On five realistic bugs, each run three times: 15/15 reproduced, 15/15 fixed and 
 - **NVIDIA Nemotron 3 Super on Nebius Token Factory**, in three roles. The navigator picks one click or keystroke at a time with thinking off, because "click Pay" needs speed, not reasoning. A separate judge answers one narrow question whenever the browser records new evidence: does this match the complaint? The fixer runs with reasoning on, because root-cause analysis is where thinking pays off.
 - **Playwright** drives real Chromium. Conditions are enforced, not role-played: 3 seconds of added latency per request, a 360 px phone screen, a Hindi locale, or an accessibility-tree-only view for the screen-reader twin.
 - **axe-core** gives hard accessibility evidence.
+- **NVIDIA Nemotron Embed** groups duplicate complaints (in any language) so one bug gets one investigation and a count of how many people it hurts; a Nemotron check confirms each merge. Settings were tuned on a labelled set and measured on a held-out half (precision 0.82).
 - **FastAPI** runs the complaint service: input validation, PII masking (phones, emails, long ID numbers), rate limiting, the live demo store and background investigations.
 - **React, Vite and Tailwind** for the case board: Heard, Reproduced, Fixed, Guarded, with screenshots, evidence, the diff, the proof and the guard for each case.
 - A hard token budget per run stops a looping agent from running up a bill.
