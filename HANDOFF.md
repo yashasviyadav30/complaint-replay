@@ -89,8 +89,8 @@ uv run python risk_test.py                  # 5 bugs, buggy vs clean
 
 ## Overnight plan (Oct 14, user asleep; do NOT submit or publish anything in the user's name)
 
-1. [ ] Stop demo service, remove test-artifact cases (A/B/C checks), free memory.
-2. [ ] README: mermaid architecture diagram.
+1. [x] Stop demo service, remove test-artifact cases (A/B/C checks), free memory.
+2. [x] README: mermaid architecture diagram.
 3. [ ] Redeploy recorded demo (`bash scripts/deploy_demo.sh`) incl. a grouped "xN reports" case.
 4. [ ] Final `bench.py 3` once NVIDIA free-tier quota for Nemotron 3 Super resets (light poll every 15 min).
 5. [ ] Put final numbers in README, submission/writeup.md, submission/video-script.md, video results card;
