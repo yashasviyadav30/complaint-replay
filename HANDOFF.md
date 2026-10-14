@@ -70,7 +70,7 @@ uv run python risk_test.py                  # 5 bugs, buggy vs clean
   numbers, and the video results card (`video/film/index.html` #results) then re-render; redeploy demo
   (`bash scripts/deploy_demo.sh`).
 
-## Oct 14: duplicate-complaint grouping (IN PROGRESS, uncommitted until calibration finishes)
+## Oct 14: duplicate-complaint grouping (DONE, committed a9bb1ad; test half P0.82 R0.58; live A/B/C check passed)
 
 - Why: one bug, many complaints in many languages -> one investigation + "xN reports"; board sorts by reports.
 - No NVIDIA GPU on this laptop (AMD 780M, 20 GB) -> no on-device LLM training; fine-tuning would belong on Nebius
