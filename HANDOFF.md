@@ -47,7 +47,7 @@ uv run python risk_test.py                  # 5 bugs, buggy vs clean
 
 - Before/after screenshots per case (`results/cases/shots/`), shown in the case detail.
 - Proof is decided by the evidence that proved the bug (`fix_proven`), not the proof run's verdict; judge ignores
-  errors the twin caused itself. 26 tests.
+  errors the twin caused itself. 38 tests.
 - Read-only recorded demo on GitHub Pages: https://yashasviyadav30.github.io/complaint-replay/
   (`bash scripts/deploy_demo.sh` re-exports `results/cases` and redeploys).
 - Submission materials in `submission/`: writeup, video script, criteria map, feedback, checklist.
