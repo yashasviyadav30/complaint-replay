@@ -18,6 +18,23 @@ Built for the Nebius x NVIDIA Global AI Hackathon (Coding and Agentic Engineerin
 - **Recorded demo (real cases, read-only):** https://yashasviyadav30.github.io/complaint-replay/
 - **Demo video:** recorded from one real, unscripted run; see `video/README.md` for exactly how it was cut.
 
+## How it fits together
+
+```mermaid
+flowchart LR
+    U["Customer on their own phone"] -->|"complaint or silent signal<br/>+ real conditions"| W["Report a problem widget"]
+    W --> S["Complaint service<br/>(PII masked, rate limited)"]
+    S --> G{"Same as an open case?<br/>Nemotron Embed + Nemotron check"}
+    G -->|yes| N["Join case: xN reports"]
+    G -->|no| T["AI twin in a real browser<br/>with the user's network, screen, language"]
+    T -->|"machine evidence only"| R{"Reproduced?"}
+    R -->|no| X["Could not reproduce<br/>(steps shown)"]
+    R -->|yes| F["Fix on a branch copy<br/>Nemotron 3 Super (+ Tavily sources)"]
+    F --> P["Same twin replays on the fix"]
+    P -->|"proving evidence gone"| Q["Guard test: passes on fix,<br/>fails on old code"]
+    Q --> D["Case board: Heard, Reproduced, Fixed, Guarded"]
+```
+
 ## Results
 
 Five realistic bugs planted in a demo store, each tied to a different kind of user. Every bug was run through the whole chain three times, and each complaint was also replayed on the clean store to check for false alarms. Measured on Oct 12, 2026 with `uv run python bench.py 3`.

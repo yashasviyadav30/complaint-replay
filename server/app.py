@@ -126,7 +126,15 @@ def rate_limited(ip: str) -> bool:
 
 def save_case(case: dict) -> None:
     CASES_DIR.mkdir(parents=True, exist_ok=True)
-    (CASES_DIR / f"{case['id']}.json").write_text(json.dumps(case, ensure_ascii=False, indent=2), encoding="utf-8")
+    path = CASES_DIR / f"{case['id']}.json"
+    if path.exists():
+        # A running investigation holds its own copy of the case; reports merged into it meanwhile live only
+        # on disk. Keep them, or the investigation's next save would wipe the "xN reports" count.
+        on_disk = json.loads(path.read_text(encoding="utf-8"))
+        if on_disk.get("reports", 1) > case.get("reports", 1):
+            case["reports"] = on_disk["reports"]
+            case["also_reported"] = on_disk.get("also_reported", [])
+    path.write_text(json.dumps(case, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def complaint_for_model(record: dict) -> str:

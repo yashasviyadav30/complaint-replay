@@ -52,3 +52,14 @@ def test_twin_on_fast_desktop_keeps_its_small_real_latency() -> None:
     cond = twin_condition({"effective_type": "4g", "rtt_ms": 50, "viewport": {"width": 1280, "height": 800}})
     assert cond.network == {"latency": 50}
     assert not cond.context["is_mobile"]
+
+
+def test_a_running_investigation_does_not_wipe_merged_reports(tmp_path, monkeypatch) -> None:
+    monkeypatch.setattr(srv, "CASES_DIR", tmp_path)
+    in_memory = {"id": "c1", "stage": "reproducing"}  # the investigation's own copy
+    srv.save_case(dict(in_memory))
+    srv.save_case({"id": "c1", "stage": "reproducing", "reports": 2, "also_reported": [{"said": "same bug"}]})
+    in_memory["stage"] = "fixing"
+    srv.save_case(in_memory)  # stale copy saves later
+    saved = srv.json.loads((tmp_path / "c1.json").read_text(encoding="utf-8"))
+    assert saved["stage"] == "fixing" and saved["reports"] == 2 and saved["also_reported"] == [{"said": "same bug"}]
