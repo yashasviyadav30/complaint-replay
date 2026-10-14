@@ -37,19 +37,26 @@ flowchart LR
 
 ## Results
 
-Five realistic bugs planted in a demo store, each tied to a different kind of user. Every bug was run through the whole chain three times, and each complaint was also replayed on the clean store to check for false alarms. Measured on Oct 12, 2026 with `uv run python bench.py 3`.
+Seven realistic bugs planted in a demo store, each tied to a different kind of user. Every bug was run through
+the whole chain three times, and each complaint was also replayed on the clean store to check for false alarms.
+Measured on Oct 14, 2026 with `uv run python bench.py 3`.
 
 | Bug | User condition | Reproduced | Fixed + proven | Guarded | False alarm on clean shop | Median time |
 |---|---|---|---|---|---|---|
-| OTP request gives up after 4 seconds | Slow 3G + cheap Android | 3/3 | 3/3 | 3/3 | no | 76 s |
-| Pay button pushed off-screen on small phones | Slow 3G + cheap Android | 3/3 | 3/3 | 3/3 | no | 156 s |
-| Wrong-OTP error shown only in English | Hindi speaker | 3/3 | 3/3 | 3/3 | no | 39 s |
-| Cart button has no accessible name | Screen-reader user | 3/3 | 3/3 | 3/3 | no | 58 s |
-| Coupon shown in cart but not applied at payment | Fast desktop | 3/3 | 3/3 | 2/3 | no | 66 s |
+| OTP request gives up after 4 seconds | Slow 3G + cheap Android | 3/3 | 3/3 | 3/3 | no | 94 s |
+| Pay can be tapped twice while paying, charging twice | Slow 3G + cheap Android | 3/3 | 3/3 | 3/3 | no | 201 s |
+| Pay button pushed off-screen on small phones | Slow 3G + cheap Android | 3/3 | 3/3 | 3/3 | no | 150 s |
+| Wrong-OTP error shown only in English | Hindi speaker | 3/3 | 3/3 | 3/3 | no | 53 s |
+| Cart button has no accessible name | Screen-reader user | 3/3 | 2/3 | 2/3 | no | 80 s |
+| Pay button lost when text is zoomed to 200% | Elderly first-time user | 3/3 | 3/3 | 3/3 | no | 73 s |
+| Coupon shown in cart but not applied at payment | Fast desktop | 3/3 | 3/3 | 3/3 | no | 70 s |
 
-**Total: 15/15 reproduced, 15/15 fixed and proven, 14/15 guarded, 0 false alarms.**
+**Total: 21/21 reproduced, 20/21 fixed and proven, 20/21 guarded, 0 false alarms.**
 
-Be clear about what this does and does not show. These are five bugs we planted ourselves, so it is a working demonstration, not a broad benchmark. The OTP bug, for example, never shows up on a fast laptop, which is exactly the "works for me" trap: the scripted test `test_otp_bug_works_for_me_on_a_fast_laptop` checks that.
+Be clear about what this does and does not show. These are seven bugs we planted ourselves, so it is a working
+demonstration, not a broad benchmark. The one miss: in one screen-reader run the fix could not be applied even after
+a retry, so the case stopped at "fix failed" instead of shipping a guess. The OTP bug never shows up on a fast laptop,
+which is exactly the "works for me" trap: the scripted test `test_otp_bug_works_for_me_on_a_fast_laptop` checks that.
 
 ## Duplicate complaints: one bug, one investigation
 
@@ -116,7 +123,7 @@ Open http://127.0.0.1:8200 for the dashboard. The demo store runs at http://127.
 Other entry points:
 
 ```bash
-uv run pytest -q                   # 23 tests; scripted browser checks need no API key
+uv run pytest -q                   # 38 tests; scripted browser checks need no API key
 uv run python pipeline.py 4        # one planted bug, end to end, from the command line
 uv run python bench.py 3           # the results table above
 uv run python -m replay.guard <branch>/guards/<id>.json http://127.0.0.1:8100   # run one guard

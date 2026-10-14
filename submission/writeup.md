@@ -30,7 +30,7 @@ How a case moves:
 3. **Fixed.** Nemotron reads the evidence and the code and writes the smallest fix, on a separate branch copy. The same twin replays the complaint on the fixed code.
 4. **Guarded.** The steps that triggered the bug become a test. It must pass on the fix and fail on the old code, or it isn't marked guarded.
 
-On five realistic bugs, each run three times: 15/15 reproduced, 15/15 fixed and proven, 14/15 guarded, and 0 false alarms when the same complaints were replayed on the clean store.
+On seven realistic bugs (slow phone, small screen, Hindi user, screen reader, elderly user with large text, double charge, coupon charge), each run three times: 21/21 reproduced, 20/21 fixed and proven, 20/21 guarded, and 0 false alarms when the same complaints were replayed on the clean store.
 
 ## How we built it
 

@@ -14,7 +14,7 @@ Record a working run now, not near the deadline. Everything on screen must be a 
 | 1:30-1:50 | Open the case. Screenshot, then the evidence card "Money mismatch: quote said 162, checkout charged 180", marked "cited as proof". | It found the bug. Not because the model says so. The browser caught the cart and the checkout disagreeing. That's the only kind of proof it accepts. |
 | 1:50-2:10 | The fix section: Nemotron's explanation and the one-line diff. Card moves to Fixed, then Guarded. Show the guard section with both green lines. | NVIDIA Nemotron on Nebius Token Factory reads the evidence and the code, and writes a one-line fix. The same twin replays it on the fixed code. Then the replay is saved as a test that fails on the old code. |
 | 2:10-2:25 | Quick cuts: Hindi error case, off-screen Pay button on a 360 px phone, screen-reader cart button. | It works for slow phones, small screens, Hindi users and screen readers. |
-| 2:25-2:38 | README results table. | Five bugs, three runs each. Fifteen reproduced, fifteen fixed, zero false alarms. |
+| 2:25-2:38 | README results table. | Seven bugs, three runs each. Twenty-one reproduced, twenty fixed, zero false alarms. |
 | 2:38-2:45 | Repo link and name. | Your angriest users are your best testers. I'm Yashasvi. Thanks for watching. |
 
 ## Version B: captions only (no voice)
@@ -30,7 +30,7 @@ Use the same shots. Put one short caption on screen for each row, 6 to 10 words,
 7. Nemotron on Nebius Token Factory writes the fix.
 8. Proven on the fixed code. Saved as a test.
 9. Slow phones, small screens, Hindi, screen readers.
-10. 15/15 reproduced. 15/15 fixed. 0 false alarms.
+10. 21/21 reproduced. 20/21 fixed. 0 false alarms.
 
 ## Recording checklist
 
