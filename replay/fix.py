@@ -84,6 +84,18 @@ async def propose_fix(client: AsyncOpenAI, model: str, complaint: str, condition
     return Patch(str(data.get("explanation", "")), tuple(data.get("edits", [])))
 
 
+# Files a fix may never change, whatever the model says: they control what runs in CI and with which secrets.
+# A complaint is untrusted text; without this, a prompt-injected "fix" could rewrite the start command.
+PROTECTED = ("complaint-replay.toml", ".github/*", "package.json", "package-lock.json", "yarn.lock", "pnpm-lock.yaml",
+             "pyproject.toml", "uv.lock", "requirements*.txt", "Dockerfile", "docker-compose*", "Makefile", "*.sh",
+             "*.ps1", ".env*", "*/.env*", ".npmrc", ".git/*", "vite.config.*", "webpack.config.*", "next.config.*")
+
+
+def protected(rel: str) -> bool:
+    name = rel.rsplit("/", 1)[-1]
+    return any(fnmatch.fnmatch(rel, g) or fnmatch.fnmatch(name, g) for g in PROTECTED)
+
+
 def apply_patch(patch: Patch, root: Path, allowed: tuple[str, ...] = ()) -> str:
     """Apply all edits or none. Returns a unified diff; raises ValueError on an unsafe or ambiguous edit.
 
@@ -97,6 +109,8 @@ def apply_patch(patch: Patch, root: Path, allowed: tuple[str, ...] = ()) -> str:
         if root not in path.parents or not path.is_file():
             raise ValueError(f"edit points outside the app or to a missing file: {edit.get('file')!r}")
         rel = path.relative_to(root).as_posix()
+        if protected(rel):
+            raise ValueError(f"{rel} controls builds or secrets; a fix may not change it")
         if allowed and not any(fnmatch.fnmatch(rel, g) for g in allowed):
             raise ValueError(f"{rel} is not in the files this project lets the fixer change ({', '.join(allowed)})")
         if path not in current:

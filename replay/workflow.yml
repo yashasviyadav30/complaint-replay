@@ -18,12 +18,14 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   replay:
     if: github.event_name == 'repository_dispatch' || github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: write        # push the fix branch
+      pull-requests: write   # open the pull request
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -36,7 +38,6 @@ jobs:
       - uses: yashasviyadav30/complaint-replay@main
         with:
           mode: replay
-          payload: ${{ toJson(github.event.client_payload) }}
           complaint: ${{ inputs.complaint }}
           user: ${{ inputs.user }}
           nebius-api-key: ${{ secrets.NEBIUS_API_KEY }}

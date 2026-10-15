@@ -9,6 +9,7 @@ import hmac
 import os
 import re
 import secrets
+import time
 import unicodedata
 from pathlib import Path
 
@@ -71,10 +72,26 @@ def server_secret() -> bytes:
     return SECRET_FILE.read_text(encoding="utf-8").strip().encode()
 
 
+SESSION_S = 7 * 24 * 3600
+
+
 def sign(value: str) -> str:
     return value + "." + hmac.new(server_secret(), value.encode(), hashlib.sha256).hexdigest()[:32]
 
 
 def unsign(signed: str) -> str | None:
     value = signed.rpartition(".")[0]
-    return value if value and hmac.compare_digest(sign(value), signed) else None
+    return value if value and hmac.compare_digest(sign(value).encode(), signed.encode()) else None
+
+
+def session_value(login: str) -> str:
+    """A login cookie: who, and since when. Different prefix from case tokens, so one can't pose as the other."""
+    return sign(f"session:{login}:{int(time.time())}")
+
+
+def session_login(cookie: str) -> str | None:
+    kind, _, rest = (unsign(cookie) or "").partition(":")
+    login, _, issued = rest.rpartition(":")
+    if kind != "session" or not login or not issued.isdigit() or time.time() - int(issued) > SESSION_S:
+        return None
+    return login

@@ -14,6 +14,7 @@ import tempfile
 from pathlib import Path
 
 from replay.fix import Patch, apply_patch
+from replay.project import load_project
 
 BOT = {"GIT_AUTHOR_NAME": "Complaint Replay", "GIT_AUTHOR_EMAIL": "complaint-replay@users.noreply.github.com",
        "GIT_COMMITTER_NAME": "Complaint Replay", "GIT_COMMITTER_EMAIL": "complaint-replay@users.noreply.github.com"}
@@ -45,18 +46,24 @@ def title(case: dict) -> str:
     return text if len(text) <= TITLE_MAX else text[:TITLE_MAX - 2] + "…\""
 
 
+def quoted(text: str) -> str:
+    """User text in a PR: one line, no @mentions, no images, no markdown that escapes the quote."""
+    text = " ".join(text.split()).replace("@", "@​").replace("![", "[").replace("`", "'")
+    return text.replace("<", "&lt;")
+
+
 def body(case: dict, image_url: str = "") -> str:
     """What a reviewer needs in 30 seconds: who hit it, the proof, the fix, how it is guarded."""
     rep, fix, guard = case["replay"], case["fix"], case.get("guard", {})
     cited = [e for e in rep["evidence"] if e["id"] in rep["cited"]]
     reports = f" ({case['reports']} reports)" if case.get("reports", 1) > 1 else ""
     lines = [
-        f"> {case.get('said') or case['complaint']}",
+        f"> {quoted(case.get('said') or case['complaint'])}",
         "",
         f"**Who hit it:** {case['condition']['persona']}{reports}",
         "",
         "### Proof (collected by the browser, not written by a model)",
-        *[f"- `{e['kind']}` {e['detail']}" for e in cited],
+        *[f"- `{e['kind']}` {quoted(e['detail'])}" for e in cited],
         "",
         "### Steps that triggered it",
         *[f"{i + 1}. {s['action'].get('type')} " + (f"`{s['target']}`" if s.get("target") else "")
@@ -93,7 +100,7 @@ def open_pr(repo: Path, case: dict, shots: Path | None = None, base: str = "", p
     work.rmdir()  # git worktree add wants to create it
     run(["git", "worktree", "add", "-B", branch, str(work), "HEAD"], repo)
     try:
-        apply_patch(Patch(case["fix"]["explanation"], tuple(case["fix"]["edits"])), work)
+        apply_patch(Patch(case["fix"]["explanation"], tuple(case["fix"]["edits"])), work, load_project(repo).edit)
         guard = case["guard"]
         (work / guard["file"]).parent.mkdir(parents=True, exist_ok=True)
         (work / guard["file"]).write_text(json.dumps(guard["test"], ensure_ascii=False, indent=2), encoding="utf-8")

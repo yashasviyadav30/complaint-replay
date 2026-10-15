@@ -4,13 +4,14 @@ services:
     build: .
     image: complaint-replay:local
     ports:
-      - "8200:8200"
+      - "127.0.0.1:8200:8200"   # this machine only; put it behind HTTPS with GitHub login before opening it up
     env_file:
       - path: .env
         required: false
     environment:
       DATABASE_URL: sqlite:////app/results/complaint-replay.db
       START_LIVE_SHOP: "1"   # the built-in BadShop demo; set "0" to run only your own projects
+      LOCAL_ADMIN: "1"       # no GitHub login yet: whoever reaches the bound port above manages it
     volumes:
       - replay-data:/app/results
     restart: unless-stopped

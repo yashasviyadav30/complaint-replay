@@ -44,3 +44,9 @@ def test_pr_target_is_origin_even_when_a_fork_has_an_upstream(tmp_path) -> None:
     git(tmp_path, "remote", "add", "upstream", "https://github.com/someone-else/project.git")
     git(tmp_path, "remote", "add", "origin", "git@github.com:me/my-copy.git")
     assert origin_slug(tmp_path) == "me/my-copy"
+
+
+def test_user_text_cannot_ping_people_or_break_out_of_the_quote() -> None:
+    from replay.pr import quoted
+
+    assert quoted("hi @octocat\n# Fixes #1\n![x](http://evil)") == "hi @​octocat # Fixes #1 [x](http://evil)"

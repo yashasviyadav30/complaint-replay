@@ -20,13 +20,14 @@ from collections import defaultdict, deque
 from contextlib import ExitStack, asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Literal
+import re
+from typing import Annotated, Literal
 from zoneinfo import available_timezones
 
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, field_validator
 
@@ -37,7 +38,7 @@ from replay.langid import detect
 from replay.project import running_app
 from replay.triage import classify
 from server import github
-from server.intake import complaint_for_model, impact, mask_pii, sign, unsign
+from server.intake import complaint_for_model, impact, mask_pii, session_login, session_value, sign, unsign
 from server.store import Store
 
 HERE = Path(__file__).resolve().parent
@@ -50,6 +51,11 @@ DEMO = "demo"
 COOKIE = "crp_session"
 WEEK_S = 7 * 24 * 3600
 MAX_PROGRESS_CHARS = 500_000
+MAX_BODY_BYTES = 64_000  # a widget report is a few kB; anything far bigger is not a complaint
+CASE_TOKEN_S = 24 * 3600
+MAX_DAILY_REPLAYS = int(os.getenv("MAX_DAILY_REPLAYS", "50"))  # per project: model calls and CI minutes cost money
+LOOPBACK = {"127.0.0.1", "::1", "localhost", "testclient"}
+SHOT_NAME = re.compile(r"[\w.-]{1,120}\.(png|jpe?g)")
 TIMEZONES = available_timezones()
 # What the person who complained is told, by stage. The widget shows these in the user's language.
 PUBLIC_STATUS = {
@@ -95,7 +101,7 @@ class ReportIn(BaseModel):
     text: str = Field("", max_length=1000)
     page: str = Field("/", max_length=300)
     env: Env
-    breadcrumbs: list[str] = Field(default_factory=list, max_length=20)
+    breadcrumbs: list[Annotated[str, Field(max_length=200)]] = Field(default_factory=list, max_length=20)
 
 
 class ProjectIn(BaseModel):
@@ -105,6 +111,13 @@ class ProjectIn(BaseModel):
     sector: Literal["general", "ecommerce", "fintech", "public"] = "general"
     retention_days: int = Field(30, ge=1, le=365)
     screenshots: bool = True
+
+    @field_validator("repo")
+    @classmethod
+    def no_dot_segments(cls, repo: str) -> str:
+        if repo and any(set(part) <= {"."} for part in repo.split("/")):
+            raise ValueError("not a GitHub repo name")
+        return repo
 
 
 # --- projects and cases ---
@@ -125,6 +138,12 @@ def project_by_key(key: str) -> dict:
     if not found:
         raise HTTPException(404, "unknown project key")
     return found[0]
+
+
+def replays_today(project_id: str) -> int:
+    today = datetime.now(timezone.utc).date().isoformat()
+    return sum(1 for c in store.all("case", project=project_id)
+               if c.get("created_at", "").startswith(today) and c.get("stage") not in ("heard", "not_a_bug"))
 
 
 def save_case(case: dict) -> dict:
@@ -172,8 +191,16 @@ async def run_local(case: dict, env: dict) -> None:
             save_case({**case, "stage": "error", "error": str(e)[:300]})
 
 
-def case_token(case_id: str) -> str:
-    return sign(f"case:{case_id}")
+def case_token(case_id: str, expires: int | None = None) -> str:
+    """Lets one GitHub Action run report progress on one case, for a day. Signed, so it can't be forged."""
+    return sign(f"case:{case_id}:{expires or int(time.time()) + CASE_TOKEN_S}")
+
+
+def case_token_ok(case_id: str, token: str) -> bool:
+    value = unsign(token) or ""
+    kind, _, rest = value.partition(":")
+    cid, _, expires = rest.rpartition(":")
+    return kind == "case" and cid == case_id and expires.isdigit() and int(expires) > time.time()
 
 
 async def start_case(project: dict, case: dict, env: dict, base_url: str) -> None:
@@ -226,7 +253,7 @@ def sweep_once() -> None:
                 if doc.get("created_at", now()) < cutoff:
                     store.delete(kind, doc["id"])
                     for shot in (doc.get("shots") or {}).values():
-                        (SHOTS_DIR / shot).unlink(missing_ok=True)
+                        (SHOTS_DIR / Path(str(shot)).name).unlink(missing_ok=True)  # never a path from outside
 
 
 async def retention_loop() -> None:
@@ -254,6 +281,15 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET", "P
 _hits: dict[str, deque] = defaultdict(deque)
 
 
+@app.middleware("http")
+async def limit_body(request: Request, call_next):
+    """Refuse oversized bodies before parsing them. Action progress has its own, larger limit."""
+    limit = MAX_PROGRESS_CHARS if request.url.path.endswith("/progress") else MAX_BODY_BYTES
+    if int(request.headers.get("content-length") or 0) > limit:
+        return JSONResponse({"detail": "request too large"}, status_code=413)
+    return await call_next(request)
+
+
 def rate_limited(key: str) -> bool:
     # ponytail: in-memory per-process limiter; move to Redis if this runs on more than one worker.
     t, hits = time.monotonic(), _hits[key]
@@ -265,14 +301,34 @@ def rate_limited(key: str) -> bool:
     return False
 
 
+def from_this_machine(request: Request) -> bool:
+    """A browser on this machine. A tunnel or reverse proxy also connects from 127.0.0.1, so anything that
+    carries forwarding headers came from somewhere else."""
+    forwarded = any(h in request.headers for h in ("x-forwarded-for", "forwarded", "cf-connecting-ip", "x-real-ip"))
+    return bool(request.client and request.client.host in LOOPBACK) and not forwarded
+
+
 def public_url(request: Request) -> str:
-    return (os.getenv("PUBLIC_URL") or str(request.base_url)).rstrip("/")
+    """Where GitHub Actions should send progress. Never taken from a Host header sent by a stranger."""
+    if os.getenv("PUBLIC_URL"):
+        return os.environ["PUBLIC_URL"].rstrip("/")
+    if from_this_machine(request):
+        return str(request.base_url).rstrip("/")
+    raise HTTPException(500, "set PUBLIC_URL to this server's public address")
 
 
 def current_user(request: Request) -> str | None:
     if not github.login_configured():
-        return "local"  # self-hosted without GitHub login: whoever can reach this server owns it
-    return unsign(request.cookies.get(COOKIE, ""))
+        # No GitHub login set up: only someone on this machine (or behind LOCAL_ADMIN=1, e.g. Docker bound to
+        # 127.0.0.1) may manage it. Anyone else on the network gets nothing.
+        return "local" if from_this_machine(request) or os.getenv("LOCAL_ADMIN") == "1" else None
+    return session_login(request.cookies.get(COOKIE, ""))
+
+
+def require_admin(user: str) -> None:
+    """Creating the server's GitHub App is for the server's owner only."""
+    if user != "local" and user != os.getenv("ADMIN_LOGIN"):
+        raise HTTPException(403, "only this server's admin (ADMIN_LOGIN) can do this")
 
 
 def require_user(request: Request) -> str:
@@ -295,14 +351,17 @@ def owned_project(project_id: str, user: str) -> dict:
 async def receive_report(report: ReportIn, request: Request) -> dict:
     """A complaint (spoken or silent) from the widget, with the user's real conditions."""
     ip = request.client.host if request.client else "unknown"
-    if rate_limited(ip) or rate_limited("project:" + report.project):
+    if rate_limited(ip):
         raise HTTPException(429, "too many reports, slow down")
-    project = project_by_key(report.project)
+    project = project_by_key(report.project)  # before using the key anywhere, so junk keys can't fill memory
+    if rate_limited("project:" + project["id"]):
+        raise HTTPException(429, "too many reports, slow down")
     origin = request.headers.get("origin", "")
     if project["origins"] and origin and origin not in project["origins"]:
         raise HTTPException(403, "this site is not allowed to send reports to this project")
     record = report.model_dump()
     record["text"] = mask_pii(record["text"])
+    record["page"] = mask_pii(record["page"])
     record["breadcrumbs"] = [mask_pii(b)[:80] for b in record["breadcrumbs"]]
     record.update(id=secrets.token_hex(6), project=project["id"], received_at=now(), created_at=now(),
                   status_token=secrets.token_urlsafe(16))
@@ -319,7 +378,9 @@ async def receive_report(report: ReportIn, request: Request) -> dict:
         if vec:
             store.put("vector", {"id": case["id"], "project": project["id"], "vector": vec, "created_at": now()})
             case["triage"] = classify(vec)
-        if case.get("triage", {}).get("replay", True):
+        if case.get("triage", {}).get("replay", True) and replays_today(project["id"]) >= MAX_DAILY_REPLAYS:
+            save_case({**case, "error": f"Daily replay limit ({MAX_DAILY_REPLAYS}) reached; replay it by hand."})
+        elif case.get("triage", {}).get("replay", True):
             save_case(case)
             await start_case(project, case, record["env"], public_url(request))
         else:  # spam or a clear feature wish: keep it for the team, don't spend a replay on it
@@ -331,7 +392,7 @@ async def receive_report(report: ReportIn, request: Request) -> dict:
 def report_status(report_id: str, token: str) -> dict:
     """What the person who complained may see: how far their report got. Needs the token they were given."""
     record = store.get("report", report_id)
-    if not record or not secrets.compare_digest(record.get("status_token", ""), token):
+    if not record or not secrets.compare_digest(record.get("status_token", "").encode(), token.encode()):
         raise HTTPException(404, "no such report")
     case = store.get("case", record["case"]) or {}
     return {"status": PUBLIC_STATUS.get(case.get("stage", "heard"), "received"), "reports": case.get("reports", 1)}
@@ -346,9 +407,8 @@ def widget() -> FileResponse:
 
 @app.post("/api/v1/cases/{case_id}/progress")
 async def case_progress(case_id: str, request: Request) -> dict:
-    auth = request.headers.get("authorization", "").removeprefix("Bearer ")
-    if not secrets.compare_digest(auth, case_token(case_id)):
-        raise HTTPException(403, "bad case token")
+    if not case_token_ok(case_id, request.headers.get("authorization", "").removeprefix("Bearer ")):
+        raise HTTPException(403, "bad or expired case token")
     case = store.get("case", case_id)
     if not case:
         raise HTTPException(404, "no such case")
@@ -361,6 +421,15 @@ async def case_progress(case_id: str, request: Request) -> dict:
     for key in ("stage", "condition", "replay", "fix", "proof", "guard", "shots", "pr", "error"):
         if key in update:
             case[key] = update[key]
+    # Anything shown as a link or used as a file name must be what it claims to be.
+    if not isinstance(case.get("shots"), dict) or not all(isinstance(v, str) and SHOT_NAME.fullmatch(v)
+                                                         for v in case["shots"].values()):
+        case.pop("shots", None)
+    if case.get("pr") and not str(case["pr"]).startswith("https://github.com/"):
+        case.pop("pr")
+    if isinstance(case.get("fix"), dict):
+        case["fix"]["sources"] = [s for s in case["fix"].get("sources") or []
+                                  if isinstance(s, dict) and str(s.get("url", "")).startswith("https://")]
     project = store.get("project", case["project"]) or {}
     if case.get("pr") and project.get("repo"):
         # Screenshots are committed to the pull request branch, not uploaded here: the code stays in GitHub.
@@ -441,11 +510,12 @@ def login(request: Request) -> RedirectResponse:
 
 @app.get("/auth/callback")
 def auth_callback(code: str, state: str, request: Request) -> RedirectResponse:
-    if not secrets.compare_digest(state, request.cookies.get("crp_state", "")):
+    if not secrets.compare_digest(state.encode(), request.cookies.get("crp_state", "").encode()):
         raise HTTPException(400, "login expired, try again")
     token = github.exchange_code(code)
     resp = RedirectResponse("/")
-    resp.set_cookie(COOKIE, sign(github.whoami(token)), max_age=WEEK_S, httponly=True, samesite="lax", secure=True)
+    resp.set_cookie(COOKIE, session_value(github.whoami(token)), max_age=WEEK_S, httponly=True, samesite="lax",
+                    secure=True)
     resp.set_cookie(COOKIE + "_gh", sign(token), max_age=WEEK_S, httponly=True, samesite="lax", secure=True)
     return resp
 
@@ -459,21 +529,29 @@ def logout() -> RedirectResponse:
 
 
 @app.get("/setup/github-app", response_class=HTMLResponse)
-def setup_github_app(request: Request, user: str = Depends(require_user)) -> str:
+def setup_github_app(request: Request, user: str = Depends(require_user)) -> HTMLResponse:
     """One click: GitHub creates this server's App from a manifest, then sends its keys back here."""
+    require_admin(user)
     if github.app_configured():
-        slug = github.app_settings()["slug"]
-        return f"<p>The GitHub App is already set up: <a href='https://github.com/apps/{slug}'>open it</a>.</p>"
+        slug = html.escape(github.app_settings()["slug"])
+        return HTMLResponse(f"<p>The GitHub App is already set up: <a href='https://github.com/apps/{slug}'>open it</a>.</p>")
     manifest = json.dumps(github.manifest(public_url(request), os.getenv("GITHUB_APP_NAME", "Complaint Replay")))
-    return ("<!doctype html><meta charset=utf-8><title>Create the GitHub App</title>"
-            "<form action='https://github.com/settings/apps/new' method='post'>"
-            f"<input type='hidden' name='manifest' value='{html.escape(manifest, quote=True)}'>"
-            "<p>Complaint Replay needs a GitHub App to start replays in your repos and open pull requests.</p>"
-            "<button>Create it on GitHub</button></form>")
+    state = secrets.token_urlsafe(16)  # GitHub hands it back; a code from anyone else's flow is refused
+    resp = HTMLResponse(
+        "<!doctype html><meta charset=utf-8><title>Create the GitHub App</title>"
+        f"<form action='https://github.com/settings/apps/new?state={state}' method='post'>"
+        f"<input type='hidden' name='manifest' value='{html.escape(manifest, quote=True)}'>"
+        "<p>Complaint Replay needs a GitHub App to start replays in your repos and open pull requests.</p>"
+        "<button>Create it on GitHub</button></form>")
+    resp.set_cookie("crp_manifest", state, max_age=1800, httponly=True, samesite="lax", secure=True)
+    return resp
 
 
 @app.get("/setup/github-app/done", response_class=HTMLResponse)
-def setup_github_app_done(code: str, user: str = Depends(require_user)) -> str:
+def setup_github_app_done(code: str, state: str, request: Request, user: str = Depends(require_user)) -> str:
+    require_admin(user)
+    if not secrets.compare_digest(state.encode(), request.cookies.get("crp_manifest", "").encode()):
+        raise HTTPException(400, "this setup link did not start here; open /setup/github-app again")
     if github.app_configured():
         raise HTTPException(409, "the GitHub App is already set up")
     saved = github.convert_manifest(code)
@@ -508,14 +586,20 @@ def live_state() -> dict:
     return {"url": live["url"], "broken": live["bug"] is not None}
 
 
-@app.post("/api/break")
+def demo_shop_admin(request: Request) -> None:
+    if not live["url"]:
+        raise HTTPException(404, "the demo shop is not running on this server")
+    require_user(request)
+
+
+@app.post("/api/break", dependencies=[Depends(demo_shop_admin)])
 def break_it() -> dict:
     """Plant a random bug in the live shop. The id stays secret: finding it is the tool's job."""
     start_live(random.choice([b for b in BUGS if b.id != live["bug"]]))
     return {"broken": True}
 
 
-@app.post("/api/reset")
+@app.post("/api/reset", dependencies=[Depends(demo_shop_admin)])
 def reset_live() -> dict:
     start_live()
     return {"broken": False}

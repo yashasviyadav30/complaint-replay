@@ -142,7 +142,7 @@ def twin_condition(env: dict) -> Condition:
     if latency:
         parts.append(f"{env.get('effective_type') or 'slow'} network (+{latency} ms per request)")
     return Condition(
-        "twin", "Twin of the reporter", "The real user who reported this: " + ", ".join(parts) + ".",
+        "twin", ", ".join(parts[:2]), "The real user who reported this: " + ", ".join(parts) + ".",
         context, network={"latency": latency} if latency else None,
     )
 

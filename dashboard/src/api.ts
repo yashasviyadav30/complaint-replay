@@ -40,5 +40,8 @@ export const sendTestReport = (key: string, text: string) =>
 export const getLive = (): Promise<Live | null> => (DEMO ? Promise.resolve(null) : call<Live>("/api/live"));
 export const breakShop = () => call<Live>("/api/break", "POST");
 export const resetShop = () => call<Live>("/api/reset", "POST");
+/** Links that came from a model, a web search or a CI callback: only https, never javascript: */
+export const safeUrl = (u?: string) => (u && /^https:\/\//.test(u) ? u : undefined);
+
 export const shotUrl = (name: string, base?: string) =>
   base ? `${base}/${name}?raw=true` : DEMO ? `${BASE}demo/shots/${name}` : `/shots/${name}`;

@@ -177,3 +177,41 @@ def test_spam_is_kept_but_not_replayed(client, monkeypatch) -> None:
     r = client.post("/api/v1/reports", json={"project": "demo", "kind": "spoken", "text": "buy followers", "env": ENV})
     case = srv.store.get("case", r.json()["id"])
     assert case["stage"] == "not_a_bug" and case["triage"]["label"] == "spam" and not started
+
+
+def test_progress_cannot_smuggle_paths_or_script_links(client) -> None:
+    r = client.post("/api/v1/reports", json={"project": "demo", "kind": "spoken", "text": "Pay missing", "env": ENV})
+    case_id = r.json()["id"]
+    bad = {"shots": {"before": "../secret.key"}, "pr": "javascript:alert(1)",
+           "fix": {"explanation": "x", "sources": [{"title": "t", "url": "javascript:alert(1)"}]}}
+    client.post(f"/api/v1/cases/{case_id}/progress", json=bad, headers={"Authorization": f"Bearer {srv.case_token(case_id)}"})
+    case = client.get(f"/api/v1/cases/{case_id}").json()
+    assert "shots" not in case and "pr" not in case and case["fix"]["sources"] == []
+
+
+def test_case_tokens_expire_and_cannot_log_anyone_in(client) -> None:
+    from server.intake import session_login
+
+    expired = srv.case_token("c1", expires=1)
+    assert not srv.case_token_ok("c1", expired)
+    assert srv.case_token_ok("c1", srv.case_token("c1")) and not srv.case_token_ok("c2", srv.case_token("c1"))
+    assert session_login(srv.case_token("c1")) is None
+
+
+def test_without_github_login_only_this_machine_may_manage(monkeypatch) -> None:
+    monkeypatch.setattr(srv.github, "login_configured", lambda: False)
+    monkeypatch.delenv("LOCAL_ADMIN", raising=False)
+    stranger = TestClient(srv.app, client=("203.0.113.9", 5000))
+    assert stranger.get("/api/v1/projects").status_code == 401
+    assert stranger.post("/api/break").status_code in (401, 404)
+
+
+def test_repo_names_with_dot_segments_are_refused(client) -> None:
+    assert client.post("/api/v1/projects", json={"name": "x", "repo": "../evil"}).status_code == 422
+
+
+def test_traffic_through_a_tunnel_is_not_local(monkeypatch) -> None:
+    monkeypatch.setattr(srv.github, "login_configured", lambda: False)
+    monkeypatch.delenv("LOCAL_ADMIN", raising=False)
+    local = TestClient(srv.app)
+    assert local.get("/api/v1/projects", headers={"CF-Connecting-IP": "203.0.113.9"}).status_code == 401

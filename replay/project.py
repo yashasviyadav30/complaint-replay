@@ -26,6 +26,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 CONFIG = "complaint-replay.toml"
+SECRET_WORDS = ("KEY", "TOKEN", "SECRET", "PASSWORD", "CREDENTIAL")
 START_TIMEOUT_S = 120  # a cold `npm run dev` can take a while
 
 
@@ -53,6 +54,11 @@ def load_project(root: Path) -> Project:
     if "edit" in known:
         known["edit"] = tuple(known["edit"])
     return Project(root, **known)
+
+
+def app_env() -> dict[str, str]:
+    """The app under test never sees model keys or the GitHub token: it is untrusted code on a fix branch."""
+    return {k: v for k, v in os.environ.items() if not any(w in k.upper() for w in SECRET_WORDS)}
 
 
 def free_port() -> int:
@@ -103,7 +109,7 @@ def running_app(root: Path, port: int | None = None) -> Iterator[str]:
     port = port or free_port()
     url = f"http://127.0.0.1:{port}"
     cmd = project.start.format(port=port, python=f'"{sys.executable}"')
-    proc = subprocess.Popen(cmd, shell=True, cwd=project.root, start_new_session=os.name != "nt",
+    proc = subprocess.Popen(cmd, shell=True, cwd=project.root, start_new_session=os.name != "nt", env=app_env(),
                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     try:
         _wait_ready(url + project.ready, proc, START_TIMEOUT_S)

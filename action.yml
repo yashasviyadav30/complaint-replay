@@ -51,10 +51,16 @@ runs:
         PAYLOAD: ${{ inputs.payload }}
         COMPLAINT: ${{ inputs.complaint }}
         REPLAY_USER: ${{ inputs.user }}
+        FIX: ${{ inputs.fix }}
       run: |
         args=()
-        [ "${{ inputs.fix }}" = "true" ] && args+=(--fix --pr)
-        if [ -n "$PAYLOAD" ] && [ "$PAYLOAD" != "null" ]; then
+        [ "$FIX" = "true" ] && args+=(--fix --pr)
+        if [ "$GITHUB_EVENT_NAME" = "repository_dispatch" ]; then
+          # Read the complaint from the event file, not from an input: inputs are printed in the log, and the
+          # payload holds the callback token. Mask it in case anything prints it later.
+          python3 -c 'import json,os,sys; p=json.load(open(os.environ["GITHUB_EVENT_PATH"]))["client_payload"]; print("::add-mask::"+p.get("token","")); json.dump(p, open(sys.argv[1],"w"))' "$RUNNER_TEMP/payload.json"
+          crp replay --payload "$RUNNER_TEMP/payload.json" "${args[@]}"
+        elif [ -n "$PAYLOAD" ] && [ "$PAYLOAD" != "null" ]; then
           printf '%s' "$PAYLOAD" > "$RUNNER_TEMP/payload.json"
           crp replay --payload "$RUNNER_TEMP/payload.json" "${args[@]}"
         else

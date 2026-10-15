@@ -1,7 +1,7 @@
 import { ArrowClockwise, GitPullRequest, X } from "@phosphor-icons/react";
 import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
-import { DEMO, replayCase, shotUrl } from "../api";
+import { DEMO, replayCase, safeUrl, shotUrl } from "../api";
 import { EVIDENCE, KIND, languageName, twinSummary, whatTheySaid } from "../labels";
 import { proofPassed, type Case, type Replay } from "../types";
 import { Diff } from "./Diff";
@@ -114,8 +114,8 @@ export function CaseDetail({ c, onClose }: { c: Case; onClose: () => void }) {
             {c.lang && c.lang !== "en" && <p className="text-sm text-muted">Written in {languageName(c.lang)}</p>}
             {c.error && <p className="text-sm text-accent">{c.error}</p>}
             <div className="mt-2 flex flex-wrap gap-2">
-              {c.pr && (
-                <a href={c.pr} target="_blank" rel="noreferrer"
+              {safeUrl(c.pr) && (
+                <a href={safeUrl(c.pr)} target="_blank" rel="noreferrer"
                   className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-accent-ink hover:opacity-90">
                   <GitPullRequest size={16} weight="bold" aria-hidden="true" /> Review Pull Request
                 </a>
@@ -171,7 +171,7 @@ export function CaseDetail({ c, onClose }: { c: Case; onClose: () => void }) {
                   <ul className="grid gap-1 text-sm">
                     {c.fix.sources.map((s) => (
                       <li key={s.url} className="truncate">
-                        <a href={s.url} target="_blank" rel="noreferrer" className="text-accent hover:underline">{s.title || s.url}</a>
+                        <a href={safeUrl(s.url)} target="_blank" rel="noreferrer" className="text-accent hover:underline">{s.title || s.url}</a>
                       </li>
                     ))}
                   </ul>
