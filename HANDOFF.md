@@ -3,7 +3,7 @@
 Read this first in a new session. Plan and scoring: `~/hackathon-ideas/nebius-nvidia-global-ai-2026.md`.
 Beginner explainer: `../IDEA-EXPLAINED.md`. Deadline: Oct 30, 2026, 10:00 am PDT (submit Oct 29).
 
-## Done (all committed, `uv run pytest -q` = 20 passing)
+## Done (all committed, `uv run pytest -q` = 38 passing)
 
 - BadShop demo store (`badshop/`), 5 planted bugs (`replay/bugs.py`: ids 1, 4, 7, 10, 15).
 - Real user conditions (`replay/conditions.py`) + `twin_condition(env)` built from widget data.
@@ -83,7 +83,7 @@ uv run python risk_test.py                  # 5 bugs, buggy vs clean
   embed_text/top_k on the fit half, reports test P/R into `replay/grouping.json`.
 - Server: `group_into_existing()` in `server/app.py`; vectors in `results/vectors.json`; dashboard shows
   "xN reports", sorts by reports, lists "Also reported by" in the case detail (built).
-- TODO after calibration: delete now-unused fit_threshold/shortlist_threshold/best_match/threshold from
+- DONE after calibration: deleted now-unused fit_threshold/shortlist_threshold/best_match/threshold from
   grouping.py and update tests/test_grouping.py; restart service and re-run the A/B/C live check (A Hinglish OTP,
   B English OTP -> must join A; C delivery -> separate); add the grouping numbers to README; commit + push.
 
@@ -91,11 +91,14 @@ uv run python risk_test.py                  # 5 bugs, buggy vs clean
 
 1. [x] Stop demo service, remove test-artifact cases (A/B/C checks), free memory.
 2. [x] README: mermaid architecture diagram.
-3. [ ] Redeploy recorded demo (`bash scripts/deploy_demo.sh`) incl. a grouped "xN reports" case.
-4. [ ] Final `bench.py 3` once NVIDIA free-tier quota for Nemotron 3 Super resets (light poll every 15 min).
-5. [ ] Put final numbers in README, submission/writeup.md, submission/video-script.md, video results card;
+3. [x] Redeploy recorded demo (`bash scripts/deploy_demo.sh`) incl. a grouped "xN reports" case.
+4. [x] Final `bench.py 3` once NVIDIA free-tier quota for Nemotron 3 Super resets (light poll every 15 min).
+5. [x] Put final numbers in README, submission/writeup.md, submission/video-script.md, video results card;
        re-render video (`cd video/film && npx hyperframes render -o ../complaint-replay-demo.mp4 --quality delivery`).
-6. [ ] Morning summary for the user.
+6. [x] Morning summary for the user.
+
+Final numbers (Oct 14, NVIDIA endpoint): 21/21 reproduced, 20/21 fixed+proven, 20/21 guarded, 0 false alarms.
+Video results card checked (video/frames/final-results.jpg).
 
 ## Next, in order
 
