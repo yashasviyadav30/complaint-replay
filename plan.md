@@ -1,6 +1,11 @@
 # Complaint Replay: plan for the real product
 
-Written Oct 16, 2026. Status: **draft for approval**. Nothing gets built until the user says yes.
+Written Oct 16, 2026. Approved by the user the same day. Progress and deviations: see `HANDOFF.md`.
+
+**Changed while building (Oct 16-17):** language ID uses fastText lid.176 (under 1 MB) by default, with GlotLID
+(1.7 GB, too big for free hosting) as an option. Guards stay as JSON run by `crp guard` in CI instead of
+Playwright `.spec.ts` files, because the evidence collectors are the assertion. Proof of a fix is the guard
+itself (exact steps, no model) instead of a second model-driven replay.
 Deadline: Oct 30, 2026, 10:00 am PDT (10:30 pm IST). We submit on **Oct 29**. That leaves 13 working days.
 
 v0 (what exists) is the child: it works on our own demo shop, with 5 fixed conditions and 7 bug types.
