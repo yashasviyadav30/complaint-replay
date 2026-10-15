@@ -100,6 +100,10 @@ uv run python risk_test.py                  # 5 bugs, buggy vs clean
 Final numbers (Oct 14, NVIDIA endpoint): 21/21 reproduced, 20/21 fixed+proven, 20/21 guarded, 0 false alarms.
 Video results card checked (video/frames/final-results.jpg).
 
+Oct 15: Tavily key in .env and verified live; bugs 10 and 3 re-run with Tavily sources (both guarded); demo
+redeployed with sources. Fixed: guarded cases showed a red "problem still showed up" line (CaseDetail.tsx); cut it
+from the video and re-rendered.
+
 ## Next, in order
 
 1. When the Token Factory key arrives: set `NEBIUS_API_KEY`, re-run `bench.py 3`, update README + writeup +
