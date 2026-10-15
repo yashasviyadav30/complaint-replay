@@ -16,6 +16,20 @@
     return [...new Set(parts)].join(' ').replace(/\s+/g, ' ').slice(0, 60);
   };
   const ours = (el) => el.closest(OURS) !== null;
+  // Where a control sits, in words a person would use: helps tell two similar bugs apart.
+  const PLACES = { nav: 'the navigation', header: 'the top bar', footer: 'the footer', aside: 'a side panel',
+    dialog: 'a dialog', form: 'a form', navigation: 'the navigation', banner: 'the top bar' };
+  const where = (el) => {
+    const land = el.closest('nav, header, footer, aside, dialog, form, [role=dialog], [role=navigation], [role=banner]');
+    const place = land ? (land.getAttribute('role') === 'dialog' ? 'a dialog'
+      : PLACES[land.getAttribute('role')] || PLACES[land.tagName.toLowerCase()] || '') : '';
+    let near = '';
+    for (let a = el.parentElement, i = 0; a && i < 5 && !near; a = a.parentElement, i++) {
+      const h = a.querySelector('h1, h2, h3, h4, h5, h6, [class*=title]');
+      if (h && !h.contains(el)) near = h.innerText.trim().replace(/\s+/g, ' ').slice(0, 40);
+    }
+    return [place && 'in ' + place, near && "near '" + near + "'"].filter(Boolean).join(', ');
+  };
   document.querySelectorAll('[data-bc-idx]').forEach((el) => el.removeAttribute('data-bc-idx'));
 
   const CONTROLS = 'button, a[href], input:not([type=hidden]), select, textarea, summary, [role=button], [role=link], '
@@ -28,26 +42,26 @@
   for (const el of document.querySelectorAll(CONTROLS)) {
     if (ours(el) || !visible(el)) continue;
     const r = el.getBoundingClientRect();
-    if (r.left >= vw || r.right <= 0) { offscreen.push({ label: name(el), left: Math.round(r.left), vw }); continue; }
+    if (r.left >= vw || r.right <= 0) { offscreen.push({ label: name(el), left: Math.round(r.left), vw, where: where(el) }); continue; }
     el.setAttribute('data-bc-idx', i);
     elements.push({ idx: i++, tag: el.tagName.toLowerCase(), role: el.getAttribute('role') || '', label: name(el),
       value: (el.type === 'password' ? '' : el.value) || '', disabled: !!el.disabled });
     // A name with no letters ("1", "+", "x") tells a screen-reader user nothing about what the control does.
     if (!['input', 'select', 'textarea'].includes(el.tagName.toLowerCase()) && !/\p{L}/u.test(name(el))) {
-      unnamed.push({ label: name(el), tag: el.tagName.toLowerCase() });
+      unnamed.push({ label: name(el), tag: el.tagName.toLowerCase(), where: where(el) });
     }
     // Covered: fully on screen, yet the point at its centre belongs to something else (overlay, banner).
     if ((!modal || modal.contains(el)) && r.top >= 0 && r.bottom <= vh && r.left >= 0 && r.right <= vw) {
       const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
       if (top && top !== el && !el.contains(top) && !top.contains(el) && !ours(top)) {
         const cls = typeof top.className === 'string' && top.className ? '.' + top.className.split(' ')[0] : '';
-        covered.push({ label: name(el), by: (top.id ? '#' + top.id : top.tagName.toLowerCase()) + cls });
+        covered.push({ label: name(el), by: (top.id ? '#' + top.id : top.tagName.toLowerCase()) + cls, where: where(el) });
       }
     }
     // Clipped: the text is wider than the box that hides the overflow ("Pay no..." on a small phone).
     const s = getComputedStyle(el);
     if (el.scrollWidth > el.clientWidth + 2 && el.clientWidth > 0 && (s.overflowX !== 'visible' || s.textOverflow === 'ellipsis')) {
-      clipped.push({ label: name(el), needs: el.scrollWidth, has: el.clientWidth });
+      clipped.push({ label: name(el), needs: el.scrollWidth, has: el.clientWidth, where: where(el) });
     }
   }
 

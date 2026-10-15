@@ -60,6 +60,11 @@ def evidence_key(kind: str, detail: str) -> str:
     return f"{kind}: {NUMBER.sub('#', detail)}"
 
 
+def at(item: dict) -> str:
+    """ (in the navigation, near 'Book')" for evidence details, or nothing."""
+    return f" ({item['where']})" if item.get("where") else ""
+
+
 def is_ours(url: str) -> bool:
     return urlparse(url).path in OUR_PATHS
 
@@ -94,6 +99,7 @@ class Session:
         self._amounts: list[tuple[str, str, float]] = []
         self._labels: dict[int, str] = {}  # idx -> visible name, from the latest observe()
         self.last_target: str | None = None  # name of the control the last action used
+        self.last_idx: int | None = None  # and its position among the page's controls
         self._payments: list[tuple[float, str, str]] = []  # (time, path, body) of payment-like POSTs
         self._started: dict[object, float] = {}  # request -> start time
         self._navigations: deque[tuple[float, str]] = deque(maxlen=20)
@@ -249,7 +255,7 @@ class Session:
         if self.condition.screen_reader:
             obs["aria"] = await self.page.locator("body").aria_snapshot()
             for u in obs["unnamed"]:
-                self.add("unclear_name", f"a {u['tag']} is announced only as '{u['label'] or '(nothing)'}', "
+                self.add("unclear_name", f"a {u['tag']}{at(u)} is announced only as '{u['label'] or '(nothing)'}', "
                                          "which does not say what it does")
         if self.condition.screen_reader or self.condition.keyboard_only:
             for v in await self._axe():
@@ -258,11 +264,11 @@ class Session:
 
     def _layout(self, obs: dict) -> None:
         for o in obs["offscreen"]:
-            self.add("offscreen_control", f"'{o['label']}' is outside the screen (left={o['left']}px, screen={o['vw']}px)")
+            self.add("offscreen_control", f"'{o['label']}'{at(o)} is outside the screen (left={o['left']}px, screen={o['vw']}px)")
         for c in obs["covered"]:
-            self.add("covered_control", f"'{c['label']}' is on screen but covered by {c['by']}, so a tap hits that instead")
+            self.add("covered_control", f"'{c['label']}'{at(c)} is on screen but covered by {c['by']}, so a tap hits that instead")
         for c in obs["clipped"]:
-            self.add("clipped_text", f"'{c['label']}' is cut off: its text needs {c['needs']}px but has {c['has']}px")
+            self.add("clipped_text", f"'{c['label']}'{at(c)} is cut off: its text needs {c['needs']}px but has {c['has']}px")
         if obs["overflow"] > 2:
             self.add("page_overflow", f"the page is {obs['overflow']}px wider than the {obs['vw']}px screen and scrolls sideways")
         for src in obs["brokenImages"]:
@@ -311,6 +317,7 @@ class Session:
         except (TypeError, ValueError):
             idx = -1
         self.last_target = self._labels.get(idx) if kind in ("click", "fill") else action.get("name")
+        self.last_idx = idx if kind in ("click", "fill") and idx >= 0 else None
         if self.condition.keyboard_only and kind in ("click", "fill", "click_role", "fill_role"):
             return "error: this user has no mouse; use press (Tab, Enter, Space) and type"
         try:
@@ -322,6 +329,8 @@ class Session:
                 if not action.get("name"):
                     return "error: a screen reader cannot use a control without a name"
                 target = page.get_by_role(action["role"], name=action["name"]).first
+                position = await target.get_attribute("data-bc-idx", timeout=2000)
+                self.last_idx = int(position) if position and position.isdigit() else None
                 if kind == "click_role":
                     await target.click(timeout=5000)
                 else:

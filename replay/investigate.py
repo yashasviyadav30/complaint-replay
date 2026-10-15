@@ -38,16 +38,6 @@ def as_dict(r: ReplayResult) -> dict:
     }
 
 
-def fix_proven(before: ReplayResult, after: ReplayResult) -> bool:
-    """Proven = replaying the same user on the fixed code, the evidence that proved the bug never appears.
-
-    The proof run's own verdict is not used: in testing, the twin once typed a wrong OTP during the proof,
-    got an unrelated HTTP 400, and a loose verdict blocked a correct fix. Unrelated evidence stays visible
-    in the case for a human to read, it just does not decide.
-    """
-    return bool(proof_keys(before)) and not proof_keys(before) & {evidence_key(e.kind, e.detail) for e in after.evidence}
-
-
 def proof_keys(result: ReplayResult) -> set[str]:
     """The exact problems that proved the bug (one bad button, not every button of that kind)."""
     return {evidence_key(e.kind, e.detail) for e in result.evidence if e.id in result.cited}
@@ -126,29 +116,21 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
     case["fix"] = {"model": fix_model, "explanation": patch.explanation, "diff": diff, "edits": list(patch.edits),
                    "sources": [{"title": s["title"], "url": s["url"]} for s in sources]}
 
+    # Proof and guard are one thing: the exact steps that triggered the bug, replayed by code, no model.
+    # A fresh model-driven proof replay once "proved" a fix by never reaching the broken screen at all.
     stage("proving")
-    with running_app(branch) as url:
-        after = await replay(url, complaint, cond, policy, matcher, shot("after"), **target)
-    case["proof"] = as_dict(after)
-    if not fix_proven(before, after):
-        stage("fix_unproven")
-        return case
-    stage("fixed")
-
-    # Guard: the steps that triggered the bug become a test. It must pass on the fix AND fail on the old
-    # code, otherwise it would not catch the bug coming back. (Built from the proof replay at first, which
-    # missed bugs the fixed code gives no reason to repeat, such as an impatient double tap.)
     guard = build_guard(case["id"], complaint, cond, list(before.steps), proof_keys(before))
     guard_file = branch / GUARDS / f"{case['id']}.json"
     guard_file.parent.mkdir(parents=True, exist_ok=True)
     guard_file.write_text(json.dumps(guard, ensure_ascii=False, indent=2), encoding="utf-8")
     with running_app(branch) as url:
-        on_fix = await run_guard(url, guard, project.auth_file)
+        on_fix = await run_guard(url, guard, project.auth_file, shot("after"))
     on_bug = await run_guard(live_url, guard, project.auth_file)
+    case["proof"] = {"passed": on_fix["passed"], "evidence": on_fix["evidence"], "steps": len(guard["steps"])}
     case["guard"] = {"file": f"{GUARDS}/{case['id']}.json", "steps": len(guard["steps"]), "test": guard,
                      "passes_on_fix": on_fix["passed"], "catches_bug": not on_bug["passed"]}
-    if on_fix["passed"] and not on_bug["passed"]:
-        stage("guarded")
-    else:
-        update(case)
+    if not on_fix["passed"]:
+        stage("fix_unproven")
+        return case
+    stage("guarded" if case["guard"]["catches_bug"] else "fixed")
     return case

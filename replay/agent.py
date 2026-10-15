@@ -85,7 +85,7 @@ async def _drive(session: Session, complaint: str, condition: Condition, policy:
         if action.get("type") == "verdict":
             return judge(action, session.evidence, steps)
         last_result = await session.act(action)
-        steps.append({"action": action, "result": last_result, "target": session.last_target})
+        steps.append({"action": action, "result": last_result, "target": session.last_target, "idx": session.last_idx})
     await session.observe()
     if matcher and len(session.evidence) > judged:
         match = await matcher(complaint, list(session.evidence))
