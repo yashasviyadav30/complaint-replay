@@ -50,3 +50,11 @@ def test_user_text_cannot_ping_people_or_break_out_of_the_quote() -> None:
     from replay.pr import quoted
 
     assert quoted("hi @octocat\n# Fixes #1\n![x](http://evil)") == "hi @​octocat # Fixes #1 [x](http://evil)"
+
+
+def test_failed_fix_becomes_a_complete_task_with_an_acceptance_test() -> None:
+    from replay.pr import issue_body
+
+    case = {**CASE, "stage": "fix_failed", "fix": {"explanation": "Tried a longer timeout.", "error": "edit did not apply"}}
+    text = issue_body(case)
+    assert "Acceptance test" in text and '"steps": []' in text and "edit did not apply" in text

@@ -91,6 +91,50 @@ def body(case: dict, image_url: str = "") -> str:
     return "\n".join(lines)
 
 
+def issue_body(case: dict) -> str:
+    """A complete task for a person or a coding agent: what broke, for whom, the proof, and the acceptance test."""
+    rep, fix, guard = case["replay"], case.get("fix") or {}, case["guard"]
+    cited = [e for e in rep["evidence"] if e["id"] in rep["cited"]]
+    tried = fix.get("explanation") or "No fix was attempted."
+    why = fix.get("error") or ("The fix did not hold: the same steps still showed the problem."
+                               if case["stage"] == "fix_unproven" else "")
+    lines = [
+        f"> {quoted(case.get('said') or case['complaint'])}",
+        "",
+        f"**Who hit it:** {case['condition']['persona']}",
+        "",
+        "### Proof (collected by the browser, not written by a model)",
+        *[f"- `{e['kind']}` {quoted(e['detail'])}" for e in cited],
+        "",
+        "### Steps that trigger it",
+        *[f"{i + 1}. {s['action'].get('type')} " + (f"`{s['target']}`" if s.get("target") else "")
+          for i, s in enumerate(rep["steps"])],
+        "",
+        "### What the automatic fix tried",
+        tried + (f"\n\n{why}" if why else ""),
+        "",
+        "### Acceptance test",
+        f"Save this as `{guard['file']}` and run `crp guard`. It fails on the current code; a fix is done when it passes.",
+        "",
+        "```json",
+        json.dumps(guard["test"], ensure_ascii=False, indent=2),
+        "```",
+        "",
+        "<sub>Reproduced by [Complaint Replay](https://github.com/yashasviyadav30/complaint-replay). "
+        "Assign this issue to a coding agent (for example GitHub Copilot) or a teammate.</sub>",
+    ]
+    return "\n".join(lines)
+
+
+def open_issue(repo: Path, case: dict) -> str:
+    """When the automatic fix fails, hand the proven bug over as an issue instead of losing the work."""
+    slug = origin_slug(Path(run(["git", "rev-parse", "--show-toplevel"], repo)))
+    body_file = Path(tempfile.gettempdir()) / f"crp-{case['id']}-issue.md"
+    body_file.write_text(issue_body(case), encoding="utf-8")
+    return run(["gh", "issue", "create", "--repo", slug, "--title", title(case).replace("fix:", "bug:", 1),
+                "--body-file", str(body_file)], repo).splitlines()[-1]
+
+
 def open_pr(repo: Path, case: dict, shots: Path | None = None, base: str = "", push: bool = True) -> str:
     """Create branch complaint-replay/<case id> with the fix, guard and screenshots; open the PR. Returns its URL."""
     repo = Path(run(["git", "rev-parse", "--show-toplevel"], repo))

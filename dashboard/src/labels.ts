@@ -48,6 +48,7 @@ export const EVIDENCE: Record<string, string> = {
   focus_invisible: "Focus not visible",
   not_keyboard_reachable: "Keyboard can't reach",
   unclear_name: "Unclear name",
+  no_response: "Tap did nothing",
 };
 
 export const LANGUAGE = new Intl.DisplayNames(undefined, { type: "language" });

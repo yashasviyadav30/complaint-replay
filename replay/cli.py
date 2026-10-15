@@ -123,6 +123,12 @@ async def cmd_replay(args: argparse.Namespace) -> int:
         case["pr"] = open_pr(repo, case, out / "shots", args.base)
         save(case)
         print(f"Pull request: {case['pr']}")
+    elif args.pr and case["stage"] in ("fix_failed", "fix_unproven") and case.get("guard"):
+        from replay.pr import open_issue
+
+        case["issue"] = open_issue(repo, case)  # the bug is proven; hand the fix to a person or a coding agent
+        save(case)
+        print(f"Issue for a person or coding agent: {case['issue']}")
     return 0 if case["stage"] in DONE else 1
 
 

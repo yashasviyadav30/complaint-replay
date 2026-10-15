@@ -33,6 +33,7 @@ CASES = [
     ("fetches.html", profile(network="drops"), [{"type": "click_css", "selector": "button"}], "request_failed"),
     ("shift.html", CONDITIONS["fast_desktop"], [{"type": "wait", "ms": 1200}], "layout_shift"),
     ("unnamed.html", CONDITIONS["screen_reader"], [], "unclear_name"),
+    ("dead_button.html", PHONE, [{"type": "click_css", "selector": "#pick"}], "no_response"),
 ]
 # The same problem fixed: these must stay silent.
 CLEAN = [
@@ -42,6 +43,8 @@ CLEAN = [
     ("rtl_ok.html", CONDITIONS["arabic"], []),
     ("spanish_ok.html", profile(locale="es-ES"), []),
     ("modal_open.html", PHONE, []),  # an open dialog is meant to cover the page
+    ("clean.html", PHONE, [{"type": "click_css", "selector": "button"}]),  # the button changes its text
+    ("dead_button.html", PHONE, [{"type": "click_css", "selector": "#toggle"}]),  # a toggle that toggles
 ]
 
 

@@ -25,3 +25,11 @@ def test_no_limit_on_token_factory(monkeypatch) -> None:
     monkeypatch.delenv("REPLAY_MAX_RPM", raising=False)
     monkeypatch.setenv("NEBIUS_API_KEY", "x")
     assert llm.max_rpm() == 0
+
+
+def test_own_model_server_wins_when_configured(monkeypatch) -> None:
+    from replay.llm import make_client
+
+    monkeypatch.setenv("REPLAY_BASE_URL", "http://10.0.0.5:8000/v1")
+    monkeypatch.setenv("NEBIUS_API_KEY", "k")
+    assert str(make_client().base_url).startswith("http://10.0.0.5:8000/v1")

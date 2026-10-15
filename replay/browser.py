@@ -43,6 +43,18 @@ try {
     .observe({ type: 'layout-shift', buffered: true });
 } catch (e) {}
 """
+# Everything a tap could change that a user (or assistive tech) would notice. Same before and after = dead control.
+FINGERPRINT_JS = """
+() => {
+  const states = [...document.querySelectorAll('[aria-expanded],[aria-pressed],[aria-checked],[aria-selected],details,dialog')]
+    .map((e) => [e.getAttribute('aria-expanded'), e.getAttribute('aria-pressed'), e.getAttribute('aria-checked'),
+                 e.getAttribute('aria-selected'), e.open].join(',')).join('|');
+  const fields = [...document.querySelectorAll('input,select,textarea')]
+    .map((e) => (e.type === 'checkbox' || e.type === 'radio') ? e.checked : e.value).join('|');
+  // Focus is left out on purpose: tapping any button focuses it, which says nothing about whether it worked.
+  return [location.href, document.querySelectorAll('*').length, document.body.innerText, states, fields].join('\\u0001');
+}
+"""
 AXE_RUN_JS = """
 async () => (await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] } }))
   .violations.map((v) => ({ id: v.id, help: v.help, targets: v.nodes.slice(0, 3).map((n) => n.target.join(' ')) }))
@@ -96,6 +108,7 @@ class Session:
         self.step = 0
         self._seen: set[tuple[str, str]] = set()
         self._inflight = 0
+        self._requests = 0  # every request the page sent, for "tapped, nothing happened"
         self._amounts: list[tuple[str, str, float]] = []
         self._labels: dict[int, str] = {}  # idx -> visible name, from the latest observe()
         self.last_target: str | None = None  # name of the control the last action used
@@ -171,6 +184,8 @@ class Session:
 
     def _on_request(self, request) -> None:
         self._track(+1)
+        if not is_ours(request.url):
+            self._requests += 1
         self._started[request] = time.monotonic()
         path = urlparse(request.url).path
         if request.method != "POST" or is_ours(request.url) or not PAYMENT_PATH.search(path):
@@ -320,6 +335,9 @@ class Session:
         self.last_idx = idx if kind in ("click", "fill") and idx >= 0 else None
         if self.condition.keyboard_only and kind in ("click", "fill", "click_role", "fill_role"):
             return "error: this user has no mouse; use press (Tab, Enter, Space) and type"
+        taps = kind in ("click", "click_role", "click_css") or (kind == "press" and action.get("key") in ("Enter", "Space"))
+        before = await self._fingerprint() if taps else None
+        requests_before = self._requests
         try:
             if kind == "click":
                 await tap(page.locator(f'[data-bc-idx="{int(action["target"])}"]'), action)
@@ -357,4 +375,13 @@ class Session:
         except Exception as e:  # report to the model; a failed click is information, not a crash
             return f"error: {str(e).splitlines()[0][:200]}"
         await self.settle()
+        if before is not None and await self._fingerprint() == before and self._requests == requests_before:
+            name = self.last_target or action.get("selector") or action.get("key") or "a control"
+            self.add("no_response", f"tapped '{name}' but nothing happened: no change on screen, no request sent")
         return "ok"
+
+    async def _fingerprint(self) -> str | None:
+        try:
+            return await self.page.evaluate(FINGERPRINT_JS)
+        except Exception:  # the page navigated mid-check: something clearly happened
+            return None

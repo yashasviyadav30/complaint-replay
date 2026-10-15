@@ -51,24 +51,41 @@ def _link(src: Path, dst: Path) -> None:
         os.symlink(src, dst, target_is_directory=True)
 
 
+def dependency_dirs(root: Path) -> list[Path]:
+    """Every installed-dependency folder, at any depth (monorepos keep one per package), relative to root."""
+    found = []
+    for here, dirs, _ in os.walk(root):
+        for name in list(dirs):
+            if name in LINKED:
+                found.append((Path(here) / name).relative_to(root))
+            if name in LINKED or name == ".git":
+                dirs.remove(name)  # never walk into them
+    return found
+
+
+def is_link(path: Path) -> bool:
+    return path.is_symlink() or (hasattr(os.path, "isjunction") and os.path.isjunction(path))
+
+
 def remove_branch(branch: Path) -> None:
-    for name in LINKED:
-        link = branch / name
-        if link.is_symlink() or (hasattr(os.path, "isjunction") and os.path.isjunction(link)):
-            os.unlink(link) if link.is_symlink() else os.rmdir(link)  # remove the link, never what it points to
+    if branch.exists():
+        for rel in dependency_dirs(branch):
+            if is_link(branch / rel):
+                (branch / rel).unlink() if (branch / rel).is_symlink() else os.rmdir(branch / rel)  # the link only
     shutil.rmtree(branch, ignore_errors=True)
 
 
 def branch_copy(source: Path, branch: Path, deps: Path | None = None) -> Path:
     """A working copy of the app to fix, the way a pull request branch would hold it.
 
-    Installed dependencies are linked from `deps` (default: the source itself).
+    Installed dependencies (at any depth) are linked from `deps` (default: the source itself), not copied.
     """
     remove_branch(branch)
     shutil.copytree(source, branch, ignore=shutil.ignore_patterns("__pycache__", ".git", *LINKED))
-    for name in LINKED:
-        if ((deps or source) / name).is_dir():
-            _link(((deps or source) / name).resolve(), branch / name)
+    deps = deps or source
+    for rel in dependency_dirs(deps):
+        if (branch / rel).parent.is_dir() and not (branch / rel).exists():
+            _link((deps / rel).resolve(), branch / rel)
     return branch
 
 
@@ -99,6 +116,10 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
     if before.verdict != "reproduced":
         stage(before.verdict)
         return case
+    # The guard exists as soon as the bug is proven: if the fix fails, it is the acceptance test for whoever
+    # (person or coding agent) takes the task over.
+    guard = build_guard(case["id"], complaint, cond, list(before.steps), proof_keys(before))
+    case["guard"] = {"file": f"{GUARDS}/{case['id']}.json", "steps": len(guard["steps"]), "test": guard}
     stage("reproduced")
 
     branch = branch_copy(source, BRANCHES / case["id"])
@@ -123,7 +144,6 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
     # Proof and guard are one thing: the exact steps that triggered the bug, replayed by code, no model.
     # A fresh model-driven proof replay once "proved" a fix by never reaching the broken screen at all.
     stage("proving")
-    guard = build_guard(case["id"], complaint, cond, list(before.steps), proof_keys(before))
     guard_file = branch / GUARDS / f"{case['id']}.json"
     guard_file.parent.mkdir(parents=True, exist_ok=True)
     guard_file.write_text(json.dumps(guard, ensure_ascii=False, indent=2), encoding="utf-8")

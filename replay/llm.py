@@ -23,6 +23,11 @@ MAX_RETRIES = 8
 
 
 def make_client() -> AsyncOpenAI:
+    """Nebius Token Factory first. Teams that must keep data in-house can point at any OpenAI-compatible
+    server instead (their own vLLM, NIM or Ollama) with REPLAY_BASE_URL and REPLAY_API_KEY."""
+    if os.getenv("REPLAY_BASE_URL"):
+        return AsyncOpenAI(base_url=os.environ["REPLAY_BASE_URL"], api_key=os.getenv("REPLAY_API_KEY") or "none",
+                           max_retries=MAX_RETRIES)
     if os.getenv("NEBIUS_API_KEY"):
         return AsyncOpenAI(base_url=os.getenv("NEBIUS_BASE_URL") or DEFAULT_BASE_URL,
                            api_key=os.environ["NEBIUS_API_KEY"], max_retries=MAX_RETRIES)
