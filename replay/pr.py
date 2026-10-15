@@ -113,6 +113,10 @@ def open_pr(repo: Path, case: dict, shots: Path | None = None, base: str = "", p
             return run(["gh", "pr", "create", "--repo", slug, "--base", base, "--head", branch, "--title", title(case),
                         "--body-file", str(body_file)], work).splitlines()[-1]
         except RuntimeError as e:
+            if "not permitted to create" in str(e):
+                raise RuntimeError("GitHub Actions may not open pull requests in this repo yet. Turn on Settings > "
+                                   "Actions > General > 'Allow GitHub Actions to create and approve pull requests' "
+                                   f"(the fix is already pushed to branch {branch}).") from e
             if "already exists" not in str(e):
                 raise
             return run(["gh", "pr", "view", branch, "--repo", slug, "--json", "url", "-q", ".url"], work)
