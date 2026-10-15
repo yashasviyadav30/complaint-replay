@@ -5,6 +5,7 @@
 /* One accent (signal orange) for "a complaint needs attention". Green is reserved for the
    real semantic state "fix proven". Everything else is neutral. */
 :root {
+  color-scheme: light dark;
   --bg: #f4f5f6;
   --surface: #ffffff;
   --surface-2: #eceef0;

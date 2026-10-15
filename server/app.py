@@ -352,9 +352,14 @@ async def case_progress(case_id: str, request: Request) -> dict:
     update = json.loads(raw)
     if not isinstance(update, dict):
         raise HTTPException(422, "progress must be a JSON object")
-    for key in ("stage", "replay", "fix", "proof", "guard", "shots", "pr", "error"):
+    for key in ("stage", "condition", "replay", "fix", "proof", "guard", "shots", "pr", "error"):
         if key in update:
             case[key] = update[key]
+    project = store.get("project", case["project"]) or {}
+    if case.get("pr") and project.get("repo"):
+        # Screenshots are committed to the pull request branch, not uploaded here: the code stays in GitHub.
+        case["shot_base"] = (f"https://github.com/{project['repo']}/blob/complaint-replay/{case_id}/"
+                             ".complaint-replay/shots")
     if isinstance(case.get("guard"), dict):
         case["guard"].pop("test", None)  # the full guard lives in the repo, not here
     if isinstance(case.get("fix"), dict):

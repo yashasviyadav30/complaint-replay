@@ -14,17 +14,18 @@ export function Board({ cases, now, onOpen }: { cases: Case[]; now: number; onOp
     <LayoutGroup>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
         {COLUMNS.map((col) => {
-          // Most-reported first: one bug hurting 40 people outranks one hurting 1.
+          // Highest impact first: people affected x how bad it is (a double charge outranks a missing image).
+          const rank = (c: Case) => c.impact ?? c.reports ?? 1;
           const items = cases
             .filter((c) => columnOf(c.stage) === col.id)
-            .sort((a, b) => (b.reports ?? 1) - (a.reports ?? 1) || b.created_at.localeCompare(a.created_at));
+            .sort((a, b) => rank(b) - rank(a) || b.created_at.localeCompare(a.created_at));
           return (
             <section key={col.id} aria-labelledby={`col-${col.id}`} className="min-w-0">
-              <header className="mb-3 flex items-baseline justify-between gap-2 border-b border-line pb-2">
+              <header className="mb-3 border-b border-line pb-2">
                 <h2 id={`col-${col.id}`} className="text-sm font-semibold text-ink">
                   {col.title} <span className="ml-1 font-mono text-xs font-normal text-muted">{items.length}</span>
                 </h2>
-                <p className="truncate text-xs text-muted">{col.hint}</p>
+                <p className="mt-0.5 truncate text-xs text-muted">{col.hint}</p>
               </header>
               <div className="grid grid-cols-1 gap-3">
                 {items.map((c) => (

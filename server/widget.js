@@ -18,7 +18,7 @@
 
   // UI text. Machine-assisted translations: native speakers, please send corrections.
   const T = {
-    en: ["Report a problem", "What went wrong?", "Tell us in your own words", "Send", "Thanks, we're on it", "Close",
+    en: ["Report a problem", "What went wrong?", "Tell us in your own words…", "Send", "Thanks, we're on it", "Close",
          "Your last report", { received: "Received", checking: "We're trying it the way you did", found: "We found the problem", fixing: "A fix is being made", fixed: "Fixed. It will reach you with the next update", not_reproduced: "We couldn't make it happen yet. The team will look" }],
     hi: ["समस्या बताएँ", "क्या गड़बड़ हुई?", "अपने शब्दों में बताइए", "भेजें", "धन्यवाद, हम देख रहे हैं", "बंद करें",
          "आपकी पिछली शिकायत", { received: "मिल गई", checking: "हम इसे आपकी तरह आज़मा रहे हैं", found: "हमें समस्या मिल गई", fixing: "इसे ठीक किया जा रहा है", fixed: "ठीक हो गया। अगले अपडेट में आप तक पहुँचेगा", not_reproduced: "अभी तक दोहरा नहीं पाए। टीम देखेगी" }],

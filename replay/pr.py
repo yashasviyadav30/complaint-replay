@@ -41,7 +41,7 @@ def origin_slug(repo: Path) -> str:
 
 def title(case: dict) -> str:
     said = " ".join((case.get("said") or case["complaint"]).split())
-    text = f"fix: {case['condition']['label']}: \"{said}\""
+    text = f"fix: \"{said}\""  # the user's own words say what broke better than any label
     return text if len(text) <= TITLE_MAX else text[:TITLE_MAX - 2] + "…\""
 
 

@@ -10,7 +10,8 @@ export const KIND: Record<Kind, { label: string; icon: Icon }> = {
 };
 
 export const STAGE: Record<Stage, { label: string; busy?: boolean; tone?: "ok" | "accent" | "muted" }> = {
-  heard: { label: "Queued", tone: "muted" },
+  heard: { label: "Heard", tone: "muted" },
+  queued: { label: "Sent to your CI", busy: true },
   reproducing: { label: "Replaying as this user", busy: true },
   reproduced: { label: "Bug proven", tone: "accent" },
   not_reproduced: { label: "Could not reproduce", tone: "muted" },
@@ -33,6 +34,29 @@ export const EVIDENCE: Record<string, string> = {
   a11y_violation: "Accessibility",
   amount_mismatch: "Money mismatch",
   duplicate_request: "Duplicate payment",
+  covered_control: "Control covered",
+  clipped_text: "Text cut off",
+  page_overflow: "Page wider than screen",
+  broken_image: "Image missing",
+  slow_request: "Slow request",
+  slow_page: "Slow page",
+  layout_shift: "Layout jumped",
+  stuck_loading: "Stuck loading",
+  redirect_loop: "Redirect loop",
+  rtl_missing: "Right-to-left missing",
+  focus_invisible: "Focus not visible",
+  not_keyboard_reachable: "Keyboard can't reach",
+  unclear_name: "Unclear name",
+};
+
+export const LANGUAGE = new Intl.DisplayNames(undefined, { type: "language" });
+export const languageName = (code?: string) => {
+  if (!code) return "";
+  try {
+    return LANGUAGE.of(code) ?? code;
+  } catch {
+    return code;
+  }
 };
 
 export const whatTheySaid = (c: Case) => c.said || c.complaint;
