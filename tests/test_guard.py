@@ -23,6 +23,21 @@ def test_guard_keeps_working_steps_by_name_and_drops_failures() -> None:
     assert guard["must_not_see"] == ["request_failed"]
 
 
+def test_guard_keeps_keyboard_steps() -> None:
+    steps = [{"action": {"type": "press", "key": "Tab"}, "result": "ok"},
+             {"action": {"type": "type", "text": "hello"}, "result": "ok"}]
+    guard = build_guard("c1", "x", CONDITIONS["keyboard"], steps, set())
+    assert guard["steps"] == [{"do": "press", "key": "Tab"}, {"do": "type", "text": "hello"}]
+
+
+def test_evidence_key_ignores_numbers_but_not_the_control() -> None:
+    from replay.browser import evidence_key
+
+    a = evidence_key("offscreen_control", "'Pay' is outside the screen (left=400px, screen=360px)")
+    assert a == evidence_key("offscreen_control", "'Pay' is outside the screen (left=412px, screen=360px)")
+    assert evidence_key("unclear_name", "announced only as '1'") != evidence_key("unclear_name", "announced only as '+'")
+
+
 def test_guard_condition_round_trips() -> None:
     guard = build_guard("c1", "complaint", CONDITIONS["slow_3g_android"], [], set())
     assert Condition(**guard["condition"]) == CONDITIONS["slow_3g_android"]

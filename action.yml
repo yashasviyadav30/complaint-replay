@@ -1,0 +1,73 @@
+name: Complaint Replay
+description: Reproduce a user's complaint under their real conditions, fix it with NVIDIA Nemotron, prove it, and open a PR with a guard test.
+branding:
+  icon: rotate-ccw
+  color: orange
+inputs:
+  mode:
+    description: "replay (reproduce, fix, open a PR) or guard (run every guard test)"
+    default: guard
+  payload:
+    description: The complaint JSON sent by the Complaint Replay service (repository_dispatch client_payload)
+    default: ""
+  complaint:
+    description: "What the user said (when started by hand)"
+    default: ""
+  user:
+    description: "A ready-made user to replay as (when started by hand)"
+    default: slow_3g_android
+  fix:
+    description: Also fix, prove and guard, and open a pull request
+    default: "true"
+  nebius-api-key:
+    description: Nebius Token Factory key (NVIDIA Nemotron models)
+    default: ""
+  nvidia-api-key:
+    description: build.nvidia.com key, used only when no Nebius key is set
+    default: ""
+  tavily-api-key:
+    description: Optional web research before each fix
+    default: ""
+  github-token:
+    description: Token used to push the fix branch and open the pull request
+    default: ${{ github.token }}
+runs:
+  using: composite
+  steps:
+    - uses: astral-sh/setup-uv@v6
+    - name: Install Complaint Replay
+      shell: bash
+      run: |
+        uv tool install --python 3.13 "complaint-replay @ git+https://github.com/yashasviyadav30/complaint-replay@${{ github.action_ref || 'main' }}"
+        crp setup
+    - name: Replay the complaint
+      if: inputs.mode == 'replay'
+      shell: bash
+      env:
+        NEBIUS_API_KEY: ${{ inputs.nebius-api-key }}
+        NVIDIA_API_KEY: ${{ inputs.nvidia-api-key }}
+        TAVILY_API_KEY: ${{ inputs.tavily-api-key }}
+        GH_TOKEN: ${{ inputs.github-token }}
+        PAYLOAD: ${{ inputs.payload }}
+        COMPLAINT: ${{ inputs.complaint }}
+        REPLAY_USER: ${{ inputs.user }}
+      run: |
+        args=()
+        [ "${{ inputs.fix }}" = "true" ] && args+=(--fix --pr)
+        if [ -n "$PAYLOAD" ] && [ "$PAYLOAD" != "null" ]; then
+          printf '%s' "$PAYLOAD" > "$RUNNER_TEMP/payload.json"
+          crp replay --payload "$RUNNER_TEMP/payload.json" "${args[@]}"
+        else
+          crp replay "$COMPLAINT" --user "$REPLAY_USER" "${args[@]}"
+        fi
+    - name: Run guard tests
+      if: inputs.mode == 'guard'
+      shell: bash
+      run: crp guard
+    - name: Keep the evidence
+      if: always() && inputs.mode == 'replay'
+      uses: actions/upload-artifact@v4
+      with:
+        name: complaint-replay-${{ github.run_id }}
+        path: .complaint-replay/runs/
+        if-no-files-found: ignore

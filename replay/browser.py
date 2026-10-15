@@ -18,7 +18,7 @@ from replay.conditions import Condition
 from replay.langid import base, detect, not_in
 
 HERE = Path(__file__).resolve().parent
-AXE_JS = HERE.parent / "vendor" / "axe.min.js"
+AXE_JS = HERE / "axe.min.js"
 OBSERVE_JS = (HERE / "observe.js").read_text(encoding="utf-8")
 MONEY_KEYS = ("total", "charged", "amount", "grand_total", "amount_due")
 SETTLE_TIMEOUT_S = 20
@@ -47,6 +47,17 @@ AXE_RUN_JS = """
 async () => (await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] } }))
   .violations.map((v) => ({ id: v.id, help: v.help, targets: v.nodes.slice(0, 3).map((n) => n.target.join(' ')) }))
 """
+
+
+NUMBER = re.compile(r"\d+(?:\.\d+)?")
+
+
+def evidence_key(kind: str, detail: str) -> str:
+    """The same problem seen again, even if pixel sizes or timings differ: numbers are blanked out.
+
+    ponytail: a fix that renames the broken control changes its key; compare by control position if that bites.
+    """
+    return f"{kind}: {NUMBER.sub('#', detail)}"
 
 
 def is_ours(url: str) -> bool:
@@ -237,6 +248,9 @@ class Session:
                 self.add("not_keyboard_reachable", f"'{label}' looks clickable but Tab never reaches it")
         if self.condition.screen_reader:
             obs["aria"] = await self.page.locator("body").aria_snapshot()
+            for u in obs["unnamed"]:
+                self.add("unclear_name", f"a {u['tag']} is announced only as '{u['label'] or '(nothing)'}', "
+                                         "which does not say what it does")
         if self.condition.screen_reader or self.condition.keyboard_only:
             for v in await self._axe():
                 self.add("a11y_violation", f"{v['id']}: {v['help']} ({', '.join(v['targets'])})")

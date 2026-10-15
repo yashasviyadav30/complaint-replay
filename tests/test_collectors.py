@@ -32,6 +32,7 @@ CASES = [
     ("fetches.html", profile(network="flaky"), [{"type": "click_css", "selector": "button"}], "request_failed"),
     ("fetches.html", profile(network="drops"), [{"type": "click_css", "selector": "button"}], "request_failed"),
     ("shift.html", CONDITIONS["fast_desktop"], [{"type": "wait", "ms": 1200}], "layout_shift"),
+    ("unnamed.html", CONDITIONS["screen_reader"], [], "unclear_name"),
 ]
 # The same problem fixed: these must stay silent.
 CLEAN = [
@@ -40,6 +41,7 @@ CLEAN = [
     ("clean.html", profile(network="flaky"), []),
     ("rtl_ok.html", CONDITIONS["arabic"], []),
     ("spanish_ok.html", profile(locale="es-ES"), []),
+    ("modal_open.html", PHONE, []),  # an open dialog is meant to cover the page
 ]
 
 

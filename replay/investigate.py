@@ -5,14 +5,16 @@ Stages, in order: heard -> reproducing -> reproduced | not_reproduced | ux_confu
 """
 
 import json
+import os
 import shutil
+import tempfile
 from collections.abc import Callable
 from pathlib import Path
 
 from openai import AsyncOpenAI
 
 from replay.agent import ReplayResult, replay
-from replay.bugs import ROOT
+from replay.browser import evidence_key
 from replay.conditions import Condition
 from replay.fix import apply_patch, pick_fix_model, propose_fix
 from replay.guard import build_guard, run_guard
@@ -20,7 +22,10 @@ from replay.research import research
 from replay.llm import Chat, llm_matcher, llm_policy
 from replay.project import load_project, running_app
 
-BRANCHES = ROOT / "workspace" / "branches"
+BRANCHES = Path(tempfile.gettempdir()) / "complaint-replay" / "branches"
+# Installed dependencies are linked into the branch copy, not copied (node_modules can be gigabytes).
+LINKED = {"node_modules", ".venv", "venv"}
+GUARDS = ".complaint-replay/guards"
 FIX_ATTEMPTS = 2
 Update = Callable[[dict], None]
 
@@ -40,8 +45,38 @@ def fix_proven(before: ReplayResult, after: ReplayResult) -> bool:
     got an unrelated HTTP 400, and a loose verdict blocked a correct fix. Unrelated evidence stays visible
     in the case for a human to read, it just does not decide.
     """
-    proof_kinds = {e.kind for e in before.evidence if e.id in before.cited}
-    return bool(proof_kinds) and not proof_kinds & {e.kind for e in after.evidence}
+    return bool(proof_keys(before)) and not proof_keys(before) & {evidence_key(e.kind, e.detail) for e in after.evidence}
+
+
+def proof_keys(result: ReplayResult) -> set[str]:
+    """The exact problems that proved the bug (one bad button, not every button of that kind)."""
+    return {evidence_key(e.kind, e.detail) for e in result.evidence if e.id in result.cited}
+
+
+def _link(src: Path, dst: Path) -> None:
+    if os.name == "nt":
+        import _winapi  # a directory junction needs no admin rights, unlike a symlink
+        _winapi.CreateJunction(str(src), str(dst))
+    else:
+        os.symlink(src, dst, target_is_directory=True)
+
+
+def remove_branch(branch: Path) -> None:
+    for name in LINKED:
+        link = branch / name
+        if link.is_symlink() or (hasattr(os.path, "isjunction") and os.path.isjunction(link)):
+            os.unlink(link) if link.is_symlink() else os.rmdir(link)  # remove the link, never what it points to
+    shutil.rmtree(branch, ignore_errors=True)
+
+
+def branch_copy(source: Path, branch: Path) -> Path:
+    """A working copy of the app to fix, the way a pull request branch would hold it."""
+    remove_branch(branch)
+    shutil.copytree(source, branch, ignore=shutil.ignore_patterns("__pycache__", ".git", *LINKED))
+    for name in LINKED:
+        if (source / name).is_dir():
+            _link((source / name).resolve(), branch / name)
+    return branch
 
 
 async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
@@ -69,17 +104,15 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
         return case
     stage("reproduced")
 
-    branch = BRANCHES / case["id"]
-    shutil.rmtree(branch, ignore_errors=True)
-    shutil.copytree(source, branch, ignore=shutil.ignore_patterns("__pycache__"))
+    branch = branch_copy(source, BRANCHES / case["id"])
     stage("fixing")
     fix_model = await pick_fix_model(client)
     sources = await research([e for e in before.evidence if e.id in before.cited])
     rejected = None
     for _ in range(FIX_ATTEMPTS):  # a rejected (ambiguous or unsafe) edit gets one retry with the reason
-        patch = await propose_fix(client, fix_model, complaint, cond, before, branch, sources, rejected)
+        patch = await propose_fix(client, fix_model, complaint, cond, before, branch, sources, rejected, project.edit)
         try:
-            diff = apply_patch(patch, branch)
+            diff = apply_patch(patch, branch, project.edit)
             break
         except ValueError as e:
             rejected = str(e)
@@ -87,7 +120,7 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
         case["fix"] = {"model": fix_model, "explanation": patch.explanation, "error": rejected}
         stage("fix_failed")
         return case
-    case["fix"] = {"model": fix_model, "explanation": patch.explanation, "diff": diff,
+    case["fix"] = {"model": fix_model, "explanation": patch.explanation, "diff": diff, "edits": list(patch.edits),
                    "sources": [{"title": s["title"], "url": s["url"]} for s in sources]}
 
     stage("proving")
@@ -102,15 +135,14 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
     # Guard: the steps that triggered the bug become a test. It must pass on the fix AND fail on the old
     # code, otherwise it would not catch the bug coming back. (Built from the proof replay at first, which
     # missed bugs the fixed code gives no reason to repeat, such as an impatient double tap.)
-    kinds = {e.kind for e in before.evidence if e.id in before.cited}
-    guard = build_guard(case["id"], complaint, cond, list(before.steps), kinds)
-    guard_file = branch / "guards" / f"{case['id']}.json"
-    guard_file.parent.mkdir(exist_ok=True)
+    guard = build_guard(case["id"], complaint, cond, list(before.steps), proof_keys(before))
+    guard_file = branch / GUARDS / f"{case['id']}.json"
+    guard_file.parent.mkdir(parents=True, exist_ok=True)
     guard_file.write_text(json.dumps(guard, ensure_ascii=False, indent=2), encoding="utf-8")
     with running_app(branch) as url:
         on_fix = await run_guard(url, guard, project.auth_file)
     on_bug = await run_guard(live_url, guard, project.auth_file)
-    case["guard"] = {"file": f"guards/{case['id']}.json", "steps": len(guard["steps"]),
+    case["guard"] = {"file": f"{GUARDS}/{case['id']}.json", "steps": len(guard["steps"]), "test": guard,
                      "passes_on_fix": on_fix["passed"], "catches_bug": not on_bug["passed"]}
     if on_fix["passed"] and not on_bug["passed"]:
         stage("guarded")

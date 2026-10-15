@@ -20,7 +20,10 @@
 
   const CONTROLS = 'button, a[href], input:not([type=hidden]), select, textarea, summary, [role=button], [role=link], '
     + '[role=tab], [role=menuitem], [role=checkbox], [role=radio], [role=switch], [role=option], [role=combobox]';
-  const elements = [], offscreen = [], covered = [], clipped = [];
+  // An open dialog is meant to cover the page: then only controls inside it are checked for being covered.
+  const modal = [...document.querySelectorAll('dialog[open], [aria-modal=true], [role=dialog], .modal.show, .offcanvas.show')]
+    .find((d) => !ours(d) && visible(d));
+  const elements = [], offscreen = [], covered = [], clipped = [], unnamed = [];
   let i = 0;
   for (const el of document.querySelectorAll(CONTROLS)) {
     if (ours(el) || !visible(el)) continue;
@@ -29,8 +32,12 @@
     el.setAttribute('data-bc-idx', i);
     elements.push({ idx: i++, tag: el.tagName.toLowerCase(), role: el.getAttribute('role') || '', label: name(el),
       value: (el.type === 'password' ? '' : el.value) || '', disabled: !!el.disabled });
+    // A name with no letters ("1", "+", "x") tells a screen-reader user nothing about what the control does.
+    if (!['input', 'select', 'textarea'].includes(el.tagName.toLowerCase()) && !/\p{L}/u.test(name(el))) {
+      unnamed.push({ label: name(el), tag: el.tagName.toLowerCase() });
+    }
     // Covered: fully on screen, yet the point at its centre belongs to something else (overlay, banner).
-    if (r.top >= 0 && r.bottom <= vh && r.left >= 0 && r.right <= vw) {
+    if ((!modal || modal.contains(el)) && r.top >= 0 && r.bottom <= vh && r.left >= 0 && r.right <= vw) {
       const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
       if (top && top !== el && !el.contains(top) && !top.contains(el) && !ours(top)) {
         const cls = typeof top.className === 'string' && top.className ? '.' + top.className.split(' ')[0] : '';
@@ -69,7 +76,7 @@
       outline: !(s.outlineStyle === 'none' || parseFloat(s.outlineWidth) === 0) || s.boxShadow !== 'none' };
   }
   return {
-    url: location.pathname, vw, elements, offscreen, covered, clipped, unreachable, brokenImages, busy, alerts, focus,
+    url: location.pathname, vw, elements, offscreen, covered, clipped, unnamed, unreachable, brokenImages, busy, alerts, focus,
     overflow: document.documentElement.scrollWidth - vw,
     lang: document.documentElement.lang || '', dir: getComputedStyle(document.body).direction,
     vitals: window.__crp || null,

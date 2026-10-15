@@ -1,6 +1,7 @@
 """Fix step: a larger Nemotron model reads the evidence and the source, then writes a minimal patch."""
 
 import difflib
+import fnmatch
 import os
 from dataclasses import dataclass
 from pathlib import Path
@@ -9,11 +10,12 @@ from openai import AsyncOpenAI
 
 from replay.agent import ReplayResult
 from replay.conditions import Condition
+from replay import sources as src
 from replay.llm import parse_json, throttle
 
-SOURCE_SUFFIXES = (".py", ".js", ".html", ".css")
-FIX_SYSTEM = """You fix one bug in a small web app.
-You get a user's complaint, the user's real conditions, machine evidence of the failure, and the app's source files.
+FIX_SYSTEM = """You fix one bug in a web app.
+You get a user's complaint, the user's real conditions, machine evidence of the failure, the steps that triggered it,
+and the source files most related to the evidence (in a big app, only some files are shown).
 Reply with ONE JSON object and nothing else:
 {"explanation": "<two sentences: the root cause and why it hits this user>",
  "edits": [{"file": "<path as given>", "find": "<exact text copied from that file>", "replace": "<new text>"}]}
@@ -29,9 +31,15 @@ class Patch:
     edits: tuple[dict, ...]
 
 
-def read_sources(shop: Path) -> str:
-    files = sorted(p for p in shop.rglob("*") if p.suffix in SOURCE_SUFFIXES and "__pycache__" not in p.parts)
-    return "\n\n".join(f"=== {p.relative_to(shop).as_posix()} ===\n{p.read_text(encoding='utf-8')}" for p in files)
+def fix_clues(result: ReplayResult) -> list[str]:
+    """Text to search the code for: the evidence and the names of the controls the twin used."""
+    steps = [f"'{s['target']}'" for s in result.steps if s.get("target")]
+    return [e.detail for e in result.evidence if e.id in result.cited] + steps
+
+
+def steps_text(result: ReplayResult) -> str:
+    return "\n".join(f"{i + 1}. {s['action'].get('type')} '{s.get('target') or ''}' -> {s['result']}"
+                     for i, s in enumerate(result.steps[-12:]))
 
 
 async def pick_fix_model(client: AsyncOpenAI) -> str:
@@ -51,15 +59,19 @@ def background(sources: list[dict]) -> str:
 
 
 async def propose_fix(client: AsyncOpenAI, model: str, complaint: str, condition: Condition,
-                      result: ReplayResult, shop: Path, sources: list[dict] | None = None,
-                      rejected: str | None = None) -> Patch:
+                      result: ReplayResult, root: Path, sources: list[dict] | None = None,
+                      rejected: str | None = None, allowed: tuple[str, ...] = ()) -> Patch:
     cited = [e for e in result.evidence if e.id in result.cited] or list(result.evidence)
+    files = src.pick(root, fix_clues(result), allowed)
+    if not files:
+        raise ValueError("no source files to fix: check `edit` in complaint-replay.toml")
     user = (
         f"Complaint: {complaint}\nUser conditions: {condition.persona}\n"
         f"Replay summary: {result.summary}\n"
         "Evidence:\n" + "\n".join(f"- [{e.kind}] {e.detail}" for e in cited) +
+        f"\nSteps that triggered it:\n{steps_text(result)}" +
         background(sources or []) +
-        f"\n\nSource files:\n{read_sources(shop)}" +
+        f"\n\nSource files:\n{src.read(root, files)}" +
         (f"\n\nYour previous patch was rejected: {rejected}. Copy each 'find' text exactly from the file and include "
          "enough surrounding lines that it appears exactly once." if rejected else "")
     )
@@ -72,18 +84,26 @@ async def propose_fix(client: AsyncOpenAI, model: str, complaint: str, condition
     return Patch(str(data.get("explanation", "")), tuple(data.get("edits", [])))
 
 
-def apply_patch(patch: Patch, shop: Path) -> str:
-    """Apply all edits or none. Returns a unified diff; raises ValueError on an unsafe or ambiguous edit."""
-    root = shop.resolve()
+def apply_patch(patch: Patch, root: Path, allowed: tuple[str, ...] = ()) -> str:
+    """Apply all edits or none. Returns a unified diff; raises ValueError on an unsafe or ambiguous edit.
+
+    Line endings are kept as they are in each file (a Windows checkout has CRLF; the model writes LF).
+    """
+    root = root.resolve()
     original: dict[Path, str] = {}
     current: dict[Path, str] = {}
     for edit in patch.edits:
         path = (root / str(edit.get("file", ""))).resolve()
         if root not in path.parents or not path.is_file():
             raise ValueError(f"edit points outside the app or to a missing file: {edit.get('file')!r}")
+        rel = path.relative_to(root).as_posix()
+        if allowed and not any(fnmatch.fnmatch(rel, g) for g in allowed):
+            raise ValueError(f"{rel} is not in the files this project lets the fixer change ({', '.join(allowed)})")
         if path not in current:
-            original[path] = current[path] = path.read_text(encoding="utf-8")
+            original[path] = current[path] = path.read_text(encoding="utf-8", newline="")
         find, replace = str(edit.get("find", "")), str(edit.get("replace", ""))
+        if "\r\n" in current[path]:
+            find, replace = (t.replace("\r\n", "\n").replace("\n", "\r\n") for t in (find, replace))
         count = current[path].count(find) if find else 0
         if count != 1:
             raise ValueError(f"'find' text must appear exactly once in {edit.get('file')}, but it appears {count} times")
@@ -92,5 +112,5 @@ def apply_patch(patch: Patch, shop: Path) -> str:
     for path, after in current.items():
         rel = path.relative_to(root).as_posix()
         diff += difflib.unified_diff(original[path].splitlines(True), after.splitlines(True), f"a/{rel}", f"b/{rel}")
-        path.write_text(after, encoding="utf-8")
+        path.write_text(after, encoding="utf-8", newline="")
     return "".join(diff)

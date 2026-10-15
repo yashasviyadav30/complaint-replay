@@ -1,7 +1,7 @@
 """Guard: a proven replay saved as a test that fails if the bug ever comes back.
 
 A guard is plain JSON: the user's conditions, the steps by visible control name, and the evidence
-kinds that must not appear. No model is needed to run it.
+evidence that must not appear (kind + detail, numbers blanked). No model is needed to run it.
 Run one: uv run python -m replay.guard guards/<id>.json http://127.0.0.1:8100
 """
 
@@ -11,11 +11,11 @@ import json
 import sys
 from pathlib import Path
 
-from replay.browser import Session
+from replay.browser import Session, evidence_key
 from replay.conditions import Condition
 
 
-def build_guard(case_id: str, complaint: str, cond: Condition, steps: list[dict], kinds: set[str]) -> dict:
+def build_guard(case_id: str, complaint: str, cond: Condition, steps: list[dict], keys: set[str]) -> dict:
     """Keep only the steps that worked, addressed by the control's visible name rather than its position."""
     kept = []
     for s in steps:
@@ -27,10 +27,11 @@ def build_guard(case_id: str, complaint: str, cond: Condition, steps: list[dict]
             kept.append({"do": a["type"], "label": s["target"], **extra})
         elif a["type"] in ("click_role", "fill_role"):
             kept.append({k: v for k, v in a.items() if k in ("role", "name", "text")} | {"do": a["type"]})
-        elif a["type"] in ("wait", "scroll"):
-            kept.append({"do": a["type"], **{k: v for k, v in a.items() if k in ("ms", "direction")}})
+        elif a["type"] in ("wait", "scroll", "press", "type", "goto"):
+            keep = ("ms", "direction", "key", "text", "path")
+            kept.append({"do": a["type"], **{k: v for k, v in a.items() if k in keep}})
     return {"case": case_id, "complaint": complaint, "condition": dataclasses.asdict(cond),
-            "must_not_see": sorted(kinds), "steps": kept}
+            "must_not_see": sorted(keys), "steps": kept}
 
 
 async def run_guard(url: str, guard: dict, storage_state: Path | None = None) -> dict:
@@ -46,8 +47,17 @@ async def run_guard(url: str, guard: dict, storage_state: Path | None = None) ->
                 action["target"] = match
             await session.act(action)
         await session.observe()
-        hits = [e for e in session.evidence if e.kind in guard["must_not_see"]]
+        banned = set(guard["must_not_see"])  # evidence keys; older guards list bare kinds
+        hits = [e for e in session.evidence if evidence_key(e.kind, e.detail) in banned or e.kind in banned]
     return {"passed": not hits, "evidence": [{"kind": e.kind, "detail": e.detail} for e in hits]}
+
+
+async def run_all(url: str, guards: list[Path], storage_state: Path | None = None) -> dict[str, dict]:
+    """Every guard against one running app: {guard file name: result}."""
+    results = {}
+    for path in guards:
+        results[path.name] = await run_guard(url, json.loads(path.read_text(encoding="utf-8")), storage_state)
+    return results
 
 
 def main() -> None:

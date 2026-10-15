@@ -1,0 +1,58 @@
+# Complaint Replay: reproduces user complaints as the user who made them, opens fix pull requests,
+# and runs the guard tests on every push. Docs: https://github.com/yashasviyadav30/complaint-replay
+name: Complaint Replay
+
+on:
+  repository_dispatch:
+    types: [complaint]        # sent by the Complaint Replay service when a user reports a problem
+  workflow_dispatch:          # or start one by hand from the Actions tab
+    inputs:
+      complaint:
+        description: What the user said, in their own words
+        required: true
+      user:
+        description: "Who to replay as: slow_3g_android, hindi, arabic, elderly, keyboard, screen_reader, flaky_network, fast_desktop"
+        default: slow_3g_android
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  replay:
+    if: github.event_name == 'repository_dispatch' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      # Install what your app needs to start, the same as in your other workflows. For example:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - uses: yashasviyadav30/complaint-replay@main
+        with:
+          mode: replay
+          payload: ${{ toJson(github.event.client_payload) }}
+          complaint: ${{ inputs.complaint }}
+          user: ${{ inputs.user }}
+          nebius-api-key: ${{ secrets.NEBIUS_API_KEY }}
+          nvidia-api-key: ${{ secrets.NVIDIA_API_KEY }}
+          tavily-api-key: ${{ secrets.TAVILY_API_KEY }}
+
+  guards:
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - uses: yashasviyadav30/complaint-replay@main
+        with:
+          mode: guard

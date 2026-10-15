@@ -53,8 +53,8 @@ wheels = [
 
 [[package]]
 name = "complaint-replay"
-version = "0.1.0"
-source = { virtual = "." }
+version = "1.0.0a1"
+source = { editable = "." }
 dependencies = [
     { name = "fastapi" },
     { name = "fasttext-predict" },

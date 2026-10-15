@@ -31,3 +31,32 @@ def test_bad_edit_changes_nothing(tmp_path: Path) -> None:
     with pytest.raises(ValueError):
         apply_patch(Patch("x", edits), shop)
     assert "4000" in (shop / "static" / "config.js").read_text(encoding="utf-8")
+
+
+def test_patch_keeps_windows_line_endings(tmp_path) -> None:
+    (tmp_path / "a.js").write_bytes(b"const a = 1;\r\nconst b = 2;\r\n")
+    apply_patch(Patch("x", ({"file": "a.js", "find": "const a = 1;\nconst b = 2;", "replace": "const a = 3;\nconst b = 2;"},)), tmp_path)
+    assert (tmp_path / "a.js").read_bytes() == b"const a = 3;\r\nconst b = 2;\r\n"
+
+
+def test_patch_refuses_files_outside_the_allowed_paths(tmp_path) -> None:
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "a.js").write_text("x = 1", encoding="utf-8")
+    (tmp_path / "server.js").write_text("y = 1", encoding="utf-8")
+    apply_patch(Patch("x", ({"file": "src/a.js", "find": "x = 1", "replace": "x = 2"},)), tmp_path, ("src/*",))
+    with pytest.raises(ValueError, match="not in the files"):
+        apply_patch(Patch("x", ({"file": "server.js", "find": "y = 1", "replace": "y = 2"},)), tmp_path, ("src/*",))
+
+
+def test_big_repo_sends_the_files_that_match_the_evidence(tmp_path) -> None:
+    from replay import sources
+
+    for i in range(30):
+        (tmp_path / f"component{i}.js").write_text(f"export const c{i} = 'filler';\n" * 50, encoding="utf-8")
+    (tmp_path / "Checkout.jsx").write_text("<button className='pay-btn'>Pay now</button>\n" + "// x\n" * 50, encoding="utf-8")
+    (tmp_path / "node_modules").mkdir()
+    (tmp_path / "node_modules" / "lib.js").write_text("Pay now", encoding="utf-8")
+    hints = ["'Pay now' is outside the screen (left=400px, screen=360px)"]
+    picked = sources.pick(tmp_path, hints, budget=3000)
+    assert picked[0] == "Checkout.jsx" and "node_modules/lib.js" not in picked
+    assert sources.pick(tmp_path, hints, budget=10**7)[0] == "Checkout.jsx"  # small enough: everything goes
