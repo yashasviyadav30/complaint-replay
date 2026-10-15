@@ -60,10 +60,18 @@ runs:
         else
           crp replay "$COMPLAINT" --user "$REPLAY_USER" "${args[@]}"
         fi
-    - name: Run guard tests
+    - name: Run guard tests (on a pull request, new guards must also fail on the base branch)
       if: inputs.mode == 'guard'
       shell: bash
-      run: crp guard
+      env:
+        BASE_REF: ${{ github.base_ref }}
+      run: |
+        if [ -n "$BASE_REF" ]; then
+          git fetch --no-tags --depth=1 origin "$BASE_REF"
+          crp guard --base "origin/$BASE_REF"
+        else
+          crp guard
+        fi
     - name: Keep the evidence
       if: always() && inputs.mode == 'replay'
       uses: actions/upload-artifact@v4

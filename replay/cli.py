@@ -153,7 +153,40 @@ async def cmd_guard(args: argparse.Namespace) -> int:
     for name, r in results.items():
         print(("PASS " if r["passed"] else "FAIL ") + name + "".join(f"\n     {e['kind']}: {e['detail']}" for e in r["evidence"]))
     print(f"\n{len(results) - len(failed)}/{len(results)} guards pass")
+    if args.base and not failed:
+        return await guards_catch_bug_on_base(repo, args.base, guards)
     return 1 if failed else 0
+
+
+async def guards_catch_bug_on_base(repo: Path, base: str, guards: list[Path]) -> int:
+    """For guards this branch adds: they must FAIL on the base branch, or they don't test the bug at all."""
+    import shutil
+    import tempfile
+
+    from replay.guard import run_all
+    from replay.investigate import branch_copy, remove_branch
+    from replay.pr import run
+
+    existing = set(run(["git", "ls-tree", "-r", "--name-only", base, "--", GUARDS], repo).splitlines())
+    new = [g for g in guards if f"{GUARDS}/{g.name}" not in existing]
+    if not new:
+        print(f"No new guards compared with {base}.")
+        return 0
+    work = Path(tempfile.mkdtemp(prefix="crp-base-"))
+    work.rmdir()
+    run(["git", "worktree", "add", "--detach", str(work), base], repo)
+    old = branch_copy(work, Path(tempfile.mkdtemp(prefix="crp-old-")) / "app", deps=repo)  # base has no deps installed
+    try:
+        with running_app(old) as url:
+            results = await run_all(url, new, load_project(repo).auth_file)
+    finally:
+        remove_branch(old)
+        run(["git", "worktree", "remove", "--force", str(work)], repo)
+        shutil.rmtree(work, ignore_errors=True)
+    missed = [k for k, v in results.items() if v["passed"]]
+    for name, r in results.items():
+        print(f"{'catches the bug on ' + base if not r['passed'] else 'DOES NOT catch the bug on ' + base}: {name}")
+    return 1 if missed else 0
 
 
 async def cmd_auth(args: argparse.Namespace) -> int:
@@ -235,6 +268,7 @@ def parser() -> argparse.ArgumentParser:
     g = sub.add_parser("guard", help="run every guard test (for CI)")
     g.add_argument("--repo", default=".")
     g.add_argument("--url")
+    g.add_argument("--base", default="", help="also check that guards new on this branch fail on this ref")
     a = sub.add_parser("auth", help="save a test login for the twin")
     a.add_argument("--url", required=True)
     a.add_argument("--repo", default=".")

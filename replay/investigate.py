@@ -69,13 +69,16 @@ def remove_branch(branch: Path) -> None:
     shutil.rmtree(branch, ignore_errors=True)
 
 
-def branch_copy(source: Path, branch: Path) -> Path:
-    """A working copy of the app to fix, the way a pull request branch would hold it."""
+def branch_copy(source: Path, branch: Path, deps: Path | None = None) -> Path:
+    """A working copy of the app to fix, the way a pull request branch would hold it.
+
+    Installed dependencies are linked from `deps` (default: the source itself).
+    """
     remove_branch(branch)
     shutil.copytree(source, branch, ignore=shutil.ignore_patterns("__pycache__", ".git", *LINKED))
     for name in LINKED:
-        if (source / name).is_dir():
-            _link((source / name).resolve(), branch / name)
+        if ((deps or source) / name).is_dir():
+            _link(((deps or source) / name).resolve(), branch / name)
     return branch
 
 
