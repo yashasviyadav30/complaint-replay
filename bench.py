@@ -17,7 +17,7 @@ from replay.agent import replay
 from replay.bugs import BUGS, reset_workspace
 from replay.conditions import CONDITIONS
 from replay.llm import Chat, llm_matcher, llm_policy, make_client, pick_model
-from replay.shop import running_shop
+from replay.project import running_app
 
 OUT = Path(__file__).parent / "results"
 DEPTH = {"reproduced": 1, "fixing": 1, "proving": 1, "fix_unproven": 1, "fix_failed": 1, "fixed": 2, "guarded": 3}
@@ -25,7 +25,7 @@ DEPTH = {"reproduced": 1, "fixing": 1, "proving": 1, "fix_unproven": 1, "fix_fai
 
 async def clean_run(bug, chat: Chat) -> str:
     shop = reset_workspace()
-    with running_shop(shop) as url:
+    with running_app(shop) as url:
         r = await replay(url, bug.complaint, CONDITIONS[bug.condition], llm_policy(chat), llm_matcher(chat))
     return r.verdict
 

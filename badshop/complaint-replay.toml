@@ -1,0 +1,4 @@
+[app]
+start = "{python} -m uvicorn app:app --port {port} --log-level warning"
+ready = "/api/products"
+hints = "Test data: phone 9876543210; the OTP appears on screen after sending."

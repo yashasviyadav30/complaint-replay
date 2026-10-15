@@ -7,6 +7,7 @@ That is the "no evidence, no verdict" rule.
 import asyncio
 import re
 import time
+from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urlparse
@@ -14,56 +15,42 @@ from urllib.parse import urlparse
 from playwright.async_api import async_playwright
 
 from replay.conditions import Condition
+from replay.langid import base, detect, not_in
 
-AXE_JS = Path(__file__).resolve().parent.parent / "vendor" / "axe.min.js"
-DEVANAGARI = re.compile(r"[ऀ-ॿ]")
-MONEY_KEYS = ("total", "charged", "amount")
+HERE = Path(__file__).resolve().parent
+AXE_JS = HERE.parent / "vendor" / "axe.min.js"
+OBSERVE_JS = (HERE / "observe.js").read_text(encoding="utf-8")
+MONEY_KEYS = ("total", "charged", "amount", "grand_total", "amount_due")
 SETTLE_TIMEOUT_S = 20
 # ponytail: payment-like paths by name; a per-app list of non-idempotent endpoints is the upgrade.
-PAYMENT_PATH = re.compile(r"checkout|order|pay|purchase", re.I)
+PAYMENT_PATH = re.compile(r"checkout|order|pay|purchase|transfer|booking", re.I)
 DUPLICATE_WINDOW_S = 5
 DOUBLE_TAP_GAP_MS = 300
 OUR_PATHS = ("/widget.js", "/api/complaints")
+SLOW_REQUEST_S = 10        # a request the user waited on this long
+STUCK_LOADING_S = 15       # a spinner still on screen after this long
+REDIRECT_LOOP = (4, 10.0)  # same URL loaded this many times within this many seconds
+POOR_LCP_MS, POOR_CLS = 4000, 0.25  # web.dev "poor" thresholds
+KEYS = {"Tab", "Shift+Tab", "Enter", "Space", "Escape", "ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight",
+        "Home", "End", "PageDown", "PageUp"}
+
+VITALS_JS = """
+window.__crp = { lcp: 0, cls: 0 };
+try {
+  new PerformanceObserver((l) => { for (const e of l.getEntries()) window.__crp.lcp = Math.max(window.__crp.lcp, e.startTime); })
+    .observe({ type: 'largest-contentful-paint', buffered: true });
+  new PerformanceObserver((l) => { for (const e of l.getEntries()) if (!e.hadRecentInput) window.__crp.cls += e.value; })
+    .observe({ type: 'layout-shift', buffered: true });
+} catch (e) {}
+"""
+AXE_RUN_JS = """
+async () => (await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] } }))
+  .violations.map((v) => ({ id: v.id, help: v.help, targets: v.nodes.slice(0, 3).map((n) => n.target.join(' ')) }))
+"""
 
 
 def is_ours(url: str) -> bool:
     return urlparse(url).path in OUR_PATHS
-
-OBSERVE_JS = r"""
-() => {
-  const vw = document.documentElement.clientWidth;
-  const visible = (el) => {
-    const s = getComputedStyle(el), r = el.getBoundingClientRect();
-    return s.display !== 'none' && s.visibility !== 'hidden' && r.width > 0 && r.height > 0
-      && (el.offsetParent !== null || s.position === 'fixed');
-  };
-  // aria-label plus visible text, so a sighted user's view of badges/counts ("Cart 3") is kept
-  const name = (el) => {
-    const parts = [el.getAttribute('aria-label'), el.innerText || el.value || el.placeholder || el.title
-      || (el.labels && el.labels[0] && el.labels[0].innerText)].map((s) => (s || '').trim()).filter(Boolean);
-    return [...new Set(parts)].join(' ').replace(/\s+/g, ' ').slice(0, 60);
-  };
-  document.querySelectorAll('[data-bc-idx]').forEach((el) => el.removeAttribute('data-bc-idx'));
-  const elements = [], offscreen = [];
-  let i = 0;
-  for (const el of document.querySelectorAll('button, a[href], input, select, textarea, [role=button]')) {
-    if (!visible(el)) continue;
-    const r = el.getBoundingClientRect();
-    if (r.left >= vw || r.right <= 0) { offscreen.push({ label: name(el), left: Math.round(r.left), vw }); continue; }
-    el.setAttribute('data-bc-idx', i);
-    elements.push({ idx: i++, tag: el.tagName.toLowerCase(), label: name(el), value: el.value || '' });
-  }
-  const alerts = [...document.querySelectorAll('[role=alert], [aria-live]')]
-    .filter(visible).map((e) => e.innerText.trim()).filter(Boolean);
-  return { url: location.pathname, vw, elements, offscreen, alerts, text: document.body.innerText.slice(0, 1200) };
-}
-"""
-
-AXE_RUN_JS = """
-async () => (await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa'] } }))
-  .violations.map((v) => ({ id: v.id, help: v.help, targets: v.nodes.slice(0, 3).map((n) => n.target.join(' ')) }))
-"""
-
 
 
 async def tap(locator, action: dict) -> None:
@@ -85,9 +72,10 @@ class Evidence:
 class Session:
     """Async context manager: one browser page under one condition."""
 
-    def __init__(self, base_url: str, condition: Condition):
+    def __init__(self, base_url: str, condition: Condition, storage_state: Path | None = None):
         self.base_url = base_url
         self.condition = condition
+        self.storage_state = storage_state
         self.evidence: list[Evidence] = []
         self.step = 0
         self._seen: set[tuple[str, str]] = set()
@@ -96,6 +84,11 @@ class Session:
         self._labels: dict[int, str] = {}  # idx -> visible name, from the latest observe()
         self.last_target: str | None = None  # name of the control the last action used
         self._payments: list[tuple[float, str, str]] = []  # (time, path, body) of payment-like POSTs
+        self._started: dict[object, float] = {}  # request -> start time
+        self._navigations: deque[tuple[float, str]] = deque(maxlen=20)
+        self._busy_since: dict[str, float] = {}
+        self._loaded = False  # flaky / dropping networks spare the first page load, or nothing would open
+        self._after_load = 0  # requests since the page loaded; every Nth fails, so a replay is repeatable
 
     def add(self, kind: str, detail: str) -> None:
         if (kind, detail) in self._seen:
@@ -106,7 +99,9 @@ class Session:
     async def __aenter__(self) -> "Session":
         self._pw = await async_playwright().start()
         self._browser = await self._pw.chromium.launch()
-        context = self._context = await self._browser.new_context(**self.condition.context)
+        extra = {"storage_state": str(self.storage_state)} if self.storage_state else {}
+        context = self._context = await self._browser.new_context(**self.condition.context, **extra)
+        await context.add_init_script(VITALS_JS)
         if self.condition.zoom != 1.0:
             await context.add_init_script(
                 f"addEventListener('DOMContentLoaded', () => document.documentElement.style.zoom = '{self.condition.zoom}')"
@@ -118,6 +113,7 @@ class Session:
             cdp = await context.new_cdp_session(self.page)
             await cdp.send("Emulation.setCPUThrottlingRate", {"rate": self.condition.cpu_slowdown})
         await self.page.goto(self.base_url, wait_until="load", timeout=60_000)
+        self._loaded = True
         return self
 
     async def __aexit__(self, *exc) -> None:
@@ -131,23 +127,34 @@ class Session:
         if is_ours(route.request.url):  # the twin must never file complaints about itself
             await route.fulfill(status=204, body="")
             return
-        if self.condition.network:
+        net = self.condition.network or {}
+        if self._loaded and net.get("drop_after_load"):
+            await route.abort("internetdisconnected")
+            return
+        if self._loaded and net.get("fail_rate"):
+            self._after_load += 1
+            if self._after_load % round(1 / net["fail_rate"]) == 0:
+                await route.abort("connectionreset")
+                return
+        if net.get("latency"):
             # CDP network throttling was silently ignored in tests (Playwright 1.63), so latency is
-            # added per request here. ponytail: latency only; add bandwidth limits if a bug needs them.
-            await asyncio.sleep(self.condition.network["latency"] / 1000)
+            # added per request here.
+            await asyncio.sleep(net["latency"] / 1000)
         await route.continue_()
 
     def _listen(self) -> None:
         page = self.page
         page.on("request", self._on_request)
-        page.on("requestfinished", lambda r: self._track(-1))
+        page.on("requestfinished", self._on_finished)
         page.on("requestfailed", self._on_failed)
         page.on("response", self._on_response)
+        page.on("framenavigated", self._on_navigated)
         page.on("console", lambda m: m.type == "error" and self.add("console_error", m.text[:200]))
         page.on("pageerror", lambda e: self.add("console_error", str(e)[:200]))
 
     def _on_request(self, request) -> None:
         self._track(+1)
+        self._started[request] = time.monotonic()
         path = urlparse(request.url).path
         if request.method != "POST" or is_ours(request.url) or not PAYMENT_PATH.search(path):
             return
@@ -158,11 +165,27 @@ class Session:
                                               "data (the user would be charged twice)")
         self._payments.append((now, path, body))
 
+    def _on_finished(self, request) -> None:
+        self._track(-1)
+        took = time.monotonic() - self._started.pop(request, time.monotonic())
+        if took > SLOW_REQUEST_S and not is_ours(request.url):
+            self.add("slow_request", f"{request.method} {urlparse(request.url).path} took {took:.0f} s")
+
+    def _on_navigated(self, frame) -> None:
+        if frame != self.page.main_frame:
+            return
+        now, url = time.monotonic(), frame.url
+        self._navigations.append((now, url))
+        times, window = REDIRECT_LOOP
+        if sum(1 for t, u in self._navigations if u == url and now - t < window) >= times:
+            self.add("redirect_loop", f"{urlparse(url).path} loaded {times} times in under {window:.0f} s")
+
     def _track(self, delta: int) -> None:
         self._inflight = max(0, self._inflight + delta)
 
     def _on_failed(self, request) -> None:
         self._track(-1)
+        self._started.pop(request, None)
         if is_ours(request.url):
             return
         self.add("request_failed", f"{request.method} {urlparse(request.url).path} failed ({request.failure})")
@@ -173,7 +196,7 @@ class Session:
         path = urlparse(response.url).path
         if response.status >= 400:
             self.add("http_error", f"{response.request.method} {path} returned HTTP {response.status}")
-        if not path.startswith("/api/") or "json" not in response.headers.get("content-type", ""):
+        if "json" not in response.headers.get("content-type", ""):
             return
         try:
             body = await response.json()
@@ -181,8 +204,9 @@ class Session:
             return
         if isinstance(body, dict):
             for key in MONEY_KEYS:
-                if isinstance(body.get(key), (int, float)):
-                    self._record_amount(path, key, body[key])
+                value = body.get(key)
+                if isinstance(value, (int, float)) and not isinstance(value, bool):
+                    self._record_amount(path, key, value)
 
     def _record_amount(self, path: str, key: str, value: float) -> None:
         # ponytail: compares only the last two money values from different endpoints;
@@ -203,17 +227,61 @@ class Session:
     async def observe(self) -> dict:
         obs = await self.page.evaluate(OBSERVE_JS)
         self._labels = {e["idx"]: e["label"] for e in obs["elements"]}
-        for o in obs["offscreen"]:
-            self.add("offscreen_control", f"'{o['label']}' is outside the screen (left={o['left']}px, screen={o['vw']}px)")
-        if self.condition.hindi:
-            for alert in obs["alerts"]:
-                if not DEVANAGARI.search(alert):
-                    self.add("language_mismatch", f"Hindi user was shown an English-only message: '{alert}'")
+        self._layout(obs)
+        self._language(obs)
+        self._loading(obs)
+        if self.condition.keyboard_only:
+            if obs["focus"] and not obs["focus"]["outline"]:
+                self.add("focus_invisible", f"keyboard focus is on '{obs['focus']['label']}' but nothing shows where")
+            for label in obs["unreachable"]:
+                self.add("not_keyboard_reachable", f"'{label}' looks clickable but Tab never reaches it")
         if self.condition.screen_reader:
             obs["aria"] = await self.page.locator("body").aria_snapshot()
+        if self.condition.screen_reader or self.condition.keyboard_only:
             for v in await self._axe():
                 self.add("a11y_violation", f"{v['id']}: {v['help']} ({', '.join(v['targets'])})")
         return obs
+
+    def _layout(self, obs: dict) -> None:
+        for o in obs["offscreen"]:
+            self.add("offscreen_control", f"'{o['label']}' is outside the screen (left={o['left']}px, screen={o['vw']}px)")
+        for c in obs["covered"]:
+            self.add("covered_control", f"'{c['label']}' is on screen but covered by {c['by']}, so a tap hits that instead")
+        for c in obs["clipped"]:
+            self.add("clipped_text", f"'{c['label']}' is cut off: its text needs {c['needs']}px but has {c['has']}px")
+        if obs["overflow"] > 2:
+            self.add("page_overflow", f"the page is {obs['overflow']}px wider than the {obs['vw']}px screen and scrolls sideways")
+        for src in obs["brokenImages"]:
+            self.add("broken_image", f"image '{src[:120]}' did not load")
+        vitals = obs.get("vitals") or {}
+        if vitals.get("lcp", 0) > POOR_LCP_MS:
+            self.add("slow_page", f"main content appeared after {vitals['lcp'] / 1000:.1f} s (poor is over 4 s)")
+        if vitals.get("cls", 0) > POOR_CLS:
+            self.add("layout_shift", f"the page jumped while loading (shift score {vitals['cls']:.2f}, poor is over 0.25)")
+
+    def _language(self, obs: dict) -> None:
+        """Text the user can't read, on a page that otherwise speaks their language."""
+        locale = self.condition.locale
+        want = base(locale)
+        if not locale or want == "en":
+            return
+        if base(obs["lang"]) != want and detect(obs["text"])[0] != want:
+            return  # the site is not translated into this language at all: a product gap, not this bug
+        for alert in obs["alerts"]:
+            why = not_in(alert, locale)
+            if why:
+                self.add("language_mismatch", f"message '{alert[:120]}' is {why}")
+        if self.condition.rtl and obs["dir"] != "rtl":
+            self.add("rtl_missing", f"the page is in '{want}', a right-to-left language, but lays out left-to-right")
+
+    def _loading(self, obs: dict) -> None:
+        now = time.monotonic()
+        current = set(obs["busy"])
+        self._busy_since = {k: v for k, v in self._busy_since.items() if k in current}
+        for key in current:
+            since = self._busy_since.setdefault(key, now)
+            if now - since > STUCK_LOADING_S:
+                self.add("stuck_loading", f"a loading indicator ({key}) has been on screen for over {STUCK_LOADING_S} s")
 
     async def _axe(self) -> list[dict]:
         if not await self.page.evaluate("typeof axe !== 'undefined'"):
@@ -229,6 +297,8 @@ class Session:
         except (TypeError, ValueError):
             idx = -1
         self.last_target = self._labels.get(idx) if kind in ("click", "fill") else action.get("name")
+        if self.condition.keyboard_only and kind in ("click", "fill", "click_role", "fill_role"):
+            return "error: this user has no mouse; use press (Tab, Enter, Space) and type"
         try:
             if kind == "click":
                 await tap(page.locator(f'[data-bc-idx="{int(action["target"])}"]'), action)
@@ -242,10 +312,19 @@ class Session:
                     await target.click(timeout=5000)
                 else:
                     await target.fill(str(action["text"]), timeout=5000)
+            elif kind == "press":
+                key = str(action.get("key", ""))
+                if key not in KEYS:
+                    return f"error: key must be one of {sorted(KEYS)}"
+                await page.keyboard.press(key)
+            elif kind == "type":
+                await page.keyboard.type(str(action.get("text", "")), delay=30)
             elif kind == "click_css":  # scripted tests only
                 await tap(page.locator(action["selector"]).first, action)
             elif kind == "fill_css":  # scripted tests only
                 await page.locator(action["selector"]).first.fill(str(action["text"]), timeout=5000)
+            elif kind == "goto":  # open another path of the same site (deep links in complaints, guards)
+                await page.goto(self.base_url.rstrip("/") + "/" + str(action.get("path", "")).lstrip("/"))
             elif kind in ("scroll", "swipe"):
                 await page.mouse.wheel(0, -600 if action.get("direction") == "up" else 600)
             elif kind == "wait":

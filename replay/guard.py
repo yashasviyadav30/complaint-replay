@@ -33,9 +33,9 @@ def build_guard(case_id: str, complaint: str, cond: Condition, steps: list[dict]
             "must_not_see": sorted(kinds), "steps": kept}
 
 
-async def run_guard(url: str, guard: dict) -> dict:
+async def run_guard(url: str, guard: dict, storage_state: Path | None = None) -> dict:
     cond = Condition(**guard["condition"])
-    async with Session(url, cond) as session:
+    async with Session(url, cond, storage_state) as session:
         for step in guard["steps"]:
             obs = await session.observe()
             action = {k: v for k, v in step.items() if k not in ("do", "label")} | {"type": step["do"]}

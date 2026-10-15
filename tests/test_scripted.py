@@ -11,7 +11,7 @@ import pytest
 from replay.agent import replay, scripted_policy
 from replay.bugs import BUGS_BY_ID, inject, reset_workspace
 from replay.conditions import CONDITIONS
-from replay.shop import running_shop
+from replay.project import running_app
 
 LOGIN = [
     {"type": "fill_css", "selector": "#phone", "text": "9876543210"},
@@ -45,7 +45,7 @@ def evidence_kinds(bug_id: int, buggy: bool, condition: str | None = None) -> se
     if buggy:
         inject(bug, shop)
     cond = CONDITIONS[condition or bug.condition]
-    with running_shop(shop) as url:
+    with running_app(shop) as url:
         result = asyncio.run(replay(url, bug.complaint, cond, scripted_policy(script)))
     LAST_EVIDENCE[:] = [f"{e.kind}: {e.detail}" for e in result.evidence]
     return {e.kind for e in result.evidence}

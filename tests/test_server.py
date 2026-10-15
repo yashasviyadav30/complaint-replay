@@ -45,7 +45,7 @@ def test_twin_copies_the_reporters_conditions() -> None:
     assert cond.context["viewport"] == {"width": 360, "height": 740}
     assert cond.context["locale"] == "hi-IN" and cond.context["is_mobile"]
     assert cond.network == {"latency": 1800}
-    assert cond.hindi
+    assert cond.locale == "hi-IN" and not cond.rtl
 
 
 def test_twin_on_fast_desktop_keeps_its_small_real_latency() -> None:
@@ -63,3 +63,15 @@ def test_a_running_investigation_does_not_wipe_merged_reports(tmp_path, monkeypa
     srv.save_case(in_memory)  # stale copy saves later
     saved = srv.json.loads((tmp_path / "c1.json").read_text(encoding="utf-8"))
     assert saved["stage"] == "fixing" and saved["reports"] == 2 and saved["also_reported"] == [{"said": "same bug"}]
+
+
+def test_twin_copies_timezone_dark_mode_and_rtl() -> None:
+    env = {**ENV, "language": "ar-EG", "timezone": "Africa/Cairo", "color_scheme": "dark", "reduced_motion": True}
+    cond = twin_condition(env)
+    assert cond.context["timezone_id"] == "Africa/Cairo" and cond.context["color_scheme"] == "dark"
+    assert cond.context["reduced_motion"] == "reduce" and cond.rtl
+
+
+def test_unknown_timezone_is_dropped_not_crashed_on() -> None:
+    assert srv.Env(viewport={"width": 400, "height": 800}, timezone="Africa/Cairo").timezone == "Africa/Cairo"
+    assert srv.Env(viewport={"width": 400, "height": 800}, timezone="Mars/Olympus").timezone is None

@@ -1,0 +1,2279 @@
+{
+"BlackBerry Z30": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (BB10; Touch) AppleWebKit/537.10+ (KHTML, like Gecko) Version/26.6 Mobile Safari/537.10+",
+"viewport": {
+"height": 640,
+"width": 360
+}
+},
+"BlackBerry Z30 landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (BB10; Touch) AppleWebKit/537.10+ (KHTML, like Gecko) Version/26.6 Mobile Safari/537.10+",
+"viewport": {
+"height": 360,
+"width": 640
+}
+},
+"Blackberry PlayBook": {
+"default_browser_type": "webkit",
+"device_scale_factor": 1,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (PlayBook; U; RIM Tablet OS 2.1.0; en-US) AppleWebKit/536.2+ (KHTML like Gecko) Version/26.6 Safari/536.2+",
+"viewport": {
+"height": 1024,
+"width": 600
+}
+},
+"Blackberry PlayBook landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 1,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (PlayBook; U; RIM Tablet OS 2.1.0; en-US) AppleWebKit/536.2+ (KHTML like Gecko) Version/26.6 Safari/536.2+",
+"viewport": {
+"height": 600,
+"width": 1024
+}
+},
+"Desktop Chrome": {
+"default_browser_type": "chromium",
+"device_scale_factor": 1,
+"has_touch": false,
+"is_mobile": false,
+"user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36",
+"viewport": {
+"height": 720,
+"width": 1280
+}
+},
+"Desktop Chrome HiDPI": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2,
+"has_touch": false,
+"is_mobile": false,
+"user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36",
+"viewport": {
+"height": 720,
+"width": 1280
+}
+},
+"Desktop Edge": {
+"default_browser_type": "chromium",
+"device_scale_factor": 1,
+"has_touch": false,
+"is_mobile": false,
+"user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36 Edg/153.0.8010.12",
+"viewport": {
+"height": 720,
+"width": 1280
+}
+},
+"Desktop Edge HiDPI": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2,
+"has_touch": false,
+"is_mobile": false,
+"user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36 Edg/153.0.8010.12",
+"viewport": {
+"height": 720,
+"width": 1280
+}
+},
+"Desktop Firefox": {
+"default_browser_type": "firefox",
+"device_scale_factor": 1,
+"has_touch": false,
+"is_mobile": false,
+"user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:155.0) Gecko/20100101 Firefox/155.0",
+"viewport": {
+"height": 720,
+"width": 1280
+}
+},
+"Desktop Firefox HiDPI": {
+"default_browser_type": "firefox",
+"device_scale_factor": 2,
+"has_touch": false,
+"is_mobile": false,
+"user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:155.0) Gecko/20100101 Firefox/155.0",
+"viewport": {
+"height": 720,
+"width": 1280
+}
+},
+"Desktop Safari": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": false,
+"is_mobile": false,
+"user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Safari/605.1.15",
+"viewport": {
+"height": 720,
+"width": 1280
+}
+},
+"Galaxy A55": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.25,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 14; SM-A556B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 1040,
+"width": 480
+}
+},
+"Galaxy A55 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.25,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 14; SM-A556B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 480,
+"width": 1040
+}
+},
+"Galaxy Note 3": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; U; Android 4.3; en-us; SM-N900T Build/JSS15J) AppleWebKit/534.30 (KHTML, like Gecko) Version/26.6 Mobile Safari/534.30",
+"viewport": {
+"height": 640,
+"width": 360
+}
+},
+"Galaxy Note 3 landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; U; Android 4.3; en-us; SM-N900T Build/JSS15J) AppleWebKit/534.30 (KHTML, like Gecko) Version/26.6 Mobile Safari/534.30",
+"viewport": {
+"height": 360,
+"width": 640
+}
+},
+"Galaxy Note II": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; U; Android 4.1; en-us; GT-N7100 Build/JRO03C) AppleWebKit/534.30 (KHTML, like Gecko) Version/26.6 Mobile Safari/534.30",
+"viewport": {
+"height": 640,
+"width": 360
+}
+},
+"Galaxy Note II landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; U; Android 4.1; en-us; GT-N7100 Build/JRO03C) AppleWebKit/534.30 (KHTML, like Gecko) Version/26.6 Mobile Safari/534.30",
+"viewport": {
+"height": 360,
+"width": 640
+}
+},
+"Galaxy S III": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; U; Android 4.0; en-us; GT-I9300 Build/IMM76D) AppleWebKit/534.30 (KHTML, like Gecko) Version/26.6 Mobile Safari/534.30",
+"viewport": {
+"height": 640,
+"width": 360
+}
+},
+"Galaxy S III landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; U; Android 4.0; en-us; GT-I9300 Build/IMM76D) AppleWebKit/534.30 (KHTML, like Gecko) Version/26.6 Mobile Safari/534.30",
+"viewport": {
+"height": 360,
+"width": 640
+}
+},
+"Galaxy S24": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 14; SM-S921U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 780,
+"width": 360
+}
+},
+"Galaxy S24 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 14; SM-S921U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 360,
+"width": 780
+}
+},
+"Galaxy S5": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 640,
+"width": 360
+}
+},
+"Galaxy S5 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 360,
+"width": 640
+}
+},
+"Galaxy S8": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 7.0; SM-G950U Build/NRD90M) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 740,
+"width": 360
+}
+},
+"Galaxy S8 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 7.0; SM-G950U Build/NRD90M) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 360,
+"width": 740
+}
+},
+"Galaxy S9+": {
+"default_browser_type": "chromium",
+"device_scale_factor": 4.5,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 8.0.0; SM-G965U Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 658,
+"width": 320
+}
+},
+"Galaxy S9+ landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 4.5,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 8.0.0; SM-G965U Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 320,
+"width": 658
+}
+},
+"Galaxy Tab S4": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.25,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 8.1.0; SM-T837A) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36",
+"viewport": {
+"height": 1138,
+"width": 712
+}
+},
+"Galaxy Tab S4 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.25,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 8.1.0; SM-T837A) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36",
+"viewport": {
+"height": 712,
+"width": 1138
+}
+},
+"Galaxy Tab S9": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.5,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 14; SM-X710) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36",
+"viewport": {
+"height": 1024,
+"width": 640
+}
+},
+"Galaxy Tab S9 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.5,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 14; SM-X710) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36",
+"viewport": {
+"height": 640,
+"width": 1024
+}
+},
+"Galaxy Z Flip 6": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 10; SM-F741U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 804,
+"width": 360
+}
+},
+"Galaxy Z Flip 6 Cover": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 10; SM-F741U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 298,
+"width": 360
+}
+},
+"Galaxy Z Flip 6 Cover landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 10; SM-F741U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 308,
+"width": 322
+}
+},
+"Galaxy Z Flip 6 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 10; SM-F741U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 308,
+"width": 828
+}
+},
+"Galaxy Z Flip 7": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 10; SM-F761U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 764,
+"width": 360
+}
+},
+"Galaxy Z Flip 7 Cover": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 10; SM-F761U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 448,
+"width": 474
+}
+},
+"Galaxy Z Flip 7 Cover landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 10; SM-F761U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 422,
+"width": 472
+}
+},
+"Galaxy Z Flip 7 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 10; SM-F761U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 308,
+"width": 788
+}
+},
+"Galaxy Z Fold 6": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 10; SM-F956U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 1004,
+"width": 928
+}
+},
+"Galaxy Z Fold 6 Cover": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 10; SM-F956U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 1112,
+"width": 484
+}
+},
+"Galaxy Z Fold 6 Cover landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 10; SM-F956U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 432,
+"width": 1136
+}
+},
+"Galaxy Z Fold 6 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 10; SM-F956U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 876,
+"width": 1028
+}
+},
+"Galaxy Z Fold 7": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 10; SM-F966U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 1016,
+"width": 984
+}
+},
+"Galaxy Z Fold 7 Cover": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 10; SM-F966U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 764,
+"width": 360
+}
+},
+"Galaxy Z Fold 7 Cover landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 10; SM-F966U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 308,
+"width": 788
+}
+},
+"Galaxy Z Fold 7 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 10; SM-F966U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 932,
+"width": 1040
+}
+},
+"Kindle Fire HDX": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; U; en-us; KFAPWI Build/JDQ39) AppleWebKit/535.19 (KHTML, like Gecko) Silk/3.13 Safari/535.19 Silk-Accelerated=true",
+"viewport": {
+"height": 1280,
+"width": 800
+}
+},
+"Kindle Fire HDX landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; U; en-us; KFAPWI Build/JDQ39) AppleWebKit/535.19 (KHTML, like Gecko) Silk/3.13 Safari/535.19 Silk-Accelerated=true",
+"viewport": {
+"height": 800,
+"width": 1280
+}
+},
+"LG Optimus L70": {
+"default_browser_type": "chromium",
+"device_scale_factor": 1.25,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; U; Android 4.4.2; en-us; LGMS323 Build/KOT49I.MS32310c) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 640,
+"width": 384
+}
+},
+"LG Optimus L70 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 1.25,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; U; Android 4.4.2; en-us; LGMS323 Build/KOT49I.MS32310c) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 384,
+"width": 640
+}
+},
+"Microsoft Lumia 550": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Windows Phone 10.0; Android 4.2.1; Microsoft; Lumia 550) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36 Edge/14.14263",
+"viewport": {
+"height": 640,
+"width": 360
+}
+},
+"Microsoft Lumia 550 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Windows Phone 10.0; Android 4.2.1; Microsoft; Lumia 550) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36 Edge/14.14263",
+"viewport": {
+"height": 360,
+"width": 640
+}
+},
+"Microsoft Lumia 950": {
+"default_browser_type": "chromium",
+"device_scale_factor": 4,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Windows Phone 10.0; Android 4.2.1; Microsoft; Lumia 950) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36 Edge/14.14263",
+"viewport": {
+"height": 640,
+"width": 360
+}
+},
+"Microsoft Lumia 950 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 4,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Windows Phone 10.0; Android 4.2.1; Microsoft; Lumia 950) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36 Edge/14.14263",
+"viewport": {
+"height": 360,
+"width": 640
+}
+},
+"Moto G4": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 7.0; Moto G (4)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 640,
+"width": 360
+}
+},
+"Moto G4 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 7.0; Moto G (4)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 360,
+"width": 640
+}
+},
+"Nexus 10": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 10 Build/MOB31T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36",
+"viewport": {
+"height": 1280,
+"width": 800
+}
+},
+"Nexus 10 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 10 Build/MOB31T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36",
+"viewport": {
+"height": 800,
+"width": 1280
+}
+},
+"Nexus 4": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 4.4.2; Nexus 4 Build/KOT49H) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 640,
+"width": 384
+}
+},
+"Nexus 4 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 4.4.2; Nexus 4 Build/KOT49H) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 384,
+"width": 640
+}
+},
+"Nexus 5": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 640,
+"width": 360
+}
+},
+"Nexus 5 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 360,
+"width": 640
+}
+},
+"Nexus 5X": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.625,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 8.0.0; Nexus 5X Build/OPR4.170623.006) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 732,
+"width": 412
+}
+},
+"Nexus 5X landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.625,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 8.0.0; Nexus 5X Build/OPR4.170623.006) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 412,
+"width": 732
+}
+},
+"Nexus 6": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3.5,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 7.1.1; Nexus 6 Build/N6F26U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 732,
+"width": 412
+}
+},
+"Nexus 6 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3.5,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 7.1.1; Nexus 6 Build/N6F26U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 412,
+"width": 732
+}
+},
+"Nexus 6P": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3.5,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 8.0.0; Nexus 6P Build/OPP3.170518.006) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 732,
+"width": 412
+}
+},
+"Nexus 6P landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3.5,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 8.0.0; Nexus 6P Build/OPP3.170518.006) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 412,
+"width": 732
+}
+},
+"Nexus 7": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 7 Build/MOB30X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36",
+"viewport": {
+"height": 960,
+"width": 600
+}
+},
+"Nexus 7 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 7 Build/MOB30X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Safari/537.36",
+"viewport": {
+"height": 600,
+"width": 960
+}
+},
+"Nokia Lumia 520": {
+"default_browser_type": "chromium",
+"device_scale_factor": 1.5,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (compatible; MSIE 10.0; Windows Phone 8.0; Trident/6.0; IEMobile/10.0; ARM; Touch; NOKIA; Lumia 520)",
+"viewport": {
+"height": 533,
+"width": 320
+}
+},
+"Nokia Lumia 520 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 1.5,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (compatible; MSIE 10.0; Windows Phone 8.0; Trident/6.0; IEMobile/10.0; ARM; Touch; NOKIA; Lumia 520)",
+"viewport": {
+"height": 320,
+"width": 533
+}
+},
+"Nokia N9": {
+"default_browser_type": "webkit",
+"device_scale_factor": 1,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (MeeGo; NokiaN9) AppleWebKit/534.13 (KHTML, like Gecko) NokiaBrowser/8.5.0 Mobile Safari/534.13",
+"viewport": {
+"height": 854,
+"width": 480
+}
+},
+"Nokia N9 landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 1,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (MeeGo; NokiaN9) AppleWebKit/534.13 (KHTML, like Gecko) NokiaBrowser/8.5.0 Mobile Safari/534.13",
+"viewport": {
+"height": 480,
+"width": 854
+}
+},
+"Pixel 10": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 16; Pixel 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 732,
+"width": 360
+}
+},
+"Pixel 10 Pro": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 16; Pixel 10 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 876,
+"width": 427
+}
+},
+"Pixel 10 Pro XL": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 16; Pixel 10 Pro XL) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 921,
+"width": 448
+}
+},
+"Pixel 10 Pro XL landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 16; Pixel 10 Pro XL) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 396,
+"width": 945
+}
+},
+"Pixel 10 Pro landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 16; Pixel 10 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 375,
+"width": 900
+}
+},
+"Pixel 10 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 16; Pixel 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 308,
+"width": 756
+}
+},
+"Pixel 2": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.625,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 8.0; Pixel 2 Build/OPD3.170816.012) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 731,
+"width": 411
+}
+},
+"Pixel 2 XL": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3.5,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 8.0.0; Pixel 2 XL Build/OPD1.170816.004) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 823,
+"width": 411
+}
+},
+"Pixel 2 XL landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3.5,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 8.0.0; Pixel 2 XL Build/OPD1.170816.004) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 411,
+"width": 823
+}
+},
+"Pixel 2 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.625,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 8.0; Pixel 2 Build/OPD3.170816.012) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 411,
+"width": 731
+}
+},
+"Pixel 3": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.75,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 9; Pixel 3 Build/PQ1A.181105.017.A1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 786,
+"width": 393
+}
+},
+"Pixel 3 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.75,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 9; Pixel 3 Build/PQ1A.181105.017.A1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 393,
+"width": 786
+}
+},
+"Pixel 4": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 10; Pixel 4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 745,
+"width": 353
+}
+},
+"Pixel 4 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 10; Pixel 4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 353,
+"width": 745
+}
+},
+"Pixel 4a (5G)": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.63,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 11; Pixel 4a (5G)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 765,
+"width": 412
+}
+},
+"Pixel 4a (5G) landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.63,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 11; Pixel 4a (5G)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 312,
+"width": 840
+}
+},
+"Pixel 5": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.75,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 727,
+"width": 393
+}
+},
+"Pixel 5 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.75,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 293,
+"width": 802
+}
+},
+"Pixel 6": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.625,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 839,
+"width": 412
+}
+},
+"Pixel 6 Pro": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3.5,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 12; Pixel 6 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 816,
+"width": 412
+}
+},
+"Pixel 6 Pro landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3.5,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 12; Pixel 6 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 360,
+"width": 840
+}
+},
+"Pixel 6 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.625,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 360,
+"width": 863
+}
+},
+"Pixel 6a": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.625,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 12; Pixel 6a) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 839,
+"width": 412
+}
+},
+"Pixel 6a landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.625,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 12; Pixel 6a) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 360,
+"width": 863
+}
+},
+"Pixel 7": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.625,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 839,
+"width": 412
+}
+},
+"Pixel 7 Pro": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3.5,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 13; Pixel 7 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 816,
+"width": 412
+}
+},
+"Pixel 7 Pro landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3.5,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 13; Pixel 7 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 360,
+"width": 840
+}
+},
+"Pixel 7 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.625,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 360,
+"width": 863
+}
+},
+"Pixel 7a": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.625,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 13; Pixel 7a) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 839,
+"width": 412
+}
+},
+"Pixel 7a landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.625,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 13; Pixel 7a) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 360,
+"width": 863
+}
+},
+"Pixel 8": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.625,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 839,
+"width": 412
+}
+},
+"Pixel 8 Pro": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 921,
+"width": 448
+}
+},
+"Pixel 8 Pro landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 396,
+"width": 945
+}
+},
+"Pixel 8 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.625,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 360,
+"width": 863
+}
+},
+"Pixel 8a": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.625,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 14; Pixel 8a) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 839,
+"width": 412
+}
+},
+"Pixel 8a landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 2.625,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 14; Pixel 8a) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 360,
+"width": 863
+}
+},
+"Pixel 9": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 14; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 732,
+"width": 360
+}
+},
+"Pixel 9 Pro": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 14; Pixel 9 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 876,
+"width": 427
+}
+},
+"Pixel 9 Pro XL": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 14; Pixel 9 Pro XL) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 921,
+"width": 448
+}
+},
+"Pixel 9 Pro XL landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 14; Pixel 9 Pro XL) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 396,
+"width": 945
+}
+},
+"Pixel 9 Pro landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 14; Pixel 9 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 375,
+"width": 900
+}
+},
+"Pixel 9 landscape": {
+"default_browser_type": "chromium",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (Linux; Android 14; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.12 Mobile Safari/537.36",
+"viewport": {
+"height": 308,
+"width": 756
+}
+},
+"iPad (gen 11)": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2.5,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPad; CPU OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/19E241 Safari/604.1",
+"viewport": {
+"height": 944,
+"width": 656
+}
+},
+"iPad (gen 11) landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2.5,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPad; CPU OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/19E241 Safari/604.1",
+"viewport": {
+"height": 656,
+"width": 944
+}
+},
+"iPad (gen 5)": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 1024,
+"width": 768
+}
+},
+"iPad (gen 5) landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 768,
+"width": 1024
+}
+},
+"iPad (gen 6)": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 1024,
+"width": 768
+}
+},
+"iPad (gen 6) landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 768,
+"width": 1024
+}
+},
+"iPad (gen 7)": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 1080,
+"width": 810
+}
+},
+"iPad (gen 7) landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 810,
+"width": 1080
+}
+},
+"iPad Mini": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 1024,
+"width": 768
+}
+},
+"iPad Mini landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 768,
+"width": 1024
+}
+},
+"iPad Pro 11": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 1194,
+"width": 834
+}
+},
+"iPad Pro 11 landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 834,
+"width": 1194
+}
+},
+"iPhone 11": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 715,
+"width": 414
+}
+},
+"iPhone 11 Pro": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 635,
+"width": 375
+}
+},
+"iPhone 11 Pro Max": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 715,
+"width": 414
+}
+},
+"iPhone 11 Pro Max landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 364,
+"width": 808
+}
+},
+"iPhone 11 Pro landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 325,
+"width": 724
+}
+},
+"iPhone 11 landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 364,
+"width": 800
+}
+},
+"iPhone 12": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 664,
+"width": 390
+}
+},
+"iPhone 12 Mini": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 629,
+"width": 375
+}
+},
+"iPhone 12 Mini landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 325,
+"width": 712
+}
+},
+"iPhone 12 Pro": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 664,
+"width": 390
+}
+},
+"iPhone 12 Pro Max": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 746,
+"width": 428
+}
+},
+"iPhone 12 Pro Max landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 378,
+"width": 832
+}
+},
+"iPhone 12 Pro landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 340,
+"width": 750
+}
+},
+"iPhone 12 landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 340,
+"width": 750
+}
+},
+"iPhone 13": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 664,
+"width": 390
+}
+},
+"iPhone 13 Mini": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 629,
+"width": 375
+}
+},
+"iPhone 13 Mini landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 327,
+"width": 712
+}
+},
+"iPhone 13 Pro": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 664,
+"width": 390
+}
+},
+"iPhone 13 Pro Max": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 746,
+"width": 428
+}
+},
+"iPhone 13 Pro Max landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 380,
+"width": 832
+}
+},
+"iPhone 13 Pro landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 342,
+"width": 750
+}
+},
+"iPhone 13 landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 342,
+"width": 750
+}
+},
+"iPhone 14": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 664,
+"width": 390
+}
+},
+"iPhone 14 Plus": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 746,
+"width": 428
+}
+},
+"iPhone 14 Plus landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 378,
+"width": 832
+}
+},
+"iPhone 14 Pro": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 660,
+"width": 393
+}
+},
+"iPhone 14 Pro Max": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 740,
+"width": 430
+}
+},
+"iPhone 14 Pro Max landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 380,
+"width": 814
+}
+},
+"iPhone 14 Pro landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 343,
+"width": 734
+}
+},
+"iPhone 14 landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 340,
+"width": 750
+}
+},
+"iPhone 15": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 659,
+"width": 393
+}
+},
+"iPhone 15 Plus": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 739,
+"width": 430
+}
+},
+"iPhone 15 Plus landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 380,
+"width": 814
+}
+},
+"iPhone 15 Pro": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 659,
+"width": 393
+}
+},
+"iPhone 15 Pro Max": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 739,
+"width": 430
+}
+},
+"iPhone 15 Pro Max landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 380,
+"width": 814
+}
+},
+"iPhone 15 Pro landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 343,
+"width": 734
+}
+},
+"iPhone 15 landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 343,
+"width": 734
+}
+},
+"iPhone 16": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 659,
+"width": 393
+}
+},
+"iPhone 16 Plus": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 739,
+"width": 430
+}
+},
+"iPhone 16 Plus landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 380,
+"width": 814
+}
+},
+"iPhone 16 Pro": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 681,
+"width": 402
+}
+},
+"iPhone 16 Pro Max": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 763,
+"width": 440
+}
+},
+"iPhone 16 Pro Max landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 390,
+"width": 838
+}
+},
+"iPhone 16 Pro landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 352,
+"width": 756
+}
+},
+"iPhone 16 landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 343,
+"width": 734
+}
+},
+"iPhone 16e": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 651,
+"width": 390
+}
+},
+"iPhone 16e landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 340,
+"width": 726
+}
+},
+"iPhone 17": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 681,
+"width": 402
+}
+},
+"iPhone 17 Pro": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 681,
+"width": 402
+}
+},
+"iPhone 17 Pro Max": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 763,
+"width": 440
+}
+},
+"iPhone 17 Pro Max landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 390,
+"width": 838
+}
+},
+"iPhone 17 Pro landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 352,
+"width": 756
+}
+},
+"iPhone 17 landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 352,
+"width": 756
+}
+},
+"iPhone 17e": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 651,
+"width": 390
+}
+},
+"iPhone 17e landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 340,
+"width": 726
+}
+},
+"iPhone 6": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/26.6 Mobile/15A372 Safari/604.1",
+"viewport": {
+"height": 667,
+"width": 375
+}
+},
+"iPhone 6 Plus": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/26.6 Mobile/15A372 Safari/604.1",
+"viewport": {
+"height": 736,
+"width": 414
+}
+},
+"iPhone 6 Plus landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/26.6 Mobile/15A372 Safari/604.1",
+"viewport": {
+"height": 414,
+"width": 736
+}
+},
+"iPhone 6 landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/26.6 Mobile/15A372 Safari/604.1",
+"viewport": {
+"height": 375,
+"width": 667
+}
+},
+"iPhone 7": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/26.6 Mobile/15A372 Safari/604.1",
+"viewport": {
+"height": 667,
+"width": 375
+}
+},
+"iPhone 7 Plus": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/26.6 Mobile/15A372 Safari/604.1",
+"viewport": {
+"height": 736,
+"width": 414
+}
+},
+"iPhone 7 Plus landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/26.6 Mobile/15A372 Safari/604.1",
+"viewport": {
+"height": 414,
+"width": 736
+}
+},
+"iPhone 7 landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/26.6 Mobile/15A372 Safari/604.1",
+"viewport": {
+"height": 375,
+"width": 667
+}
+},
+"iPhone 8": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/26.6 Mobile/15A372 Safari/604.1",
+"viewport": {
+"height": 667,
+"width": 375
+}
+},
+"iPhone 8 Plus": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/26.6 Mobile/15A372 Safari/604.1",
+"viewport": {
+"height": 736,
+"width": 414
+}
+},
+"iPhone 8 Plus landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/26.6 Mobile/15A372 Safari/604.1",
+"viewport": {
+"height": 414,
+"width": 736
+}
+},
+"iPhone 8 landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/26.6 Mobile/15A372 Safari/604.1",
+"viewport": {
+"height": 375,
+"width": 667
+}
+},
+"iPhone Air": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 719,
+"width": 420
+}
+},
+"iPhone Air landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 370,
+"width": 794
+}
+},
+"iPhone SE": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/26.6 Mobile/14E304 Safari/602.1",
+"viewport": {
+"height": 568,
+"width": 320
+}
+},
+"iPhone SE (3rd gen)": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/26.6 Mobile/19E241 Safari/602.1",
+"viewport": {
+"height": 667,
+"width": 375
+}
+},
+"iPhone SE (3rd gen) landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/26.6 Mobile/19E241 Safari/602.1",
+"viewport": {
+"height": 375,
+"width": 667
+}
+},
+"iPhone SE landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 2,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/26.6 Mobile/14E304 Safari/602.1",
+"viewport": {
+"height": 320,
+"width": 568
+}
+},
+"iPhone X": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/26.6 Mobile/15A372 Safari/604.1",
+"viewport": {
+"height": 812,
+"width": 375
+}
+},
+"iPhone X landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/26.6 Mobile/15A372 Safari/604.1",
+"viewport": {
+"height": 375,
+"width": 812
+}
+},
+"iPhone XR": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 896,
+"width": 414
+}
+},
+"iPhone XR landscape": {
+"default_browser_type": "webkit",
+"device_scale_factor": 3,
+"has_touch": true,
+"is_mobile": true,
+"user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E148 Safari/604.1",
+"viewport": {
+"height": 414,
+"width": 896
+}
+}
+}

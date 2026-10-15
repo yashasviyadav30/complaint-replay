@@ -14,7 +14,7 @@ from replay.agent import replay
 from replay.bugs import BUGS, inject, reset_workspace
 from replay.conditions import CONDITIONS
 from replay.llm import Chat, llm_matcher, llm_policy, make_client, pick_model
-from replay.shop import running_shop
+from replay.project import running_app
 
 RESULTS = Path(__file__).parent / "results" / "risk_test.json"
 PASS_MIN_REPRODUCED = 3
@@ -24,7 +24,7 @@ async def run_one(bug, buggy: bool, policy, matcher) -> dict:
     shop = reset_workspace()
     if buggy:
         inject(bug, shop)
-    with running_shop(shop) as url:
+    with running_app(shop) as url:
         r = await replay(url, bug.complaint, CONDITIONS[bug.condition], policy, matcher)
     return {
         "verdict": r.verdict, "summary": r.summary, "cited": list(r.cited), "steps": list(r.steps),

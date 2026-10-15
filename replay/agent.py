@@ -42,10 +42,15 @@ Matcher = Callable[[str, list[Evidence]], Awaitable[dict]]
 
 
 async def replay(base_url: str, complaint: str, condition: Condition, policy: Policy,
-                 matcher: Matcher | None = None, screenshot: Path | None = None) -> ReplayResult:
-    """Replay a complaint. If `screenshot` is given, save what the user sees at the moment of the verdict."""
-    async with Session(base_url, condition) as session:
-        result = await _drive(session, complaint, condition, policy, matcher)
+                 matcher: Matcher | None = None, screenshot: Path | None = None, hints: str = "",
+                 storage_state: Path | None = None) -> ReplayResult:
+    """Replay a complaint. If `screenshot` is given, save what the user sees at the moment of the verdict.
+
+    `hints` are facts about the app the twin may need (test accounts, test data), from the project config.
+    `storage_state` is a saved login, so the twin starts signed in.
+    """
+    async with Session(base_url, condition, storage_state) as session:
+        result = await _drive(session, complaint, condition, policy, matcher, hints)
         if screenshot:
             screenshot.parent.mkdir(parents=True, exist_ok=True)
             await session.page.screenshot(path=str(screenshot))
@@ -53,7 +58,7 @@ async def replay(base_url: str, complaint: str, condition: Condition, policy: Po
 
 
 async def _drive(session: Session, complaint: str, condition: Condition, policy: Policy,
-                 matcher: Matcher | None) -> ReplayResult:
+                 matcher: Matcher | None, hints: str = "") -> ReplayResult:
     steps: list[dict] = []
     last_result = "(page just opened)"
     judged = 0
@@ -75,7 +80,7 @@ async def _drive(session: Session, complaint: str, condition: Condition, policy:
                 return judge({"verdict": "reproduced", **match}, session.evidence, steps)
         action = await policy({
             "complaint": complaint, "condition": condition, "obs": obs, "step": step,
-            "evidence": list(session.evidence), "steps": steps, "last_result": last_result,
+            "evidence": list(session.evidence), "steps": steps, "last_result": last_result, "hints": hints,
         })
         if action.get("type") == "verdict":
             return judge(action, session.evidence, steps)
@@ -102,7 +107,7 @@ def scripted_policy(actions: list[dict]) -> Policy:
 
 SYSTEM_PROMPT = """You check whether a user's complaint about a website is real by replaying it in a real browser.
 The browser already runs under the user's real conditions (network, phone, language, assistive tech).
-Act like that user: try to do what they were trying to do. Test data: phone 9876543210; the OTP appears on screen after sending.
+Act like that user: try to do what they were trying to do. When a form needs data, use what "About this app" gives.
 If the complaint says what the user did (typed a wrong OTP, used a coupon code, opened the cart), do exactly that.
 Finish the whole flow the complaint is about: if it is about paying or being charged, actually press pay.
 If the complaint lists what the user did just before, repeat those steps in the same order (for example: type the
@@ -111,6 +116,7 @@ coupon, then press Apply, then Pay) before any verdict. Skipping one of them can
 Reply with ONE JSON object and nothing else: {"thought": "<one short sentence>", "action": {...}}
 Actions:
 {ACTIONS}
+{"type": "goto", "path": "/<path on the same site>"}   (only if the complaint names a page you cannot reach by clicking)
 {"type": "wait", "ms": <up to 10000>}
 {"type": "scroll", "direction": "down" | "up"}
 {"type": "verdict", "verdict": "reproduced" | "ux_confusion" | "not_reproduced", "evidence": ["E1", ...], "summary": "<2 sentences>"}
@@ -127,11 +133,15 @@ SIGHTED_ACTIONS = """{"type": "click", "target": <idx>}   (add "times": 2 to tap
 SCREEN_READER_ACTIONS = """{"type": "click_role", "role": "button", "name": "<exact accessible name>"}
 {"type": "fill_role", "role": "textbox", "name": "<exact accessible name>", "text": "..."}
 You can only use controls that have a name in the accessibility tree."""
+KEYBOARD_ACTIONS = """{"type": "press", "key": "Tab" | "Shift+Tab" | "Enter" | "Space" | "Escape" | "ArrowDown" | "ArrowUp"}
+{"type": "type", "text": "..."}   (types into the focused field)
+This user has no mouse. "Focused" shows where the keyboard is now; press Tab to move to the next control."""
 
 
 def build_prompt(ctx: dict) -> tuple[str, str]:
     cond: Condition = ctx["condition"]
-    actions = SCREEN_READER_ACTIONS if cond.screen_reader else SIGHTED_ACTIONS
+    actions = (KEYBOARD_ACTIONS if cond.keyboard_only else SCREEN_READER_ACTIONS if cond.screen_reader
+               else SIGHTED_ACTIONS)
     obs = ctx["obs"]
     page = (
         f"Accessibility tree (what the screen reader announces):\n{obs['aria']}"
@@ -141,10 +151,15 @@ def build_prompt(ctx: dict) -> tuple[str, str]:
             for e in obs["elements"]
         ) + f"\n\nVisible text:\n{obs['text']}"
     )
+    if cond.keyboard_only:
+        focus = obs.get("focus")
+        page = (f"Focused: {focus['tag']} '{focus['label']}'" if focus else "Focused: nothing yet") + \
+            f"\n\nVisible text:\n{obs['text']}"
+    about = f"About this app: {ctx['hints']}\n" if ctx.get("hints") else ""
     evidence = "\n".join(f"{e.id} [{e.kind}] {e.detail}" for e in ctx["evidence"]) or "(none yet)"
     history = "\n".join(json.dumps(s["action"]) + " -> " + s["result"] for s in ctx["steps"][-6:]) or "(none)"
     user = (
-        f"Complaint: {ctx['complaint']}\nUser: {cond.persona}\n"
+        f"Complaint: {ctx['complaint']}\nUser: {cond.persona}\n{about}"
         f"Step {ctx['step'] + 1} of {cond.max_steps}. Last action result: {ctx['last_result']}\n\n"
         f"Recent actions:\n{history}\n\n{page}\n\nEvidence collected by the browser:\n{evidence}"
     )

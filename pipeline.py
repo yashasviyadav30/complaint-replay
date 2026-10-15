@@ -16,7 +16,7 @@ from replay.bugs import BUGS_BY_ID, inject, reset_workspace
 from replay.conditions import CONDITIONS
 from replay.investigate import investigate
 from replay.llm import Chat, make_client, pick_model
-from replay.shop import running_shop
+from replay.project import running_app
 
 CASES_DIR = Path(__file__).parent / "results" / "cases"
 
@@ -35,7 +35,7 @@ async def run_bug(bug_id: int) -> dict:
             "complaint": bug.complaint, "condition": {"label": cond.label, "persona": cond.persona}, "stage": "heard"}
     shop = reset_workspace()
     inject(bug, shop)
-    with running_shop(shop) as url:
+    with running_app(shop) as url:
         return await investigate(case, cond, url, shop, client, chat, save, CASES_DIR / "shots")
 
 

@@ -18,7 +18,7 @@ from replay.fix import apply_patch, pick_fix_model, propose_fix
 from replay.guard import build_guard, run_guard
 from replay.research import research
 from replay.llm import Chat, llm_matcher, llm_policy
-from replay.shop import running_shop
+from replay.project import load_project, running_app
 
 BRANCHES = ROOT / "workspace" / "branches"
 FIX_ATTEMPTS = 2
@@ -52,6 +52,8 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
 
     complaint = case["complaint"]
     policy, matcher = llm_policy(chat), llm_matcher(chat)
+    project = load_project(source)
+    target = {"hints": project.hints, "storage_state": project.auth_file}
 
     def shot(name: str) -> Path | None:
         if not shots:
@@ -60,7 +62,7 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
         return shots / case["shots"][name]
 
     stage("reproducing")
-    before = await replay(live_url, complaint, cond, policy, matcher, shot("before"))
+    before = await replay(live_url, complaint, cond, policy, matcher, shot("before"), **target)
     case["replay"] = as_dict(before)
     if before.verdict != "reproduced":
         stage(before.verdict)
@@ -89,8 +91,8 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
                    "sources": [{"title": s["title"], "url": s["url"]} for s in sources]}
 
     stage("proving")
-    with running_shop(branch) as url:
-        after = await replay(url, complaint, cond, policy, matcher, shot("after"))
+    with running_app(branch) as url:
+        after = await replay(url, complaint, cond, policy, matcher, shot("after"), **target)
     case["proof"] = as_dict(after)
     if not fix_proven(before, after):
         stage("fix_unproven")
@@ -105,9 +107,9 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
     guard_file = branch / "guards" / f"{case['id']}.json"
     guard_file.parent.mkdir(exist_ok=True)
     guard_file.write_text(json.dumps(guard, ensure_ascii=False, indent=2), encoding="utf-8")
-    with running_shop(branch) as url:
-        on_fix = await run_guard(url, guard)
-    on_bug = await run_guard(live_url, guard)
+    with running_app(branch) as url:
+        on_fix = await run_guard(url, guard, project.auth_file)
+    on_bug = await run_guard(live_url, guard, project.auth_file)
     case["guard"] = {"file": f"guards/{case['id']}.json", "steps": len(guard["steps"]),
                      "passes_on_fix": on_fix["passed"], "catches_bug": not on_bug["passed"]}
     if on_fix["passed"] and not on_bug["passed"]:

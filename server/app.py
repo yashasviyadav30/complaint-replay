@@ -16,20 +16,21 @@ from contextlib import ExitStack, asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Literal
+from zoneinfo import available_timezones
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from replay.bugs import BUGS, LIVE_SHOP, Bug, inject, reset_workspace
 from replay.conditions import twin_condition
 from replay.grouping import find_duplicate
 from replay.investigate import investigate
 from replay.llm import Chat, make_client, pick_model
-from replay.shop import running_shop
+from replay.project import running_app
 
 HERE = Path(__file__).resolve().parent
 STORE = HERE.parent / "results" / "complaints.jsonl"
@@ -39,6 +40,7 @@ DASHBOARD_DIST = HERE.parent / "dashboard" / "dist"
 RATE_LIMIT, RATE_WINDOW_S = 30, 60
 LIVE_PORT = int(os.getenv("LIVE_SHOP_PORT", "8100"))
 log = logging.getLogger("complaint-replay")
+TIMEZONES = available_timezones()
 
 # Personal data masked before a complaint is stored or shown to any model.
 PII_PATTERNS = (
@@ -70,6 +72,15 @@ class Env(BaseModel):
     language: str = Field("en", max_length=35)
     user_agent: str = Field("", max_length=200)
     touch: bool = False
+    timezone: str | None = Field(None, max_length=64)
+    color_scheme: Literal["dark", "light"] | None = None
+    reduced_motion: bool = False
+    forced_colors: bool = False
+
+    @field_validator("timezone")
+    @classmethod
+    def known_timezone(cls, tz: str | None) -> str | None:
+        return tz if tz in TIMEZONES else None  # an unknown zone would crash the browser; drop it instead
 
 
 class ComplaintIn(BaseModel):
@@ -94,7 +105,7 @@ def start_live(bug: Bug | None = None) -> None:
     if bug:
         inject(bug, shop)
     stack = ExitStack()
-    live.update(url=stack.enter_context(running_shop(shop, LIVE_PORT)), stack=stack, bug=bug.id if bug else None)
+    live.update(url=stack.enter_context(running_app(shop, LIVE_PORT)), stack=stack, bug=bug.id if bug else None)
 
 
 @asynccontextmanager

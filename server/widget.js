@@ -32,6 +32,10 @@
       language: navigator.language,
       user_agent: navigator.userAgent.slice(0, 200),
       touch: navigator.maxTouchPoints > 0,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || null,
+      color_scheme: matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light",
+      reduced_motion: matchMedia("(prefers-reduced-motion: reduce)").matches,
+      forced_colors: matchMedia("(forced-colors: active)").matches,
     };
   };
 
