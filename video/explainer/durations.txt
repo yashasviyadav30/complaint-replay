@@ -1,0 +1,17 @@
+break 14.016000
+close 8.448000
+conditions 19.434667
+evidence 25.664000
+fix 23.936000
+grouping 26.752000
+guard 18.858667
+heard 12.778667
+limits 22.506667
+problem 22.442667
+repro 16.853333
+results 22.080000
+shop 19.690667
+stack 22.549333
+steps 34.404667
+title 6.656000
+users 25.237333

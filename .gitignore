@@ -13,3 +13,5 @@ video/record.log
 video/film/snaps/
 video/film/.hyperframes/
 video/film/renders/
+video/explainer/assets/vo/*.wav
+video/explainer/.hyperframes/

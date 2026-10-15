@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "Geist"; src: url("assets/fonts/geist-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
+      @font-face { font-family: "Geist Mono"; src: url("assets/fonts/geist-mono-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
+      :root { --bg: #0c0d0f; --surface: #141619; --line: #2a2e34; --text: #e9eaec; --muted: #9ba1a8; --accent: #ff7043; --ok: #46d394; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+      #root { position: relative; width: 1920px; height: 1080px; font-family: "Geist", sans-serif; color: var(--text); }
+
+      /* Product footage and screenshots sit in one frame; subtitles live in the band below, never over the product. */
+      .footage, .frame { position: absolute; left: 160px; top: 24px; width: 1600px; height: 900px; border: 1px solid var(--line);
+                         border-radius: 14px; background: #f4f5f6; overflow: hidden; }
+      .footage { object-fit: cover; }
+      .frame img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; transform-origin: 70% 30%; }
+
+      .sub { position: absolute; left: 160px; top: 944px; width: 1600px; height: 120px; text-align: center;
+             font-size: 34px; line-height: 1.3; font-weight: 500; letter-spacing: -0.005em; padding: 12px 40px 0; }
+
+      .slide { position: absolute; left: 0; top: 0; width: 1920px; height: 930px; display: flex; flex-direction: column;
+               justify-content: center; padding: 0 200px; }
+      .kicker { font-family: "Geist Mono", monospace; font-size: 28px; color: var(--accent); margin-bottom: 32px; }
+      .big { font-size: 128px; font-weight: 650; letter-spacing: -0.04em; line-height: 1.02; }
+      .mid { font-size: 88px; font-weight: 650; letter-spacing: -0.03em; line-height: 1.05; }
+      .quote { font-size: 88px; font-weight: 600; letter-spacing: -0.03em; line-height: 1.1; }
+      .lede { font-size: 40px; color: var(--muted); margin-top: 28px; line-height: 1.3; max-width: 1500px; }
+      .stat-line { font-size: 40px; margin-top: 40px; color: var(--muted); }
+      .stat-line b { font-size: 72px; color: var(--accent); font-weight: 650; margin-right: 16px; letter-spacing: -0.03em; }
+      .stat-line span { font-family: "Geist Mono", monospace; font-size: 26px; }
+      .link { font-family: "Geist Mono", monospace; font-size: 38px; color: var(--accent); margin-top: 48px; }
+
+      .steps, .users { list-style: none; display: flex; flex-direction: column; gap: 22px; }
+      .row { display: grid; grid-template-columns: 560px 1fr; gap: 32px; align-items: baseline; padding-bottom: 18px;
+             border-bottom: 1px solid var(--line); }
+      .row b { font-size: 42px; font-weight: 600; letter-spacing: -0.02em; }
+      .row span { font-size: 34px; color: var(--muted); line-height: 1.3; }
+      .steps .row b { color: var(--accent); }
+
+      .cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px; }
+      .col { display: flex; flex-direction: column; gap: 18px; padding: 40px; border: 1px solid var(--line); border-radius: 18px;
+             background: var(--surface); }
+      .col b { font-size: 44px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 8px; }
+      .col span { font-size: 32px; color: var(--muted); line-height: 1.3; }
+
+      .chips { list-style: none; display: flex; flex-wrap: wrap; gap: 18px; margin-top: 48px; }
+      .chip { font-family: "Geist Mono", monospace; font-size: 30px; padding: 14px 24px; border: 1px solid var(--accent);
+              border-radius: 999px; color: var(--text); }
+
+      .flow { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 32px; align-items: center; }
+      .bubbles { display: flex; flex-direction: column; gap: 16px; }
+      .bubbles p { font-size: 28px; padding: 18px 22px; border-radius: 18px 18px 18px 4px; background: var(--surface);
+                   border: 1px solid var(--line); line-height: 1.3; }
+      .box { display: flex; flex-direction: column; gap: 12px; padding: 32px; border: 1px solid var(--line); border-radius: 18px;
+             background: var(--surface); min-height: 220px; justify-content: center; }
+      .box b { font-size: 36px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.15; }
+      .box span { font-size: 28px; color: var(--muted); }
+      .badge { display: inline-block; align-self: flex-start; font-family: "Geist Mono", monospace; font-size: 34px;
+               background: var(--accent); color: #1a0a04; padding: 8px 18px; border-radius: 999px; }
+
+      .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 48px; margin-top: 24px; }
+      .stat .n { font-size: 128px; font-weight: 650; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
+      .stat .l { font-size: 32px; color: var(--muted); margin-top: 8px; }
+      .stat.ok .n { color: var(--ok); }
+
+      .todo { margin-top: 48px; padding: 32px 40px; border: 1px solid var(--accent); border-radius: 18px; display: flex;
+              flex-direction: column; gap: 10px; }
+      .todo b { font-size: 36px; color: var(--accent); font-weight: 600; }
+      .todo span { font-size: 34px; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="357.61" data-width="1920" data-height="1080">
+<!-- title 0.0-7.6 -->
+<div id="title" class="clip slide" data-start="0.00" data-duration="7.56" data-track-index="2"><p class="kicker">Nebius x NVIDIA Global AI Hackathon · explainer</p><h1 class="big">Complaint Replay</h1><p class="lede">Complaint in. Proof, fix and test out.</p></div>
+<!-- problem 7.6-30.9 -->
+<div id="problem" class="clip slide" data-start="7.56" data-duration="23.34" data-track-index="2"><p class="quote">"OTP never comes!"</p><p class="lede l1">Developer, fast laptop, good Wi-Fi: it works. Closed as "can't reproduce".</p><p class="stat-line l2"><b>13-24%</b> of bug reports are never reproduced <span>(ICSME 2020)</span></p><p class="lede l3">The bug only shows up on the customer's slow phone, small screen or language.</p></div>
+<!-- steps 30.9-66.2 -->
+<div id="steps" class="clip slide" data-start="30.90" data-duration="35.30" data-track-index="2"><p class="kicker">Six steps</p><ol class="steps"><li class="row r0"><b>1  Heard</b><span>A typed complaint, or a silent signal like rage clicks</span></li><li class="row r1"><b>2  Reproduced</b><span>An AI twin repeats it in a real browser, under the user&#x27;s conditions</span></li><li class="row r2"><b>3  Proven</b><span>Machine evidence only. No evidence, no verdict</span></li><li class="row r3"><b>4  Fixed</b><span>NVIDIA Nemotron writes the smallest fix, on a branch copy</span></li><li class="row r4"><b>5  Fix proven</b><span>The same twin replays the complaint on the fixed code</span></li><li class="row r5"><b>6  Guarded</b><span>The steps become a test: passes on the fix, fails on the old code</span></li></ol></div>
+<!-- break 66.2-81.1 -->
+<video id="break-v0" class="clip footage" src="assets/s-break.mp4" data-start="66.20" data-duration="14.92" data-media-start="0" data-playback-rate="0.536" data-track-index="0" muted playsinline></video>
+<!-- shop 81.1-101.7 -->
+<video id="shop-v0" class="clip footage" src="assets/s-shopA.mp4" data-start="81.12" data-duration="12.94" data-media-start="0" data-playback-rate="0.850" data-track-index="0" muted playsinline></video>
+<video id="shop-v1" class="clip footage" src="assets/s-shopB.mp4" data-start="94.06" data-duration="7.65" data-media-start="0" data-playback-rate="0.850" data-track-index="0" muted playsinline></video>
+<!-- heard 101.7-115.4 -->
+<video id="heard-v0" class="clip footage" src="assets/s-heard.mp4" data-start="101.71" data-duration="13.68" data-media-start="0" data-playback-rate="0.585" data-track-index="0" muted playsinline></video>
+<!-- repro 115.4-133.1 -->
+<video id="repro-v0" class="clip footage" src="assets/s-repro.mp4" data-start="115.39" data-duration="17.75" data-media-start="0" data-playback-rate="0.451" data-track-index="0" muted playsinline></video>
+<!-- conditions 133.1-153.5 -->
+<div id="conditions" class="clip slide" data-start="133.14" data-duration="20.33" data-track-index="2"><p class="kicker">Real conditions, not role-play</p><div class="cols"><div class="col c0"><b>Slow 3G phone</b><span>+3 s on every request</span><span>360 px screen</span></div><div class="col c1"><b>Hindi user</b><span>Browser locale hi-IN</span><span>Hindi page, Hindi errors expected</span></div><div class="col c2"><b>Screen-reader user</b><span>Sees only the accessibility tree</span><span>Unnamed buttons can't be used</span></div></div></div>
+<!-- evidence 153.5-180.0 -->
+<div id="evidence" class="clip slide" data-start="153.48" data-duration="26.56" data-track-index="2"><p class="kicker">The rule</p><h2 class="mid">No evidence, no verdict.</h2><p class="lede">Code watching the browser collects it. The model can only cite it.</p><ul class="chips"><li class="chip h0">Failed request</li><li class="chip h1">Server error</li><li class="chip h2">Button off screen</li><li class="chip h3">English error for a Hindi user</li><li class="chip h4">Accessibility violation</li><li class="chip h5">Money values disagree</li><li class="chip h6">Payment sent twice</li></ul></div>
+<!-- fix 180.0-204.9 -->
+<div id="fix-s0" class="clip frame" data-start="180.04" data-duration="10.80" data-track-index="0"><img src="assets/shot-tavily.png" alt="Case detail: sources Tavily found before the fix" /></div>
+<div id="fix-s1" class="clip frame" data-start="190.84" data-duration="14.04" data-track-index="0"><img src="assets/shot-double.png" alt="Case detail: evidence, the fix and its diff" /></div>
+<!-- guard 204.9-224.6 -->
+<video id="guard-v0" class="clip footage" src="assets/s-fixed.mp4" data-start="204.88" data-duration="5.00" data-media-start="0" data-playback-rate="1.000" data-track-index="0" muted playsinline></video>
+<video id="guard-v1" class="clip footage" src="assets/s-detail.mp4" data-start="209.88" data-duration="16.50" data-media-start="0" data-playback-rate="1.000" data-track-index="0" muted playsinline></video>
+<!-- users 224.6-250.8 -->
+<div id="users" class="clip slide" data-start="224.64" data-duration="26.14" data-track-index="2"><p class="kicker">Seven planted bugs, seven kinds of user</p><ul class="users"><li class="row r0"><b>Slow 3G phone</b><span>OTP request gives up after 4 seconds</span></li><li class="row r1"><b>Small 360 px phone</b><span>Pay button pushed off screen</span></li><li class="row r2"><b>Hindi speaker</b><span>Wrong-OTP error only in English</span></li><li class="row r3"><b>Screen-reader user</b><span>Cart button has no name</span></li><li class="row r4"><b>Elderly user, 200% text</b><span>Pay button lost</span></li><li class="row r5"><b>Slow network, double tap</b><span>Charged twice</span></li><li class="row r6"><b>Fast desktop</b><span>Coupon shown, not applied at payment</span></li></ul></div>
+<!-- grouping 250.8-278.4 -->
+<div id="grouping" class="clip slide" data-start="250.77" data-duration="27.65" data-track-index="2"><p class="kicker">One bug, many complaints</p><div class="flow"><div class="bubbles g0"><p>"otp nahi aa raha, baar baar something went wrong"</p><p>"never got the login code"</p><p>"code hi nahi aaya yaar"</p></div><div class="box g1"><b>Nemotron Embed</b><span>finds the 3 nearest open cases</span></div><div class="box g2"><b>Nemotron 3.5 Lightning</b><span>"Same problem?"</span></div><div class="box g3"><b class="badge">×3 reports</b><span>one investigation</span></div></div><p class="stat-line g4"><b>0.82</b> precision on held-out complaints: right about 4 times in 5 when it merges</p></div>
+<!-- results 278.4-301.4 -->
+<div id="results" class="clip slide" data-start="278.42" data-duration="22.98" data-track-index="2"><p class="kicker">7 planted bugs · 3 full runs each</p><div class="stats"><div class="stat ok s0"><p class="n">21/21</p><p class="l">reproduced</p></div><div class="stat ok s1"><p class="n">20/21</p><p class="l">fixed and proven</p></div><div class="stat ok s2"><p class="n">20/21</p><p class="l">guarded by a test</p></div><div class="stat s3"><p class="n">0</p><p class="l">false alarms</p></div></div><p class="lede miss">The one miss stopped at "fix failed" instead of shipping a guess.</p></div>
+<!-- stack 301.4-324.9 -->
+<div id="stack" class="clip slide" data-start="301.40" data-duration="23.45" data-track-index="2"><p class="kicker">Under the hood</p><ul class="users"><li class="row r0"><b>NVIDIA Nemotron 3 Super</b><span>navigator, judge and fixer</span></li><li class="row r1"><b>Nemotron Embed + Nemotron 3.5 Lightning</b><span>group duplicate complaints</span></li><li class="row r2"><b>Tavily</b><span>research before each fix</span></li><li class="row r3"><b>Playwright + axe-core</b><span>real browser, accessibility checks</span></li><li class="row r4"><b>One OpenAI-compatible client</b><span>Nebius Token Factory is one setting</span></li></ul></div>
+<!-- limits 324.9-348.3 -->
+<div id="limits" class="clip slide" data-start="324.85" data-duration="23.41" data-track-index="2"><p class="kicker">Limits, honestly</p><ul class="users"><li class="row r0"><b>Web apps only</b><span>not native mobile apps</span></li><li class="row r1"><b>Small, local fixes</b><span>a timeout, a label, a CSS rule</span></li><li class="row r2"><b>Seven planted bugs</b><span>a working demonstration, not a broad benchmark</span></li></ul><div class="todo t3"><b>Before submitting</b><span>Nebius Token Factory key (required by the rules) · final video under 3:00</span></div></div>
+<!-- close 348.3-357.6 -->
+<div id="close" class="clip slide" data-start="348.26" data-duration="9.35" data-track-index="2"><p class="quote">Your angriest users are your best testers.</p><p class="link">github.com/yashasviyadav30/complaint-replay</p><p class="lede">Built solo by Yashasvi Yadav.</p></div>
+<p id="sub-title-0" class="clip sub" data-start="0.30" data-duration="1.41" data-track-index="1">This is Complaint Replay.</p>
+<p id="sub-title-1" class="clip sub" data-start="1.71" data-duration="5.25" data-track-index="1">In the next few minutes, you&#x27;ll see what it does, how it works inside, and how well it works.</p>
+<p id="sub-problem-0" class="clip sub" data-start="7.86" data-duration="1.32" data-track-index="1">Here is the problem.</p>
+<p id="sub-problem-1" class="clip sub" data-start="9.18" data-duration="2.31" data-track-index="1">A customer writes: OTP never comes.</p>
+<p id="sub-problem-2" class="clip sub" data-start="11.49" data-duration="3.70" data-track-index="1">The developer tries it on a fast laptop with good Wi-Fi.</p>
+<p id="sub-problem-3" class="clip sub" data-start="15.18" data-duration="0.59" data-track-index="1">It works.</p>
+<p id="sub-problem-4" class="clip sub" data-start="15.78" data-duration="3.10" data-track-index="1">So the complaint is closed as: can&#x27;t reproduce.</p>
+<p id="sub-problem-5" class="clip sub" data-start="18.88" data-duration="6.07" data-track-index="1">Studies of real bug trackers put that at thirteen to twenty-four percent of all bug reports.</p>
+<p id="sub-problem-6" class="clip sub" data-start="24.95" data-duration="5.35" data-track-index="1">It only shows up on the customer&#x27;s slow phone, small screen, or language setting.</p>
+<p id="sub-steps-0" class="clip sub" data-start="31.20" data-duration="3.30" data-track-index="1">Complaint Replay closes that gap in six steps.</p>
+<p id="sub-steps-1" class="clip sub" data-start="34.50" data-duration="6.59" data-track-index="1">One: it hears the complaint, typed into a small widget, or a silent signal like rage clicks.</p>
+<p id="sub-steps-2" class="clip sub" data-start="41.09" data-duration="5.88" data-track-index="1">Two: an AI twin reproduces it in a real browser, under the user&#x27;s real conditions.</p>
+<p id="sub-steps-3" class="clip sub" data-start="46.97" data-duration="3.73" data-track-index="1">Three: it proves the bug with machine evidence only.</p>
+<p id="sub-steps-4" class="clip sub" data-start="50.69" data-duration="5.59" data-track-index="1">Four: NVIDIA Nemotron writes the smallest fix, on a separate copy of the code.</p>
+<p id="sub-steps-5" class="clip sub" data-start="56.29" data-duration="4.30" data-track-index="1">Five: the same twin replays the complaint on the fixed code.</p>
+<p id="sub-steps-6" class="clip sub" data-start="60.59" data-duration="5.02" data-track-index="1">And six: the steps become a test, so the bug can&#x27;t silently come back.</p>
+<p id="sub-break-0" class="clip sub" data-start="66.50" data-duration="5.77" data-track-index="1">To show it working, there is a small demo shop called BadShop, with OTP login, a cart,</p>
+<p id="sub-break-1" class="clip sub" data-start="72.27" data-duration="1.74" data-track-index="1">a coupon and a pay button.</p>
+<p id="sub-break-2" class="clip sub" data-start="74.01" data-duration="2.35" data-track-index="1">On the dashboard, I press Break It.</p>
+<p id="sub-break-3" class="clip sub" data-start="76.36" data-duration="2.62" data-track-index="1">That plants one secret bug in the shop.</p>
+<p id="sub-break-4" class="clip sub" data-start="78.98" data-duration="1.54" data-track-index="1">I don&#x27;t know which one.</p>
+<p id="sub-shop-0" class="clip sub" data-start="81.42" data-duration="2.88" data-track-index="1">Now I use the shop like a normal customer.</p>
+<p id="sub-shop-1" class="clip sub" data-start="84.30" data-duration="4.12" data-track-index="1">I log in, add rice to the cart, and apply the coupon SAVE10.</p>
+<p id="sub-shop-2" class="clip sub" data-start="88.42" data-duration="3.22" data-track-index="1">The cart says one hundred and sixty-two rupees.</p>
+<p id="sub-shop-3" class="clip sub" data-start="91.64" data-duration="3.50" data-track-index="1">But when I pay, I&#x27;m charged one hundred and eighty.</p>
+<p id="sub-shop-4" class="clip sub" data-start="95.14" data-duration="1.99" data-track-index="1">The coupon was never applied.</p>
+<p id="sub-shop-5" class="clip sub" data-start="97.13" data-duration="3.98" data-track-index="1">So I press Report a problem, and complain in my own words.</p>
+<p id="sub-heard-0" class="clip sub" data-start="102.01" data-duration="5.88" data-track-index="1">The widget also records my real conditions: screen size, language, network and device.</p>
+<p id="sub-heard-1" class="clip sub" data-start="107.89" data-duration="2.87" data-track-index="1">It never records what I typed into fields.</p>
+<p id="sub-heard-2" class="clip sub" data-start="110.76" data-duration="4.03" data-track-index="1">The complaint lands on the case board, in the Heard column.</p>
+<p id="sub-repro-0" class="clip sub" data-start="115.69" data-duration="6.99" data-track-index="1">Now an AI twin opens a real Chromium browser with those exact conditions, and repeats what I did,</p>
+<p id="sub-repro-1" class="clip sub" data-start="122.67" data-duration="1.44" data-track-index="1">one click at a time.</p>
+<p id="sub-repro-2" class="clip sub" data-start="124.12" data-duration="2.45" data-track-index="1">Nemotron 3 Super is the navigator.</p>
+<p id="sub-repro-3" class="clip sub" data-start="126.56" data-duration="5.98" data-track-index="1">A separate judge answers only one question: does this evidence match the complaint?</p>
+<p id="sub-conditions-0" class="clip sub" data-start="133.44" data-duration="2.87" data-track-index="1">These conditions are real, not role-play.</p>
+<p id="sub-conditions-1" class="clip sub" data-start="136.31" data-duration="5.31" data-track-index="1">For a slow 3G phone, the browser really adds three seconds to every request,</p>
+<p id="sub-conditions-2" class="clip sub" data-start="141.62" data-duration="2.94" data-track-index="1">on a three hundred and sixty pixel screen.</p>
+<p id="sub-conditions-3" class="clip sub" data-start="144.56" data-duration="3.57" data-track-index="1">For a Hindi user, the browser really runs in Hindi.</p>
+<p id="sub-conditions-4" class="clip sub" data-start="148.12" data-duration="4.75" data-track-index="1">For a screen-reader user, the twin sees only the accessibility tree.</p>
+<p id="sub-evidence-0" class="clip sub" data-start="153.78" data-duration="3.83" data-track-index="1">And here is the most important rule: no evidence, no verdict.</p>
+<p id="sub-evidence-1" class="clip sub" data-start="157.60" data-duration="3.70" data-track-index="1">The model is not allowed to say reproduced on its own word.</p>
+<p id="sub-evidence-2" class="clip sub" data-start="161.31" data-duration="5.27" data-track-index="1">Code that watches the browser collects the evidence: failed requests, server errors,</p>
+<p id="sub-evidence-3" class="clip sub" data-start="166.58" data-duration="5.58" data-track-index="1">buttons pushed off screen, English errors shown to Hindi users, accessibility violations,</p>
+<p id="sub-evidence-4" class="clip sub" data-start="172.16" data-duration="3.33" data-track-index="1">money values that disagree, and a payment sent twice.</p>
+<p id="sub-evidence-5" class="clip sub" data-start="175.49" data-duration="3.95" data-track-index="1">If it claims a bug without evidence, the verdict is downgraded.</p>
+<p id="sub-fix-0" class="clip sub" data-start="180.34" data-duration="2.45" data-track-index="1">Once the bug is proven, the fix starts.</p>
+<p id="sub-fix-1" class="clip sub" data-start="182.79" data-duration="4.52" data-track-index="1">First, Tavily searches the web for the documented cause of the evidence,</p>
+<p id="sub-fix-2" class="clip sub" data-start="187.31" data-duration="4.08" data-track-index="1">for example the official axe rule page for a button with no name.</p>
+<p id="sub-fix-3" class="clip sub" data-start="191.40" data-duration="5.59" data-track-index="1">Then Nemotron 3 Super, with reasoning on, reads the evidence, those sources and the code,</p>
+<p id="sub-fix-4" class="clip sub" data-start="196.99" data-duration="1.76" data-track-index="1">and writes the smallest fix.</p>
+<p id="sub-fix-5" class="clip sub" data-start="198.75" data-duration="5.53" data-track-index="1">The fix goes to a separate branch copy, never to the live app, just like a pull request.</p>
+<p id="sub-guard-0" class="clip sub" data-start="205.18" data-duration="4.18" data-track-index="1">Then the same twin replays the same complaint on the fixed code.</p>
+<p id="sub-guard-1" class="clip sub" data-start="209.35" data-duration="4.11" data-track-index="1">If the evidence that proved the bug is gone, the fix is proven.</p>
+<p id="sub-guard-2" class="clip sub" data-start="213.46" data-duration="4.05" data-track-index="1">Finally, the steps that triggered the bug are saved as a test.</p>
+<p id="sub-guard-3" class="clip sub" data-start="217.51" data-duration="4.11" data-track-index="1">That test must pass on the fixed code and fail on the old code.</p>
+<p id="sub-guard-4" class="clip sub" data-start="221.62" data-duration="2.41" data-track-index="1">Only then is the case marked Guarded.</p>
+<p id="sub-users-0" class="clip sub" data-start="224.94" data-duration="4.40" data-track-index="1">The shop has seven planted bugs, each tied to a different kind of user.</p>
+<p id="sub-users-1" class="clip sub" data-start="229.34" data-duration="3.35" data-track-index="1">A slow phone where the OTP request gives up too early.</p>
+<p id="sub-users-2" class="clip sub" data-start="232.69" data-duration="3.47" data-track-index="1">A small phone where the pay button is pushed off screen.</p>
+<p id="sub-users-3" class="clip sub" data-start="236.16" data-duration="2.73" data-track-index="1">A Hindi user who gets an English-only error.</p>
+<p id="sub-users-4" class="clip sub" data-start="238.89" data-duration="2.79" data-track-index="1">A screen-reader user who can&#x27;t find the cart.</p>
+<p id="sub-users-5" class="clip sub" data-start="241.68" data-duration="3.53" data-track-index="1">An elderly user with large text who loses the pay button.</p>
+<p id="sub-users-6" class="clip sub" data-start="245.21" data-duration="2.98" data-track-index="1">A slow network where a double tap charges twice.</p>
+<p id="sub-users-7" class="clip sub" data-start="248.19" data-duration="1.98" data-track-index="1">And the coupon bug you just saw.</p>
+<p id="sub-grouping-0" class="clip sub" data-start="251.07" data-duration="5.83" data-track-index="1">In real life, forty people describe one bug in forty ways, in English, Hindi and Hinglish.</p>
+<p id="sub-grouping-1" class="clip sub" data-start="256.90" data-duration="3.50" data-track-index="1">Each complaint is embedded with NVIDIA Nemotron Embed.</p>
+<p id="sub-grouping-2" class="clip sub" data-start="260.40" data-duration="6.41" data-track-index="1">The three most similar open cases are each checked by Nemotron 3.5 Lightning: same problem, or not?</p>
+<p id="sub-grouping-3" class="clip sub" data-start="266.81" data-duration="5.89" data-track-index="1">On a yes, the complaint joins that case, and the board shows how many people the bug hurts.</p>
+<p id="sub-grouping-4" class="clip sub" data-start="272.71" data-duration="5.12" data-track-index="1">On held-out test data, when it merges, it&#x27;s right about four times out of five.</p>
+<p id="sub-results-0" class="clip sub" data-start="278.72" data-duration="1.32" data-track-index="1">Here are the results.</p>
+<p id="sub-results-1" class="clip sub" data-start="280.04" data-duration="2.07" data-track-index="1">Seven bugs, three full runs each.</p>
+<p id="sub-results-2" class="clip sub" data-start="282.11" data-duration="2.51" data-track-index="1">Twenty-one out of twenty-one reproduced.</p>
+<p id="sub-results-3" class="clip sub" data-start="284.62" data-duration="2.63" data-track-index="1">Twenty out of twenty-one fixed and proven.</p>
+<p id="sub-results-4" class="clip sub" data-start="287.26" data-duration="2.70" data-track-index="1">Twenty out of twenty-one guarded by a test.</p>
+<p id="sub-results-5" class="clip sub" data-start="289.95" data-duration="4.96" data-track-index="1">And zero false alarms when the same complaints were replayed on the clean shop.</p>
+<p id="sub-results-6" class="clip sub" data-start="294.91" data-duration="5.90" data-track-index="1">The one miss was a fix that could not be applied, so that case stopped honestly at fix failed.</p>
+<p id="sub-stack-0" class="clip sub" data-start="301.70" data-duration="5.35" data-track-index="1">Under the hood: NVIDIA Nemotron 3 Super for navigating, judging and fixing.</p>
+<p id="sub-stack-1" class="clip sub" data-start="307.06" data-duration="3.92" data-track-index="1">Nemotron Embed and Nemotron 3.5 Lightning for grouping.</p>
+<p id="sub-stack-2" class="clip sub" data-start="310.98" data-duration="1.43" data-track-index="1">Tavily for research.</p>
+<p id="sub-stack-3" class="clip sub" data-start="312.41" data-duration="5.00" data-track-index="1">Playwright drives the real browser, and axe-core checks accessibility.</p>
+<p id="sub-stack-4" class="clip sub" data-start="317.40" data-duration="6.85" data-track-index="1">All model calls go through one client, so switching to Nebius Token Factory is a single setting.</p>
+<p id="sub-limits-0" class="clip sub" data-start="325.15" data-duration="4.89" data-track-index="1">To be honest about the limits: it works on web apps, not native mobile apps.</p>
+<p id="sub-limits-1" class="clip sub" data-start="330.04" data-duration="2.57" data-track-index="1">Fixing works best for small, local bugs.</p>
+<p id="sub-limits-2" class="clip sub" data-start="332.61" data-duration="6.62" data-track-index="1">And these are seven bugs planted on purpose, so this is a working demonstration, not a broad benchmark.</p>
+<p id="sub-limits-3" class="clip sub" data-start="339.24" data-duration="5.79" data-track-index="1">Before submitting, two things remain: a Nebius Token Factory key, which the rules require,</p>
+<p id="sub-limits-4" class="clip sub" data-start="345.02" data-duration="2.64" data-track-index="1">and the final video, under three minutes.</p>
+<p id="sub-close-0" class="clip sub" data-start="348.56" data-duration="2.69" data-track-index="1">Your angriest users are your best testers.</p>
+<p id="sub-close-1" class="clip sub" data-start="351.25" data-duration="4.48" data-track-index="1">Complaint Replay turns their complaints into proof, a fix, and a test.</p>
+<p id="sub-close-2" class="clip sub" data-start="355.73" data-duration="1.28" data-track-index="1">Thanks for watching.</p>
+<audio id="vo-title" src="assets/vo/title.wav" data-start="0.30" data-duration="6.66" data-track-index="5"></audio>
+<audio id="vo-problem" src="assets/vo/problem.wav" data-start="7.86" data-duration="22.44" data-track-index="6"></audio>
+<audio id="vo-steps" src="assets/vo/steps.wav" data-start="31.20" data-duration="34.40" data-track-index="5"></audio>
+<audio id="vo-break" src="assets/vo/break.wav" data-start="66.50" data-duration="14.02" data-track-index="6"></audio>
+<audio id="vo-shop" src="assets/vo/shop.wav" data-start="81.42" data-duration="19.69" data-track-index="5"></audio>
+<audio id="vo-heard" src="assets/vo/heard.wav" data-start="102.01" data-duration="12.78" data-track-index="6"></audio>
+<audio id="vo-repro" src="assets/vo/repro.wav" data-start="115.69" data-duration="16.85" data-track-index="5"></audio>
+<audio id="vo-conditions" src="assets/vo/conditions.wav" data-start="133.44" data-duration="19.43" data-track-index="6"></audio>
+<audio id="vo-evidence" src="assets/vo/evidence.wav" data-start="153.78" data-duration="25.66" data-track-index="5"></audio>
+<audio id="vo-fix" src="assets/vo/fix.wav" data-start="180.34" data-duration="23.94" data-track-index="6"></audio>
+<audio id="vo-guard" src="assets/vo/guard.wav" data-start="205.18" data-duration="18.86" data-track-index="5"></audio>
+<audio id="vo-users" src="assets/vo/users.wav" data-start="224.94" data-duration="25.24" data-track-index="6"></audio>
+<audio id="vo-grouping" src="assets/vo/grouping.wav" data-start="251.07" data-duration="26.75" data-track-index="5"></audio>
+<audio id="vo-results" src="assets/vo/results.wav" data-start="278.72" data-duration="22.08" data-track-index="6"></audio>
+<audio id="vo-stack" src="assets/vo/stack.wav" data-start="301.70" data-duration="22.55" data-track-index="5"></audio>
+<audio id="vo-limits" src="assets/vo/limits.wav" data-start="325.15" data-duration="22.51" data-track-index="6"></audio>
+<audio id="vo-close" src="assets/vo/close.wav" data-start="348.56" data-duration="8.45" data-track-index="5"></audio>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      const rise = (sel, at) => tl.fromTo(sel, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, at);
+      rise("#title .kicker", 0.20);
+      rise("#title .big", 0.50);
+      rise("#title .lede", 1.20);
+      rise("#problem .quote", 9.18);
+      rise("#problem .l1", 11.49);
+      rise("#problem .l2", 18.88);
+      rise("#problem .l3", 24.95);
+      rise("#steps .kicker", 31.10);
+      rise("#steps .r0", 34.50);
+      rise("#steps .r1", 41.09);
+      rise("#steps .r2", 46.97);
+      rise("#steps .r3", 50.69);
+      rise("#steps .r4", 56.29);
+      rise("#steps .r5", 60.59);
+      rise("#conditions .kicker", 133.34);
+      rise("#conditions .c0", 136.30);
+      rise("#conditions .c1", 144.59);
+      rise("#conditions .c2", 148.14);
+      rise("#evidence .kicker", 153.68);
+      rise("#evidence .mid", 153.88);
+      rise("#evidence .lede", 157.59);
+      rise("#evidence .h0", 163.47);
+      rise("#evidence .h1", 164.97);
+      rise("#evidence .h2", 166.47);
+      rise("#evidence .h3", 167.97);
+      rise("#evidence .h4", 169.47);
+      rise("#evidence .h5", 170.97);
+      rise("#evidence .h6", 172.47);
+      tl.fromTo("#fix-s0 img", { scale: 1 }, { scale: 1.04, duration: 10.80, ease: "none" }, 180.04);
+      tl.fromTo("#fix-s1 img", { scale: 1 }, { scale: 1.04, duration: 14.04, ease: "none" }, 190.84);
+      rise("#users .kicker", 224.84);
+      rise("#users .r0", 229.34);
+      rise("#users .r1", 232.69);
+      rise("#users .r2", 236.16);
+      rise("#users .r3", 238.89);
+      rise("#users .r4", 241.68);
+      rise("#users .r5", 245.21);
+      rise("#users .r6", 248.19);
+      rise("#grouping .kicker", 250.97);
+      rise("#grouping .g0", 251.07);
+      rise("#grouping .g1", 256.90);
+      rise("#grouping .g2", 260.40);
+      rise("#grouping .g3", 266.81);
+      rise("#grouping .g4", 272.71);
+      rise("#results .kicker", 278.62);
+      rise("#results .s0", 282.11);
+      rise("#results .s1", 284.62);
+      rise("#results .s2", 287.26);
+      rise("#results .s3", 289.95);
+      rise("#results .miss", 294.91);
+      rise("#stack .kicker", 301.60);
+      rise("#stack .r0", 301.70);
+      rise("#stack .r1", 307.06);
+      rise("#stack .r2", 310.98);
+      rise("#stack .r3", 312.41);
+      rise("#stack .r4", 317.40);
+      rise("#limits .kicker", 325.05);
+      rise("#limits .r0", 325.15);
+      rise("#limits .r1", 330.03);
+      rise("#limits .r2", 332.59);
+      rise("#limits .t3", 339.20);
+      rise("#close .quote", 348.46);
+      rise("#close .link", 351.25);
+      rise("#close .lede", 355.73);
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

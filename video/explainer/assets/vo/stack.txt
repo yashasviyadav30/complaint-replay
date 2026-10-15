@@ -1,0 +1,1 @@
+Under the hood: NVIDIA Nemotron 3 Super for navigating, judging and fixing. Nemotron Embed and Nemotron 3.5 Lightning for grouping. Tavily for research. Playwright drives the real browser, and axe-core checks accessibility. All model calls go through one client, so switching to Nebius Token Factory is a single setting.

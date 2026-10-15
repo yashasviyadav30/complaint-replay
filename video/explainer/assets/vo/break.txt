@@ -1,0 +1,1 @@
+To show it working, there is a small demo shop called BadShop, with OTP login, a cart, a coupon and a pay button. On the dashboard, I press Break It. That plants one secret bug in the shop. I don't know which one.
