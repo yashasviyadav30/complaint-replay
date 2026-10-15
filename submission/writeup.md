@@ -9,7 +9,7 @@
 
 **Track:** Coding and Agentic Engineering
 
-**Built with:** nvidia-nemotron, nebius-token-factory, python, fastapi, playwright, react, vite, tailwindcss, axe-core
+**Built with:** nvidia-nemotron, nebius-token-factory, tavily, python, fastapi, playwright, react, vite, tailwindcss, axe-core
 
 ---
 
@@ -27,7 +27,7 @@ How a case moves:
 
 1. **Heard.** A one-line widget adds a "Report a problem" button to any site. It also catches silent frustration: rage clicks, page errors, failed or very slow requests. With each complaint it records the user's real conditions, never what they typed into fields.
 2. **Reproduced.** The twin opens a real browser with those exact conditions and repeats what the user did. Evidence is collected by code watching the browser, not by the model: failed requests, controls pushed off screen, English-only errors shown to a Hindi user, accessibility violations, a cart total that disagrees with the amount charged.
-3. **Fixed.** Nemotron reads the evidence and the code and writes the smallest fix, on a separate branch copy. The same twin replays the complaint on the fixed code.
+3. **Fixed.** Tavily searches the web for the documented cause of the evidence (for example the axe rule page). Nemotron reads the evidence, those sources and the code and writes the smallest fix, on a separate branch copy. The same twin replays the complaint on the fixed code.
 4. **Guarded.** The steps that triggered the bug become a test. It must pass on the fix and fail on the old code, or it isn't marked guarded.
 
 On seven realistic bugs (slow phone, small screen, Hindi user, screen reader, elderly user with large text, double charge, coupon charge), each run three times: 21/21 reproduced, 20/21 fixed and proven, 20/21 guarded, and 0 false alarms when the same complaints were replayed on the clean store.
@@ -37,6 +37,7 @@ On seven realistic bugs (slow phone, small screen, Hindi user, screen reader, el
 - **NVIDIA Nemotron 3 Super on Nebius Token Factory**, in three roles. The navigator picks one click or keystroke at a time with thinking off, because "click Pay" needs speed, not reasoning. A separate judge answers one narrow question whenever the browser records new evidence: does this match the complaint? The fixer runs with reasoning on, because root-cause analysis is where thinking pays off.
 - **Playwright** drives real Chromium. Conditions are enforced, not role-played: 3 seconds of added latency per request, a 360 px phone screen, a Hindi locale, or an accessibility-tree-only view for the screen-reader twin.
 - **axe-core** gives hard accessibility evidence.
+- **Tavily** runs one search per case before the fix, keyed on the evidence kind (or the axe rule id). The fixer sees the top three sources, and the case shows them, so a developer can check where the fix came from. If the search fails, the fix still runs, just without sources.
 - **NVIDIA Nemotron Embed** groups duplicate complaints (in any language) so one bug gets one investigation and a count of how many people it hurts; a Nemotron check confirms each merge. Settings were tuned on a labelled set and measured on a held-out half (precision 0.82).
 - **FastAPI** runs the complaint service: input validation, PII masking (phones, emails, long ID numbers), rate limiting, the live demo store and background investigations.
 - **React, Vite and Tailwind** for the case board: Heard, Reproduced, Fixed, Guarded, with screenshots, evidence, the diff, the proof and the guard for each case.

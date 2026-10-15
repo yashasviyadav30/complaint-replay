@@ -41,7 +41,8 @@ async def run_bug(bug_id: int) -> dict:
 
 def main() -> None:
     load_dotenv()
-    case = asyncio.run(run_bug(int(sys.argv[1]) if len(sys.argv) > 1 else 1))
+    sys.stdout.reconfigure(encoding="utf-8")  # model text can hold characters the Windows console code page lacks
+    case =asyncio.run(run_bug(int(sys.argv[1]) if len(sys.argv) > 1 else 1))
     print(f"{case['id']}: stage={case['stage']}  verdict={case['replay']['verdict']}")
     if "fix" in case:
         print(f"Fix ({case['fix']['model']}): {case['fix'].get('explanation') or case['fix'].get('error')}")

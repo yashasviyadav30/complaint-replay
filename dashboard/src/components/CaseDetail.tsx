@@ -161,8 +161,8 @@ export function CaseDetail({ c, onClose }: { c: Case; onClose: () => void }) {
 
           {c.proof && (
             <Section title="Proof on the fixed code">
-              <p className={`text-sm ${c.stage === "fixed" ? "text-ok" : "text-accent"}`}>
-                {c.stage === "fixed"
+              <p className={`text-sm ${c.stage === "fixed" || c.stage === "guarded" ? "text-ok" : "text-accent"}`}>
+                {c.stage === "fixed" || c.stage === "guarded"
                   ? "The same user replayed the complaint on the fixed code. The problem is gone."
                   : "The problem still showed up on the fixed code."}
               </p>

@@ -18,5 +18,8 @@ Everything in the video comes from one real, unscripted run of the product. Noth
 
    Each clip: `ffmpeg -ss <start> -t <length> -i raw/<source>.webm -vf "crop=<crop>,scale=1600:900,fps=30" -an -c:v libx264 -crf 18 -pix_fmt yuv420p film/assets/<clip>`
 
+   `s-detail.mp4` then has 10.3-12.1 s cut out: the dashboard briefly showed a wrong red "problem still showed up"
+   line once a case reached Guarded (a display bug, fixed in `CaseDetail.tsx` on Oct 15). The last frame is held 1.8 s
+   so the clip keeps its 16.5 s length.
 3. The before/after screenshots are the real ones the engine saved for bugs 4, 7 and 10 (`results/cases/shots/`).
 4. `film/` is a HyperFrames composition. `npx hyperframes check` then `npx hyperframes render -o ../complaint-replay-demo.mp4 --quality delivery`.
