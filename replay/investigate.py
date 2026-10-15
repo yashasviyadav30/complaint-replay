@@ -15,11 +15,11 @@ from openai import AsyncOpenAI
 
 from replay.agent import ReplayResult, replay
 from replay.browser import evidence_key
-from replay.conditions import Condition
+from replay.conditions import Condition, with_needs
 from replay.fix import apply_patch, pick_fix_model, propose_fix
 from replay.guard import build_guard, run_guard
 from replay.research import research
-from replay.llm import Chat, llm_matcher, llm_policy
+from replay.llm import Chat, llm_matcher, llm_policy, stated_needs
 from replay.project import load_project, running_app
 
 BRANCHES = Path(tempfile.gettempdir()) / "complaint-replay" / "branches"
@@ -88,6 +88,10 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
             return None
         case.setdefault("shots", {})[name] = f"{case['id']}-{name}.png"
         return shots / case["shots"][name]
+
+    if cond.key == "twin":  # measured by the widget: add what the user said about themselves
+        cond = with_needs(cond, await stated_needs(chat, case.get("said") or complaint))
+        case["condition"] = {"label": cond.label, "persona": cond.persona}
 
     stage("reproducing")
     before = await replay(live_url, complaint, cond, policy, matcher, shot("before"), **target)

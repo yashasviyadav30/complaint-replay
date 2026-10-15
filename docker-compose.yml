@@ -1,0 +1,18 @@
+# Self-host Complaint Replay: docker compose up, then open http://localhost:8200
+services:
+  complaint-replay:
+    build: .
+    image: complaint-replay:local
+    ports:
+      - "8200:8200"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: sqlite:////app/results/complaint-replay.db
+      START_LIVE_SHOP: "1"   # the built-in BadShop demo; set "0" to run only your own projects
+    volumes:
+      - replay-data:/app/results
+    restart: unless-stopped
+volumes:
+  replay-data:

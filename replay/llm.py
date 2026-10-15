@@ -128,6 +128,24 @@ def llm_matcher(chat: Chat) -> Matcher:
     return matcher
 
 
+NEEDS_SYSTEM = """A user complained about a website. Some needs no device can report: a screen reader, using only
+a keyboard, or text made larger. Did THIS user say (in any language) that they rely on one of these?
+Reply with ONE JSON object and nothing else: {"screen_reader": false, "keyboard_only": false, "text_zoom": 1.0}
+Set a value only when the complaint says so; text_zoom is 2.0 for "bigger letters" or "zoomed in"."""
+
+
+async def stated_needs(chat: Chat, complaint: str) -> dict:
+    """What the widget cannot see but the user told us: screen reader, keyboard only, larger text."""
+    try:
+        data = parse_json(await chat([{"role": "system", "content": NEEDS_SYSTEM},
+                                      {"role": "user", "content": complaint}]))
+    except ValueError:
+        return {}
+    zoom = data.get("text_zoom")
+    return {"screen_reader": data.get("screen_reader") is True, "keyboard_only": data.get("keyboard_only") is True,
+            "zoom": float(zoom) if isinstance(zoom, (int, float)) and 1 <= zoom <= 3 else 1.0}
+
+
 def llm_policy(chat: Chat, retries: int = 2) -> Policy:
     async def policy(ctx: dict) -> dict:
         system, user = build_prompt(ctx)

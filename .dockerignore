@@ -1,0 +1,13 @@
+.git
+.venv
+.env
+**/__pycache__
+.pytest_cache
+dashboard/node_modules
+dashboard/dist
+dashboard/dist-demo
+results
+workspace
+video
+submission
+tests

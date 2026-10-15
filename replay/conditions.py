@@ -6,7 +6,7 @@ timezone, dark mode, forced colors, reduced motion, text zoom, keyboard only, or
 """
 
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from functools import cache
 from pathlib import Path
 
@@ -145,6 +145,18 @@ def twin_condition(env: dict) -> Condition:
         "twin", "Twin of the reporter", "The real user who reported this: " + ", ".join(parts) + ".",
         context, network={"latency": latency} if latency else None,
     )
+
+
+def with_needs(cond: Condition, needs: dict) -> Condition:
+    """Add what the user said about themselves (screen reader, keyboard only, larger text) to measured conditions."""
+    words = [w for w, on in (("uses a screen reader", needs.get("screen_reader")),
+                             ("uses only a keyboard", needs.get("keyboard_only")),
+                             (f"has text zoomed to {needs.get('zoom', 1):.0%}", needs.get("zoom", 1) > 1)) if on]
+    if not words:
+        return cond
+    return replace(cond, persona=cond.persona.rstrip(".") + "; the user says they " + " and ".join(words) + ".",
+                   screen_reader=bool(needs.get("screen_reader")), keyboard_only=bool(needs.get("keyboard_only")),
+                   zoom=needs.get("zoom", 1.0) or 1.0)
 
 
 CONDITIONS = {

@@ -151,3 +151,12 @@ def test_twin_copies_timezone_dark_mode_and_rtl() -> None:
 def test_unknown_timezone_is_dropped_not_crashed_on() -> None:
     assert srv.Env(viewport={"width": 400, "height": 800}, timezone="Africa/Cairo").timezone == "Africa/Cairo"
     assert srv.Env(viewport={"width": 400, "height": 800}, timezone="Mars/Olympus").timezone is None
+
+
+def test_what_the_user_says_about_themselves_joins_the_measured_conditions() -> None:
+    from replay.conditions import with_needs
+
+    cond = with_needs(twin_condition(ENV), {"screen_reader": True, "keyboard_only": False, "zoom": 1.0})
+    assert cond.screen_reader and not cond.keyboard_only and cond.context["locale"] == "hi-IN"
+    assert "uses a screen reader" in cond.persona
+    assert with_needs(twin_condition(ENV), {}) == twin_condition(ENV)
