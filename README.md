@@ -2,149 +2,167 @@
 
 **Your users already told you what's broken. Complaint Replay proves it, fixes it, and makes sure it never comes back.**
 
-A customer writes *"OTP never comes!"*. The developer tries it on a fast laptop, it works, and the complaint is closed as "can't reproduce". Studies of real bug trackers put that at 13-24% of all bug reports ([ICSME 2020](https://marco-c.github.io/publications/non_reproducibility-icsme2020.pdf)), and a large share fail because the user's device, network or settings differ from the developer's.
+A customer writes *"OTP never comes!"*, *"الزر لا يعمل"* or *"I use a screen reader and can't find the cart"*. The developer tries it on a fast laptop, it works, and the complaint is closed as "can't reproduce". Studies of real bug trackers put that at 13-24% of all bug reports ([ICSME 2020](https://marco-c.github.io/publications/non_reproducibility-icsme2020.pdf)), and a large share fail because the user's device, network or settings differ from the developer's.
 
-Complaint Replay closes that gap:
+Complaint Replay turns the complaint into a pull request:
 
-1. **Hears** the complaint: typed into a one-line "Report a problem" widget, or a silent signal (rage clicks, page errors, failed or very slow requests). The widget also records the user's real conditions: network, screen size, language, device.
-2. **Reproduces** it: an AI twin opens a real browser **under those exact conditions** and repeats what the user did, step by step.
-3. **Proves** it with machine evidence only. The AI is not allowed to say "reproduced" on its own word.
-4. **Fixes** it: NVIDIA Nemotron reads the evidence and the code and writes the smallest fix, on a separate branch copy.
-5. **Proves the fix**: the same twin replays the complaint on the fixed code.
-6. **Guards** it: the steps that triggered the bug become a test that must pass on the fix and fail on the old code.
+1. **Hears** it: a one-line widget on your site takes the complaint in any language, plus silent signals (rage clicks, page errors, failed or slow requests), plus the user's real conditions: screen, device, network, language, timezone, dark mode, reduced motion.
+2. **Reproduces** it: an AI twin opens a real browser **under those exact conditions** and repeats what the user did. If the user says they use a screen reader or only a keyboard, the twin does too.
+3. **Proves** it with machine evidence only. The AI may only cite what code watching the browser recorded.
+4. **Fixes** it: NVIDIA Nemotron reads the evidence and the relevant source files and writes the smallest fix.
+5. **Proves the fix**: the exact steps that triggered the bug run again on the fixed code, by code, no model.
+6. **Guards** it: those steps become a test that passes on the fix and fails on the old code, and runs in your CI on every pull request.
+7. **Closes the loop**: a pull request with the evidence, before/after screenshots and the guard; the person who complained sees "fixed" in the widget.
+
+It runs inside **your own GitHub Actions**, so your source code never leaves your CI. Open source, Apache 2.0.
 
 Built for the Nebius x NVIDIA Global AI Hackathon (Coding and Agentic Engineering track).
 
-- **Recorded demo (real cases, read-only):** https://yashasviyadav30.github.io/complaint-replay/
-- **Demo video:** recorded from one real, unscripted run; see `video/README.md` for exactly how it was cut.
+## Set it up on your app (about 10 minutes)
+
+1. **Add the widget** to your site, one tag before `</body>`:
+   ```html
+   <script src="https://YOUR-SERVER/widget.js" data-project="crp_your_key" defer></script>
+   ```
+2. **Add the workflow** to your repo. This writes `complaint-replay.toml` (how to start your app) and `.github/workflows/complaint-replay.yml`:
+   ```bash
+   uvx --from git+https://github.com/yashasviyadav30/complaint-replay crp init
+   ```
+   Set `start` in `complaint-replay.toml`, add `NEBIUS_API_KEY` as a repository secret, and in Settings > Actions turn on *Allow GitHub Actions to create and approve pull requests*.
+3. **Connect GitHub**: install the Complaint Replay GitHub App on the repo (one click from the dashboard's Set Up page), or for a single team set `GITHUB_TOKEN` on your server.
+4. **Send a test complaint** from the Set Up page and watch it move across the board.
+
+The dashboard walks you through the same four steps.
+
+### Run the server
+
+```bash
+docker compose up          # API, dashboard, widget and the built-in demo shop on http://localhost:8200
+```
+
+SQLite by default; set `DATABASE_URL=postgresql://...` for Postgres. Set `PUBLIC_URL` to the address GitHub Actions can reach. GitHub login and per-repo installs need a GitHub App: open `/setup/github-app` and GitHub creates one from a manifest in one click (or set `GITHUB_APP_*` and `GITHUB_CLIENT_*`).
+
+### Or use the command line
+
+```bash
+uv tool install git+https://github.com/yashasviyadav30/complaint-replay
+crp setup                                                      # installs the browser
+crp replay "Pay button is missing on my phone" --device "Galaxy S9+" --network slow-3g
+crp replay "الدفع لا يعمل" --user arabic --fix --pr               # reproduce, fix, prove, guard, open a PR
+crp guard                                                      # run every guard test (what CI runs)
+crp auth --url https://staging.example.com                     # save a test login the twin reuses
+crp devices pixel                                              # 207 device profiles
+```
+
+## What the twin can be
+
+| Condition | How it is enforced (never role-played) |
+|---|---|
+| Any of 207 phones, tablets and desktops | Playwright's device catalog: screen, pixel ratio, touch, user agent |
+| Network: 4g, 3g, slow-3g, 2g, satellite, flaky, drops | Latency added per request; flaky fails every 4th request; drops cuts the connection after the page loads |
+| Any language and timezone, right-to-left | Browser locale and timezone; RTL layout is checked |
+| Dark mode, forced colors, reduced motion, 200% text | Browser media settings and page zoom |
+| Screen reader | The twin sees only the accessibility tree and can only use named controls |
+| Keyboard only | The twin can only press Tab, Enter, Space and arrows |
+
+Conditions come from the widget (measured on the real user's device) plus what the user says about themselves in the complaint (Nemotron reads "I use a screen reader" in any language).
+
+## What counts as evidence
+
+Code watching the browser records: failed requests, HTTP errors, console errors, slow requests, controls off screen or covered by something else, text cut off, the page wider than the screen, missing images, slow pages and layout jumps (web vitals), spinners stuck for 15 s, redirect loops, messages not in the user's language (fastText language ID on CPU), right-to-left pages laid out left-to-right, invisible keyboard focus, things a keyboard can't reach, controls a screen reader announces only as "1" or "+", accessibility violations (axe-core, WCAG 2.2 AA), money values that disagree between API calls, and the same payment sent twice. Every item says where on the page it happened ("in the navigation", "near 'Book $10.99'").
+
+## Results
+
+### On someone else's app, with real bugs we did not plant
+
+[WebDevSimplified/react-ts-shopping-cart](https://github.com/WebDevSimplified/react-ts-shopping-cart) (MIT), copied unchanged into a demo repo. Three real accessibility bugs, three complaints, three guarded pull requests:
+
+| Complaint | Found | Fix | Where it ran |
+|---|---|---|---|
+| "I use a screen reader... I can't find the cart button, it just says one" | Cart button announced only as "1" | `aria-label="Cart"` | Laptop, `crp replay --fix --pr` |
+| "...the buttons next to the book only say plus and minus" | Quantity buttons announced as "+" and "−" | `aria-label` on both | GitHub Actions, started by hand |
+| "I'm blind... the product pictures are not described at all" | `image-alt` violation on every product image | `alt` text on the images | Full loop: widget, server, GitHub Actions, PR, status back to the widget |
+
+Each guard passed on the fix and failed on the old code when the pipeline checked it; for the first pull request the same check also ran in CI (`crp guard --base main`). Three is a small number: it shows the chain works on code we did not write, not how often it works. A larger benchmark on real, closed issues of open-source apps is in progress.
+
+### On the demo shop, 7 planted bugs, 3 runs each
+
+Measured Oct 14, 2026 with `uv run python bench.py 3` (NVIDIA API catalog endpoint, Nemotron 3 Super):
+**21/21 reproduced, 20/21 fixed and proven, 20/21 guarded, 0 false alarms** on the clean shop ([per-bug table](benchmarks/demo-shop.md)). These are bugs we planted ourselves: a working demonstration, not a broad benchmark.
+
+### Any language
+
+On 400 complaints in 20 languages and scripts (Hindi, Hinglish, Arabic, Urdu, Bengali, Tamil, Telugu, Marathi, Swahili, Japanese, Chinese and more), **written by Nemotron, not by real users**:
+
+- Same bug, different language: the nearest complaint in another language is the same bug **97%** of the time (99% within the top 3 that grouping verifies).
+- Triage (bug, confusion, feature request, spam): **98%** on a held-out half, with a small model trained on a laptop CPU. It is weak on wishes about topics it never saw; details in [benchmarks/triage.md](benchmarks/triage.md).
+
+Treat these as a check that nothing breaks across scripts. Real complaints are messier.
+
+## How NVIDIA Nemotron and Nebius are used
+
+| Job | Model | Runs on |
+|---|---|---|
+| Navigator: one click or keystroke at a time | Nemotron 3 Super (thinking off) | Nebius Token Factory |
+| Judge: does this evidence match the complaint? | Nemotron 3 Super (thinking off) | Nebius Token Factory |
+| Stated needs: screen reader, keyboard, bigger text | Nemotron 3 Super | Nebius Token Factory |
+| Fixer: reads evidence + the relevant source files, writes the patch | Nemotron 3 Super (reasoning on) | Nebius Token Factory |
+| Duplicate grouping | Nemotron Embed + Nemotron 3.5 Lightning check | Nebius Token Factory |
+| Triage: bug, confusion, feature request, spam | Small model on Nemotron Embed vectors | CPU, trained on a laptop |
+| Language ID of complaints and page text | fastText lid.176 (GlotLID optional) | CPU |
+| Research before the fix | Tavily search API | Tavily |
+
+All model calls go through one OpenAI-compatible client (`replay/llm.py`): with `NEBIUS_API_KEY` it calls **Nebius Token Factory**; with only `NVIDIA_API_KEY` it calls NVIDIA's API catalog. The results above were measured on NVIDIA's API catalog endpoint with the same models. A hard token budget per run (`REPLAY_TOKEN_BUDGET`) stops a looping agent.
 
 ## How it fits together
 
 ```mermaid
 flowchart LR
-    U["Customer on their own phone"] -->|"complaint or silent signal<br/>+ real conditions"| W["Report a problem widget"]
-    W --> S["Complaint service<br/>(PII masked, rate limited)"]
-    S --> G{"Same as an open case?<br/>Nemotron Embed + Nemotron check"}
-    G -->|yes| N["Join case: xN reports"]
-    G -->|no| T["AI twin in a real browser<br/>with the user's network, screen, language"]
-    T -->|"machine evidence only"| R{"Reproduced?"}
-    R -->|no| X["Could not reproduce<br/>(steps shown)"]
-    R -->|yes| F["Fix on a branch copy<br/>Nemotron 3 Super (+ Tavily sources)"]
-    F --> P["Same twin replays on the fix"]
-    P -->|"proving evidence gone"| Q["Guard test: passes on fix,<br/>fails on old code"]
-    Q --> D["Case board: Heard, Reproduced, Fixed, Guarded"]
+    U["User on their own phone"] -->|"complaint in any language<br/>+ real conditions"| W["widget.js"]
+    W --> S["Complaint Replay server<br/>PII masked, language ID, triage, grouping"]
+    S -->|"repository_dispatch"| A["Your GitHub Action"]
+    A --> T["AI twin in a real browser<br/>with the user's device, network, language"]
+    T -->|"machine evidence only"| F["Nemotron fix on a branch"]
+    F --> P["Same steps replayed on the fix"]
+    P --> G["Guard test: passes on fix,<br/>fails on old code"]
+    G --> PR["Pull request with evidence,<br/>screenshots, guard"]
+    A -. "progress, signed" .-> S
+    S -. "status" .-> W
 ```
 
-## Results
+## Privacy and security
 
-Seven realistic bugs planted in a demo store, each tied to a different kind of user. Every bug was run through
-the whole chain three times, and each complaint was also replayed on the clean store to check for false alarms.
-Measured on Oct 14, 2026 with `uv run python bench.py 3`.
+- The widget never sends what users type into your forms, only button names. Emails, phone numbers (digits in any script), card and account numbers, PAN and Aadhaar are masked before storage and before any model sees them.
+- Your source code stays in your CI; the server receives evidence, steps and verdicts. Screenshots live in the pull request branch.
+- Fixes only ever land on a new branch and a pull request, committed as "Complaint Replay", never as a person, and only to the repo's own `origin`.
+- Each project can limit which sites may send complaints, choose how long complaints are kept (deleted automatically) and turn screenshots off.
+- Action callbacks are signed per case; the person who complained can see only their own report's status.
 
-| Bug | User condition | Reproduced | Fixed + proven | Guarded | False alarm on clean shop | Median time |
-|---|---|---|---|---|---|---|
-| OTP request gives up after 4 seconds | Slow 3G + cheap Android | 3/3 | 3/3 | 3/3 | no | 94 s |
-| Pay can be tapped twice while paying, charging twice | Slow 3G + cheap Android | 3/3 | 3/3 | 3/3 | no | 201 s |
-| Pay button pushed off-screen on small phones | Slow 3G + cheap Android | 3/3 | 3/3 | 3/3 | no | 150 s |
-| Wrong-OTP error shown only in English | Hindi speaker | 3/3 | 3/3 | 3/3 | no | 53 s |
-| Cart button has no accessible name | Screen-reader user | 3/3 | 2/3 | 2/3 | no | 80 s |
-| Pay button lost when text is zoomed to 200% | Elderly first-time user | 3/3 | 3/3 | 3/3 | no | 73 s |
-| Coupon shown in cart but not applied at payment | Fast desktop | 3/3 | 3/3 | 3/3 | no | 70 s |
+## Limits, honestly
 
-**Total: 21/21 reproduced, 20/21 fixed and proven, 20/21 guarded, 0 false alarms.**
+- Web apps only. Native mobile apps need emulators (planned).
+- Fixing works best on small, local bugs: a label, a CSS rule, a timeout, a wrong variable. Larger refactors are out of scope.
+- The real-app results above are three bugs on one app. A wider benchmark is still being run.
+- Translations in the widget are machine-assisted; corrections from native speakers are welcome.
+- Pull requests opened with the default Actions token don't trigger your other workflows (a GitHub rule); the GitHub App token does.
 
-Be clear about what this does and does not show. These are seven bugs we planted ourselves, so it is a working
-demonstration, not a broad benchmark. The one miss: in one screen-reader run the fix could not be applied even after
-a retry, so the case stopped at "fix failed" instead of shipping a guess. The OTP bug never shows up on a fast laptop,
-which is exactly the "works for me" trap: the scripted test `test_otp_bug_works_for_me_on_a_fast_laptop` checks that.
-
-## Duplicate complaints: one bug, one investigation
-
-Forty people describe one bug forty ways ("otp nahi aa raha", "never got the code"). A new complaint is embedded
-with **NVIDIA Nemotron Embed** (`nemotron-3-embed-1b`); the 3 most similar open cases are each checked by
-**Nemotron 3.5 Lightning** ("same problem?"), and on a yes it joins that case instead of starting another
-investigation. The board then sorts by how many people a bug hurts ("x12 reports").
-
-The settings were tuned, not guessed: `scripts/calibrate_grouping.py` replays 57 hand-written complaints
-(English, Hinglish, Hindi; `data/complaints_labeled.json`) in arrival order, picks the setting on one half and
-measures it on the other half:
-
-| Held-out half | Precision | Recall | F1 |
-|---|---|---|---|
-| Embedding similarity alone | 0.61 | 0.71 | 0.65 |
-| Top-3 nearest cases + Nemotron check (in use) | 0.82 | 0.58 | 0.68 |
-
-Read this plainly: when it merges, it is right about 4 times in 5; it would rather miss a duplicate (an extra
-investigation) than merge two different bugs (hiding one). The test set is small (27 complaints), so treat the
-numbers as a first measurement, not a benchmark. Every merged report stays visible in the case for a human to check.
-
-## How NVIDIA Nemotron and Nebius are used
-
-| Job | Model | Why this one |
-|---|---|---|
-| Navigator: picks one click or keystroke at a time | Nemotron 3 Super (thinking off) | Fast and cheap per step; thinking adds nothing to "click Pay" |
-| Judge: does this machine evidence match the complaint? | Nemotron 3 Super (thinking off) | A narrow yes/no question, kept separate from navigation |
-| Fixer: reads evidence + source, writes the patch | Nemotron 3 Super (reasoning on) | Root-cause reasoning is where thinking pays off |
-| Research: finds the documented cause of the evidence before the fix | Tavily search API | The fix can cite a real source (for example the axe rule page) instead of guessing |
-
-All model calls go through one OpenAI-compatible client (`replay/llm.py`). With `NEBIUS_API_KEY` set it calls **Nebius Token Factory**; with only `NVIDIA_API_KEY` it calls NVIDIA's API catalog. The results table above was measured on NVIDIA's API catalog endpoint with the same Nemotron 3 Super model. A hard token budget per run (`REPLAY_TOKEN_BUDGET`) stops a looping agent from running up a bill.
-
-Things we learned the hard way, so you don't have to:
-
-- With thinking on, Nemotron sometimes used its whole token budget thinking and returned an empty answer. Browser steps now run with `enable_thinking: False`.
-- One model doing both navigation and judging tended to wander after the bug had already shown. Splitting out a small judge, which runs only when new evidence appears, fixed that.
-
-## The rules that make it trustworthy
-
-- **Real conditions, not role-play.** The twin doesn't pretend to be on a slow phone. The browser really adds 3 s per request, really has a 360 px screen, really runs in Hindi. The screen-reader twin sees only the accessibility tree.
-- **No evidence, no verdict.** Evidence is collected by code watching the browser: failed requests, HTTP errors, console errors, controls off screen, English-only errors shown to Hindi users, axe-core accessibility violations, money values that disagree between API calls. The model can only cite evidence ids; a "reproduced" verdict without real evidence is downgraded.
-- **Unreadable model replies never decide anything.** They become a short wait, and the next step tries again.
-- **Fixes never touch the live app.** They go to a branch copy, the way a pull request would.
-- **Privacy.** The widget never sends what users type into fields, only button names. Phone numbers, emails and long ID numbers in complaints are masked before storage or any model call.
-
-## Run it
-
-Needs Python 3.13, [uv](https://docs.astral.sh/uv/), Node 22.
+## Run the tests
 
 ```bash
-uv sync
-uv run playwright install chromium
-cd dashboard && npm install && npm run build && cd ..
-cp .env.example .env        # add NEBIUS_API_KEY (Token Factory)
-uv run uvicorn server.app:app --port 8200
-```
-
-Open http://127.0.0.1:8200 for the dashboard. The demo store runs at http://127.0.0.1:8100 with the widget in the corner.
-
-1. Press **Break It** to plant a random secret bug.
-2. Use the store like a customer. When something goes wrong, press **Report a problem** and complain in your own words, or just rage-click.
-3. Watch the case move across the board: Heard, Reproduced, Fixed, Guarded.
-
-Other entry points:
-
-```bash
-uv run pytest -q                   # 38 tests; scripted browser checks need no API key
-uv run python pipeline.py 4        # one planted bug, end to end, from the command line
-uv run python bench.py 3           # the results table above
-uv run python -m replay.guard <branch>/guards/<id>.json http://127.0.0.1:8100   # run one guard
+uv sync && uv run playwright install chromium
+uv run pytest -q          # 80+ tests; real-browser checks need no API key
 ```
 
 ## Project layout
 
 | Path | What it is |
 |---|---|
-| `server/` | The service: complaint API (validation, PII masking, rate limit), live demo store, investigations, `widget.js` |
-| `replay/` | The engine: conditions, browser + evidence, navigator + judge, fixer, guard |
-| `badshop/` | The demo store, bug-free; bugs are injected into a copy |
-| `dashboard/` | The case board (React, Vite, Tailwind) |
-| `tests/` | Unit tests and real-browser scripted tests |
-
-## Limits, honestly
-
-- Web apps only (desktop and mobile web). Native mobile apps would need emulators.
-- Fixing works best on small, local bugs: a timeout, a label, a CSS rule, a wrong variable. Larger refactors are out of scope.
-- Fixing needs access to the code. Without it you still get the reproduction, the evidence and the guard steps.
-- One investigation runs at a time, because each drives a real browser.
+| `replay/` | The engine: conditions, browser + evidence, twin, fixer, guard, PR, CLI (`crp`) |
+| `server/` | The service: projects, widget intake, GitHub, `widget.js` |
+| `dashboard/` | The web app (React, Vite, Tailwind) |
+| `action.yml` | The GitHub Action |
+| `badshop/` | The demo shop with planted bugs |
+| `benchmarks/`, `data/` | Measurements and the data behind them |
 
 ## License
 
