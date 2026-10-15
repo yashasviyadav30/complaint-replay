@@ -149,9 +149,9 @@ def twin_condition(env: dict) -> Condition:
 
 def with_needs(cond: Condition, needs: dict) -> Condition:
     """Add what the user said about themselves (screen reader, keyboard only, larger text) to measured conditions."""
-    words = [w for w, on in (("uses a screen reader", needs.get("screen_reader")),
-                             ("uses only a keyboard", needs.get("keyboard_only")),
-                             (f"has text zoomed to {needs.get('zoom', 1):.0%}", needs.get("zoom", 1) > 1)) if on]
+    words = [w for w, on in (("use a screen reader", needs.get("screen_reader")),
+                             ("use only a keyboard", needs.get("keyboard_only")),
+                             (f"have text zoomed to {needs.get('zoom', 1):.0%}", needs.get("zoom", 1) > 1)) if on]
     if not words:
         return cond
     return replace(cond, persona=cond.persona.rstrip(".") + "; the user says they " + " and ".join(words) + ".",

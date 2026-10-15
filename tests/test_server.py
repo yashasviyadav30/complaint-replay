@@ -158,7 +158,7 @@ def test_what_the_user_says_about_themselves_joins_the_measured_conditions() -> 
 
     cond = with_needs(twin_condition(ENV), {"screen_reader": True, "keyboard_only": False, "zoom": 1.0})
     assert cond.screen_reader and not cond.keyboard_only and cond.context["locale"] == "hi-IN"
-    assert "uses a screen reader" in cond.persona
+    assert "the user says they use a screen reader" in cond.persona
     assert with_needs(twin_condition(ENV), {}) == twin_condition(ENV)
 
 
