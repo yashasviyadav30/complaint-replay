@@ -91,14 +91,14 @@ class Chat:
         self.budget = int(os.getenv("REPLAY_TOKEN_BUDGET", "2000000"))
         self.used = 0
 
-    async def __call__(self, messages: list[dict]) -> str:
+    async def __call__(self, messages: list[dict], max_tokens: int = 1500) -> str:
         if self.used >= self.budget:
             raise TokenBudgetExceeded(f"used {self.used} tokens, budget is {self.budget} (REPLAY_TOKEN_BUDGET)")
         # Thinking off: one step at a time doesn't need it, and long thinking used up
         # max_tokens before any answer (empty replies in the first risk test).
         await throttle()
         resp = await self.client.chat.completions.create(
-            model=self.model, messages=messages, temperature=0.2, max_tokens=1500,
+            model=self.model, messages=messages, temperature=0.2, max_tokens=max_tokens,
             extra_body={"chat_template_kwargs": {"enable_thinking": False}},
         )
         self.used += resp.usage.total_tokens if resp.usage else 0

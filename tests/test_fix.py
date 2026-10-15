@@ -60,3 +60,12 @@ def test_big_repo_sends_the_files_that_match_the_evidence(tmp_path) -> None:
     picked = sources.pick(tmp_path, hints, budget=3000)
     assert picked[0] == "Checkout.jsx" and "node_modules/lib.js" not in picked
     assert sources.pick(tmp_path, hints, budget=10**7)[0] == "Checkout.jsx"  # small enough: everything goes
+
+
+def test_triage_picks_the_nearest_class_and_skips_only_clear_non_bugs() -> None:
+    from replay.triage import classify, fit
+
+    centroids = fit([[1, 0], [0.9, 0.1], [0, 1]], ["bug", "bug", "spam"])
+    assert classify([0.95, 0.05], centroids)["label"] == "bug" and classify([0.95, 0.05], centroids)["replay"]
+    spam = classify([0.05, 1], centroids)
+    assert spam["label"] == "spam" and not spam["replay"]

@@ -1,6 +1,6 @@
 export type Stage =
   | "heard" | "queued" | "reproducing" | "reproduced" | "not_reproduced" | "ux_confusion"
-  | "fixing" | "proving" | "fixed" | "fix_unproven" | "fix_failed" | "guarded" | "error";
+  | "fixing" | "proving" | "fixed" | "fix_unproven" | "fix_failed" | "guarded" | "error" | "not_a_bug";
 
 export type Kind = "spoken" | "rage_click" | "js_error" | "failed_request" | "slow_request";
 
@@ -31,6 +31,7 @@ export interface Case {
   condition: { label: string; persona: string };
   stage: Stage;
   impact?: number;
+  triage?: { label: "bug" | "ux_confusion" | "feature_request" | "spam"; margin: number; replay: boolean };
   replay?: Replay;
   fix?: { model: string; explanation: string; diff?: string; error?: string; sources?: { title: string; url: string }[] };
   proof?: Proof | Replay;

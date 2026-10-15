@@ -160,3 +160,20 @@ def test_what_the_user_says_about_themselves_joins_the_measured_conditions() -> 
     assert cond.screen_reader and not cond.keyboard_only and cond.context["locale"] == "hi-IN"
     assert "uses a screen reader" in cond.persona
     assert with_needs(twin_condition(ENV), {}) == twin_condition(ENV)
+
+
+def test_spam_is_kept_but_not_replayed(client, monkeypatch) -> None:
+    async def grouping_with_vector(*_):
+        return None, [1.0, 0.0]
+
+    monkeypatch.setattr(srv, "group_into_existing", grouping_with_vector)
+    monkeypatch.setattr(srv, "classify", lambda vec: {"label": "spam", "margin": 0.4, "replay": False})
+    started = []
+
+    async def fake_start(*args):
+        started.append(args)
+
+    monkeypatch.setattr(srv, "start_case", fake_start)
+    r = client.post("/api/v1/reports", json={"project": "demo", "kind": "spoken", "text": "buy followers", "env": ENV})
+    case = srv.store.get("case", r.json()["id"])
+    assert case["stage"] == "not_a_bug" and case["triage"]["label"] == "spam" and not started

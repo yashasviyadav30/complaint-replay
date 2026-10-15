@@ -1,0 +1,2006 @@
+{
+ "_about": "SYNTHETIC complaints written by NVIDIA Nemotron (scripts/make_multilingual_set.py), not real users. scenario = what the complaint is about; bug:* ids are duplicate groups across languages.",
+ "model": "nvidia/nemotron-3-super-120b-a12b",
+ "complaints": [
+  {
+   "lang": "en",
+   "scenario": "bug:otp",
+   "text": "I waited 10 minutes for the login code but it never came. Then an error popped up saying 'OTP expired' even though I never got it. This keeps happening and I can't get into my account."
+  },
+  {
+   "lang": "en",
+   "scenario": "bug:otp",
+   "text": "The OTP just won't send. I've tried 3 times, restarted my phone, checked signal. After waiting, it says 'Failed to send code'. I'm locked out and really frustrated."
+  },
+  {
+   "lang": "en",
+   "scenario": "bug:pay_missing",
+   "text": "I added everything to my cart, went to checkout, but there's no Pay button at all. Just a blank space where it should be. I can't complete my order no matter what I do."
+  },
+  {
+   "lang": "en",
+   "scenario": "bug:pay_missing",
+   "text": "After filling my cart, I tapped checkout and the screen just shows my items and a continue button that does nothing. No Pay option appears. I've tried closing and reopening the app but it's still missing."
+  },
+  {
+   "lang": "en",
+   "scenario": "bug:double_charge",
+   "text": "I tapped Pay twice because nothing happened after the first tap, and now I see two charges on my card for the same order. I only wanted to pay once. Please refund the extra amount."
+  },
+  {
+   "lang": "en",
+   "scenario": "bug:double_charge",
+   "text": "The payment button didn't respond so I tapped it again. Now I've been charged double for one purchase. I checked my bank and there are two identical transactions. This is not okay."
+  },
+  {
+   "lang": "en",
+   "scenario": "bug:coupon",
+   "text": "I applied my coupon and the cart showed 20% off, but when I went to pay, it charged me the full price. The discount disappeared at checkout. I feel tricked."
+  },
+  {
+   "lang": "en",
+   "scenario": "bug:coupon",
+   "text": "The app said my promo code was applied and showed the lower price in the cart, but the final charge was the original amount. I didn't get the discount I was promised."
+  },
+  {
+   "lang": "en",
+   "scenario": "bug:wrong_language",
+   "text": "I use the app in Spanish, but suddenly an error message popped up in English saying 'Network error'. It was jarring and confusing since everything else is in Spanish."
+  },
+  {
+   "lang": "en",
+   "scenario": "bug:wrong_language",
+   "text": "After an update, I started getting error messages in English even though my phone and app language are set to French. I don't understand what the errors mean now."
+  },
+  {
+   "lang": "en",
+   "scenario": "bug:cart_screen_reader",
+   "text": "I use TalkBack and when I navigate to the cart, it only says '3' instead of 'Cart, 3 items'. I don't know what the number means without the label."
+  },
+  {
+   "lang": "en",
+   "scenario": "bug:cart_screen_reader",
+   "text": "As a screen reader user, the cart button is announced as just a number, like '2', with no context. I can't tell it's the cart unless I memorize what the number means."
+  },
+  {
+   "lang": "en",
+   "scenario": "bug:stuck_loading",
+   "text": "I opened the orders page and it's just been showing a spinning circle for over 5 minutes. Nothing loads, no matter how long I wait or how many times I refresh."
+  },
+  {
+   "lang": "en",
+   "scenario": "bug:stuck_loading",
+   "text": "The orders tab is stuck on a loading spinner forever. I've tried restarting the app, clearing cache, even reinstalling. It never shows my orders, just keeps loading."
+  },
+  {
+   "lang": "en",
+   "scenario": "ux_confusion",
+   "text": "I need to change my delivery address for my next order but I can't find where to do it. I've looked in profile, settings, checkout - nowhere seems to let me edit it."
+  },
+  {
+   "lang": "en",
+   "scenario": "ux_confusion",
+   "text": "I want to update my address but the app doesn't make it obvious how. I tapped everywhere and still can't find the option to change it. It's frustratingly hidden."
+  },
+  {
+   "lang": "en",
+   "scenario": "feature_request",
+   "text": "Please add a dark mode. It's hard on my eyes to use the bright white interface at night. Many other apps have it, I'd love to see it here too."
+  },
+  {
+   "lang": "en",
+   "scenario": "feature_request",
+   "text": "I wish you offered cash on delivery as a payment option. I don't like using cards online and would shop more if I could pay when I get my order."
+  },
+  {
+   "lang": "en",
+   "scenario": "spam",
+   "text": "hello"
+  },
+  {
+   "lang": "en",
+   "scenario": "spam",
+   "text": "Click here to get 10k followers fast! https://fakefollowers.com"
+  },
+  {
+   "lang": "hi",
+   "scenario": "bug:otp",
+   "text": "ओटीपी नहीं आ रहा है, 10 मिनट से इंतजार कर रहा हूं, स्क्रीन पर 'नेटवर्क त्रुटि' दिख रहा है"
+  },
+  {
+   "lang": "hi",
+   "scenario": "bug:otp",
+   "text": "लॉगिन के लिए कोड नहीं मिल रहा है, बार-बार रिसेंड करने पर भी कुछ नहीं आता, बहुत परेशान हो रहा हूं"
+  },
+  {
+   "lang": "hi",
+   "scenario": "bug:pay_missing",
+   "text": "कार्ट में सामान डालने के बाद पे बटन ही नहीं दिख रहा है, स्क्रीन खाली है, कैसे भुगतान करूं?"
+  },
+  {
+   "lang": "hi",
+   "scenario": "bug:pay_missing",
+   "text": "फोन पर पेमेंट का ऑप्शन गायब है, सिर्फ 'जारी रखें' बटन है, पे करने का रास्ता नहीं मिल रहा"
+  },
+  {
+   "lang": "hi",
+   "scenario": "bug:double_charge",
+   "text": "पे बटन पर दो बार टैप किया क्योंकि कुछ नहीं हो रहा था, अब दो बार पैसा कट गया है, कृपया एक वापस कर दें"
+  },
+  {
+   "lang": "hi",
+   "scenario": "bug:double_charge",
+   "text": "लोडिंग होने के कारण दो बार पे दबाया, अब खाते से दो बार रकम कटी है, बहुत गुस्सा आ रहा है"
+  },
+  {
+   "lang": "hi",
+   "scenario": "bug:coupon",
+   "text": "कूपन लगाने पर कार्ट में 20% छूट दिखी लेकिन भुगतान पर पूरा मूल्य लिया गया, धोखा दिया गया है"
+  },
+  {
+   "lang": "hi",
+   "scenario": "bug:coupon",
+   "text": "डिस्काउंट कोड लागू हुआ दिख रहा था लेकिन अंत में फुल प्राइस चarged हुआ, ऐसा क्यों हुआ?"
+  },
+  {
+   "lang": "hi",
+   "scenario": "bug:wrong_language",
+   "text": "एप्प हिंदी में चल रहा था लेकिन अचानक एरर मैसेज अंग्रेजी में आया: 'Payment Failed', समझ नहीं आया"
+  },
+  {
+   "lang": "hi",
+   "scenario": "bug:wrong_language",
+   "text": "स्क्रीन पर अचानक अंग्रेजी में 'Server Error' लिखा आया, जबकि सब कुछ हिंदी में था, बहुत भ्रमित हो गया"
+  },
+  {
+   "lang": "hi",
+   "scenario": "bug:cart_screen_reader",
+   "text": "स्क्रीन रीडर से कार्ट बटन सिर्फ '3' बोलता है, बताता नहीं कि यह कार्ट है, नेविगेट नहीं कर पा रहा हूं"
+  },
+  {
+   "lang": "hi",
+   "scenario": "bug:cart_screen_reader",
+   "text": "टॉकबैक ने कार्ट आइकन को केवल संख्या के रूप में पढ़ा, कोई लेबल नहीं, मैं अंधा हूं और नहीं समझ पा रहा कि क्या करना है"
+  },
+  {
+   "lang": "hi",
+   "scenario": "bug:stuck_loading",
+   "text": "आर्डर्स पेज पर घंटों से लोडिंग स्पिनर घूम रहा है, कुछ भी नहीं लोड हो रहा, ऐप फ्रीज हो गया है"
+  },
+  {
+   "lang": "hi",
+   "scenario": "bug:stuck_loading",
+   "text": "ऑर्डर देखते ही स्पिनर दिखना शुरू हो गया और अब तक नहीं रुका, इंटरनेट ठीक है लेकिन ऐप जवाब नहीं दे रहा"
+  },
+  {
+   "lang": "hi",
+   "scenario": "ux_confusion",
+   "text": "डिलीवरी एड्रेस बदलना चाहता हूं लेकिन सेटिंग्स में भी नहीं मिल रहा, प्रोफाइल में भी नहीं, कहां जाएं?"
+  },
+  {
+   "lang": "hi",
+   "scenario": "ux_confusion",
+   "text": "पता बदलने का ऑप्शन कहीं नहीं दिख रहा, हर जगह खोजा लेकिन नहीं मिला, बहुत confusing है"
+  },
+  {
+   "lang": "hi",
+   "scenario": "feature_request",
+   "text": "कृपया डार्क मोड जोड़ दें, रात में स्क्रीन चमकीली होती है, आंखों में दर्द होता है"
+  },
+  {
+   "lang": "hi",
+   "scenario": "feature_request",
+   "text": "कैश ऑन डिलीवरी की सुविधा होनी चाहिए, मैं ऑनलाइन पेमेंट नहीं करता, ये जोड़ दें"
+  },
+  {
+   "lang": "hi",
+   "scenario": "spam",
+   "text": "नमस्ते, आपका दिन शुभ हो"
+  },
+  {
+   "lang": "hi",
+   "scenario": "spam",
+   "text": "फॉलोअर्स बढ़ाने के लिए इस लिंक पर क्लिक करें: buystars.in"
+  },
+  {
+   "lang": "hi-Latn",
+   "scenario": "bug:otp",
+   "text": "OTP nahi aaya, 5 minute se wait kar raha hoon, error dikh raha hai 'OTP expired' lekin aaya hi nahi!"
+  },
+  {
+   "lang": "hi-Latn",
+   "scenario": "bug:otp",
+   "text": "Login karne ke liye OTP aane ka intezaar kar raha hoon, par phone pe kuch nahi aaya, fir se bhej do ya koi solution batao!"
+  },
+  {
+   "lang": "hi-Latn",
+   "scenario": "bug:pay_missing",
+   "text": "Cart mein items add kiye, par Pay button dikhai nahi de raha, sirf 'Proceed to Checkout' likha hai lekin click karne par kuch nahi hota!"
+  },
+  {
+   "lang": "hi-Latn",
+   "scenario": "bug:pay_missing",
+   "text": "Phone se shopping kar raha tha, sab kuch add kiya, lekin Pay ka option kahan gaye? Sirf empty screen dikh raha hai, frustrated ho gaya!"
+  },
+  {
+   "lang": "hi-Latn",
+   "scenario": "bug:double_charge",
+   "text": "Pay button dabaaya, kuch nahi hua, socha network issue hai, fir se dabaaya... ab dekha toh double charge ho gaya, paisa wapas karo!"
+  },
+  {
+   "lang": "hi-Latn",
+   "scenario": "bug:double_charge",
+   "text": "Ek baar Pay dabaya, loading chala gaya, wapas nahi aaya, panik mein fir se dabaaya... ab bank statement mein do baar paisa kat gaya, yeh kaisi system hai?"
+  },
+  {
+   "lang": "hi-Latn",
+   "scenario": "bug:coupon",
+   "text": "Coupon code lagaya, cart mein 20% off dikhaya gaya, lekin payment page pe full price charge kar diya, coupon vanish ho gaya!"
+  },
+  {
+   "lang": "hi-Latn",
+   "scenario": "bug:coupon",
+   "text": "Discount show ho raha tha cart mein, par jab Pay kiya toh poora amount liya, promo code ka koi fayda nahi, thoda bewakoof lag raha hoon!"
+  },
+  {
+   "lang": "hi-Latn",
+   "scenario": "bug:wrong_language",
+   "text": "App Hindi mein chal rahi thi, accha se samajh aa rahi thi, lekin ekdum se error message English mein aaya 'Payment Failed', samajh nahi aaya kya hua!"
+  },
+  {
+   "lang": "hi-Latn",
+   "scenario": "bug:wrong_language",
+   "text": "Sab settings mein Hindi select kiya tha, par jab cart open kiya toh ek warning box English mein aaya 'Item out of stock', yeh konsi language hai ye app?"
+  },
+  {
+   "lang": "hi-Latn",
+   "scenario": "bug:cart_screen_reader",
+   "text": "Main screen reader use karta hoon, cart button ko screen reader sirf '2' bol raha hai, samajh nahi aaya yeh kya matlab hai, button ka label kahan gaya?"
+  },
+  {
+   "lang": "hi-Latn",
+   "scenario": "bug:cart_screen_reader",
+   "text": "TalkBack se app chalata hoon, cart icon par jab focus jata hai toh sirf ek number sunai deta hai, 'Cart' ya 'items in cart' nahi bolta, accessibility totally broken hai!"
+  },
+  {
+   "lang": "hi-Latn",
+   "scenario": "bug:stuck_loading",
+   "text": "Orders page khol raha hoon, se loading spinner chala gaya, 10 minute se wahi ka wahi, kuch nahi load ho raha, app restart kiya par wahi situation!"
+  },
+  {
+   "lang": "hi-Latn",
+   "scenario": "bug:stuck_loading",
+   "text": "Purane orders dekhne ki koshish kar raha hoon, par screen par bas gol gol chakki ghum rahi hai, internet bhi theek hai, phir yeh stuck kyun ho raha hai?"
+  },
+  {
+   "lang": "hi-Latn",
+   "scenario": "ux_confusion",
+   "text": "Delivery address change karni thi, par settings mein bhi nahi mila, profile mein bhi nahi, kahan jaye? Ek button bhi nahi dikhai de raha!"
+  },
+  {
+   "lang": "hi-Latn",
+   "scenario": "ux_confusion",
+   "text": "Address update karna chahta hoon, lekin koi option nahi dikhai de raha, sirf 'Save for later' ya 'Edit order' dikhai deta hai, address change kahan se karu?"
+  },
+  {
+   "lang": "hi-Latn",
+   "scenario": "feature_request",
+   "text": "App bahut acchi hai, lekin raat ko dark mode hona chahiye, aankh bhari hoti hai, please add kar do!"
+  },
+  {
+   "lang": "hi-Latn",
+   "scenario": "feature_request",
+   "text": "Cash on delivery option add kar do, kabhi kabhi internet banking fail ho jata hai, COD se paisa dene mein bharosa hai!"
+  },
+  {
+   "lang": "hi-Latn",
+   "scenario": "spam",
+   "text": "Hello bhai, followers badhana hai? yeh link click karo 1000 followers free!"
+  },
+  {
+   "lang": "hi-Latn",
+   "scenario": "spam",
+   "text": "Check out this amazing offer! Buy now and get 50% off! www.fakeshop.com/promo"
+  },
+  {
+   "lang": "ar",
+   "scenario": "bug:otp",
+   "text": "الرمز ما يوصلني أبداً، انتظرت 10 دقائق وظهر لي خطأ 'فشل في الإرسال' كل ما أحاول أسجل دخول"
+  },
+  {
+   "lang": "ar",
+   "scenario": "bug:otp",
+   "text": "ما في كود يصل على الموبايل، حتى بعد ما أعدت تشغيل الهاتف وفتحت التطبيق من جديد، الرسالة ما تجي أبداً"
+  },
+  {
+   "lang": "ar",
+   "scenario": "bug:pay_missing",
+   "text": "أضفت كل اللي أريده للسلة، لكن ما فيه زر دفع يظهر على الشاشة، فقط زر المتابعة للتسوق"
+  },
+  {
+   "lang": "ar",
+   "scenario": "bug:pay_missing",
+   "text": "بعد ما خلصت التسوق، فتحت السلة وما ظهر لي أي زر للدفع، فقط فارغ تحت قائمة المنتجات، ما أقدر أكمل الطلب"
+  },
+  {
+   "lang": "ar",
+   "scenario": "bug:double_charge",
+   "text": "ضغطت على زر الدفع مرتين لأن ما حصل أي رد، وفجأة خصموا مني المبلغ مرتين من البطاقة، وما وصلني أي تأكيد للطلب الأول"
+  },
+  {
+   "lang": "ar",
+   "scenario": "bug:double_charge",
+   "text": "ظننت أن الدفع ما نجح لأن الشاشة froze، فعدت أضغط دفع، وظهر لي إشعارين أن المبلغ اقتطع مرتين، وما في طريقة أرجع الفلوس"
+  },
+  {
+   "lang": "ar",
+   "scenario": "bug:coupon",
+   "text": "الكوبون ظهر فيه الخصم في السلة وظهر لي السعر المخفض، لكن لما وصلت للدفع charged me full price، وما في أي تفسير"
+  },
+  {
+   "lang": "ar",
+   "scenario": "bug:coupon",
+   "text": "وضعت الكوبون وظهر إن فيه 20% خصم، لكن بعد ما ضغطت تأكيد الشراء، فاتوا علي السعر الأصلي كامل، وشعرت إني خُدعت"
+  },
+  {
+   "lang": "ar",
+   "scenario": "bug:wrong_language",
+   "text": "فجأة ظهر لي خطأ بالإنجليزي: 'Network error' رغم أن كل التطبيق بالعربي، وما أقدر أفهم شو المشكلة"
+  },
+  {
+   "lang": "ar",
+   "scenario": "bug:wrong_language",
+   "text": "الرسالة اللي ظهرت بعد ما فشل الطلب كانت بالإنجليزي: 'Invalid token' وكل الواجهة بالعربي، هذا محير ومزعج"
+  },
+  {
+   "lang": "ar",
+   "scenario": "bug:cart_screen_reader",
+   "text": "أنا أستعمل قارئ الشاشة، وزر السلة ما يقرأ إلا كرقم مثل '3' وما يقول 'سلة تسوق فيها 3 منتجات'، ما أقدر أتعامل معه"
+  },
+  {
+   "lang": "ar",
+   "scenario": "bug:cart_screen_reader",
+   "text": "القارئ ما يحدد زر السلة كزر، بل يقرأه كرقم فقط، وما في أي وصف أو تسمية، فعم أعمى عن مكان السلة"
+  },
+  {
+   "lang": "ar",
+   "scenario": "bug:stuck_loading",
+   "text": "صفحة الطلبات ما بتخلص من التحميل، يدور الدوار forever وما في أي طلب يظهر، حتى بعد ما restarted التطبيق"
+  },
+  {
+   "lang": "ar",
+   "scenario": "bug:stuck_loading",
+   "text": "كل ما أفتح صفحة الطلبات يظهر لي loading spinner وما يتغير أبداً، وما في أي رسالة خطأ أو محتوى، بس دوامة لا تنتهي"
+  },
+  {
+   "lang": "ar",
+   "scenario": "ux_confusion",
+   "text": "ما فيه أي عطل، بس أنا ما أقدر ألاقي أين أغير عنوان التوصيل، فتحت كل الإعدادات وما لقيت خيار واضح dafür"
+  },
+  {
+   "lang": "ar",
+   "scenario": "ux_confusion",
+   "text": "عندي عنوان قديم وما أقدر عدله، القوائم كلها متاهة وما في زر أو رابط واضح لتعديل عنوان التسليم"
+  },
+  {
+   "lang": "ar",
+   "scenario": "feature_request",
+   "text": "بدي لو التطبيق يدعم الوضع الداكن، العين بتتعب من الضوء الأبيض خاصة بالليل"
+  },
+  {
+   "lang": "ar",
+   "scenario": "feature_request",
+   "text": "ممكن تضيفوا خاصية الدفع عند الاستلام؟ كثير مننا ما يفضل يستخدم البطاقة على الإنترنت"
+  },
+  {
+   "lang": "ar",
+   "scenario": "spam",
+   "text": "hello"
+  },
+  {
+   "lang": "ar",
+   "scenario": "spam",
+   "text": "اشتروا متابعين الآن من هنا: https://fakefollowers.com"
+  },
+  {
+   "lang": "ur",
+   "scenario": "bug:otp",
+   "text": "OTP nahi a raha, 10 minute se intezaar kar raha hoon, phir error dikhne laga. Kya karun?"
+  },
+  {
+   "lang": "ur",
+   "scenario": "bug:otp",
+   "text": "Code aaya hi nahi, phir 'OTP expired' ka message aaya. Dobara bhejna bhi nahi ho raha."
+  },
+  {
+   "lang": "ur",
+   "scenario": "bug:pay_missing",
+   "text": "Cart mein items add kiye, lekin Pay button dikhai hi nahi de raha. Screen bhar bhar ke dekha, kuch nahi."
+  },
+  {
+   "lang": "ur",
+   "scenario": "bug:pay_missing",
+   "text": "Add to cart karne ke baad sirf Continue Shopping ka option dikhta hai, Pay kahan hai? App gadbad ho gaya hai kya?"
+  },
+  {
+   "lang": "ur",
+   "scenario": "bug:double_charge",
+   "text": "Pay button dabaaya, kuch nahi hua, phir dubara dabaaya. Ab bank statement mein do baar paisa kat gaya. Wapas karo!"
+  },
+  {
+   "lang": "ur",
+   "scenario": "bug:double_charge",
+   "text": "Dabaaya, loading rahi thi, socha nahi hua, phir dubara dabaaya. Ab 2000 rupay do baar kat gaye. Ye kaisa system hai?"
+  },
+  {
+   "lang": "ur",
+   "scenario": "bug:coupon",
+   "text": "Coupon code lagaya, cart mein 20% discount dikhaya gaya, lekin payment page par full price liya gaya. Dhoka hai ye!"
+  },
+  {
+   "lang": "ur",
+   "scenario": "bug:coupon",
+   "text": "SAVE10 lagaya, cart mein 150 rupay ka discount dikha, lekin final amount 150 hi nikla. Coupon ka koi faida nahi."
+  },
+  {
+   "lang": "ur",
+   "scenario": "bug:wrong_language",
+   "text": "App pure Urdu mein chal raha tha, acchanak 'Network Error' ka English message aaya. Main samajh nahi paaya, darr lag gaya."
+  },
+  {
+   "lang": "ur",
+   "scenario": "bug:wrong_language",
+   "text": "Har cheez Urdu mein thi, lekin payment fail hone par 'Invalid Card Number' English mein aaya. Ye kaise ho sakta hai?"
+  },
+  {
+   "lang": "ur",
+   "scenario": "bug:cart_screen_reader",
+   "text": "Main screen reader use karta hoon, cart button ko sirf '3' kehta hai, kya matlab hai? Samajh nahi aata kya add hua hai."
+  },
+  {
+   "lang": "ur",
+   "scenario": "bug:cart_screen_reader",
+   "text": "TalkBack se chalata hoon, cart par jaakar suna '2', lekin kya ye 2 items hain ya kuch aur? Label nahi hai."
+  },
+  {
+   "lang": "ur",
+   "scenario": "bug:stuck_loading",
+   "text": "Orders page kholta hoon, lekin loading spinner abhi tak band nahi ho raha. 15 minute se wahi chak raha hai."
+  },
+  {
+   "lang": "ur",
+   "scenario": "bug:stuck_loading",
+   "text": "Sirf orders page par stuck ho gaya hai, baki sab chal raha hai. Loading icon ghuma raha hai, kuch nahi load ho raha."
+  },
+  {
+   "lang": "ur",
+   "scenario": "ux_confusion",
+   "text": "Delivery address change karni hai, lekin kahan jaye? Settings mein bhi nahi mila, profile mein bhi nahi. Bohat dhundha."
+  },
+  {
+   "lang": "ur",
+   "scenario": "ux_confusion",
+   "text": "Mujhe pata nahi delivery address update kaise karni hai. Koi bhi option nahi dikhta, sirf purana address dikhta hai."
+  },
+  {
+   "lang": "ur",
+   "scenario": "feature_request",
+   "text": "Plz dark mode add kar do, raat ko phone dekhne mein aankhen jalati hain."
+  },
+  {
+   "lang": "ur",
+   "scenario": "feature_request",
+   "text": "Cash on delivery option nahi hai? Sirf online payment, yeh toh bohato ke liye mushkil hai."
+  },
+  {
+   "lang": "ur",
+   "scenario": "spam",
+   "text": "Hello bhai, aapko free followers chahiye? Ye link click karo: bit.ly/followers123"
+  },
+  {
+   "lang": "ur",
+   "scenario": "spam",
+   "text": "Aaj ka special offer: 999 rupay mein iPhone 14! Sirf aaj, offer link: shopnow.xyz"
+  },
+  {
+   "lang": "bn",
+   "scenario": "bug:otp",
+   "text": "ওটিপি কোড আসছে না, ১০ মিনিট অপেক্ষা করার পরও একই ত্রুটি বার্তা দেখাচ্ছে।"
+  },
+  {
+   "lang": "bn",
+   "scenario": "bug:otp",
+   "text": "লগইন করলে ওটিপি পাঠানো হচ্ছে না, স্ক্রিনে 'কোড ব্যর্থ' শুধু দেখাচ্ছে।"
+  },
+  {
+   "lang": "bn",
+   "scenario": "bug:pay_missing",
+   "text": "কার্টে আইটেম যোগ করার পর পে বাটন দেখাচ্ছে না, কেবল খালি স্ক্রিন।"
+  },
+  {
+   "lang": "bn",
+   "scenario": "bug:pay_missing",
+   "text": "ফোনে পে বাটন গायब, আইটেম যোগ করলেও চেকআউট করতে পারছি না।"
+  },
+  {
+   "lang": "bn",
+   "scenario": "bug:double_charge",
+   "text": "পে বাটন দুবার ট্যাপ করলেই কিছু হইনি মনে করে, কিন্তু টাকা দুবার কেটে গেছে।"
+  },
+  {
+   "lang": "bn",
+   "scenario": "bug:double_charge",
+   "text": "প্রথমে পে করলে কোন প্রতিক্রিয়া নেই, দুবার চাপলেই দুবার চার্জ হয়ে গেলো।"
+  },
+  {
+   "lang": "bn",
+   "scenario": "bug:coupon",
+   "text": "কুপন কোড लगালে কার্টে ডিসকাউন্ট দেখাচ্ছিল, কিন্তু পেমেন্টে পুরো দাম নেয়া হয়।"
+  },
+  {
+   "lang": "bn",
+   "scenario": "bug:coupon",
+   "text": "কার্টে ২০% ছাড় দেখাচ্ছিল কুপন, কিন্তু চেকআউটে কোন ছাড় না দেওয়া হয়।"
+  },
+  {
+   "lang": "bn",
+   "scenario": "bug:wrong_language",
+   "text": "এপ Bangla-এ কিন্তু ত্রুটি বার্তা হঠাৎ ইংরেজিতে দেখাচ্ছে 'Network Error'।"
+  },
+  {
+   "lang": "bn",
+   "scenario": "bug:wrong_language",
+   "text": "সকল মেনু বাংলা-এ, কিন্তু একদম সdenly 'Payment Failed' ইংরেজিতে পড়ে।"
+  },
+  {
+   "lang": "bn",
+   "scenario": "bug:cart_screen_reader",
+   "text": "স্ক্রিন রিডার ব্যবহার করলে কার্ট বাটন শুধু '৩' হিসেবে পড়ে, বোঝা যায় না কি কার্ট।"
+  },
+  {
+   "lang": "bn",
+   "scenario": "bug:cart_screen_reader",
+   "text": "কার্ট আইকনকে স্ক্রিন রিডার শুধু সংখ্যা বলে ঘোষণা করে, কোন লেবেল নেই।"
+  },
+  {
+   "lang": "bn",
+   "scenario": "bug:stuck_loading",
+   "text": "অর্ডার পেজে লোডিং স্পিনার éternally ঘুরছে, কেবল সাদা স্ক্রিন।"
+  },
+  {
+   "lang": "bn",
+   "scenario": "bug:stuck_loading",
+   "text": "অর্ডার দেখতে যাওয়ালে লোডিং চক্র বন্ধ হইনি, éternally অপেক্ষা করতে হচ্ছে।"
+  },
+  {
+   "lang": "bn",
+   "scenario": "ux_confusion",
+   "text": "ডেলিভারি ঠিকানা পরিবর্তন করতে চাই কিন্তু খুজে পাই না, কোন সেটিংস মেনু পাই না।"
+  },
+  {
+   "lang": "bn",
+   "scenario": "ux_confusion",
+   "text": "এপে কোথায় ঠিকানা পরিবর্তন করবো বুঝতে পাই না, খুজে খুজে थক গেছি।"
+  },
+  {
+   "lang": "bn",
+   "scenario": "feature_request",
+   "text": "বastra দিতে চাই, দোকানে ডার্ক মোড থাকলে ভালো হত।"
+  },
+  {
+   "lang": "bn",
+   "scenario": "feature_request",
+   "text": "ক্যাশ অন ডেলিভারি অপশন যোগ করলে অনেক সহজ হত, এখনই চাই।"
+  },
+  {
+   "lang": "bn",
+   "scenario": "spam",
+   "text": "hello"
+  },
+  {
+   "lang": "bn",
+   "scenario": "spam",
+   "text": "https://buypfollowers.com/free"
+  },
+  {
+   "lang": "ta",
+   "scenario": "bug:otp",
+   "text": "ஒட்டிபி வரவில்லை, 10 நிமிடம் காத்து இருந்தேன். பிழை வருகிறது: 'OTP expired'. மின்னஞ்சல் மறுபதிவு செய்யினும் இல்லை."
+  },
+  {
+   "lang": "ta",
+   "scenario": "bug:otp",
+   "text": "ஒட்டிபி வரவில்லை. மீண்டும் அனுப்பினும் காத்து இருக்கிறேன். பிழை: 'Network error'. மின்னஞ்சல் மறுபதிவு செய்யினும் இல்லை. துயரமாக இருக்கிறேன்."
+  },
+  {
+   "lang": "ta",
+   "scenario": "bug:pay_missing",
+   "text": "கார்டில் பொருட்கள் சேர்த்து Pay பட்டன் காட்டவில்லை. மட்டுமே 'Continue to payment' என்று தான் காட்டுகிறது. அதை அழுத்தினும் கேட்கப்படவில்லை."
+  },
+  {
+   "lang": "ta",
+   "scenario": "bug:pay_missing",
+   "text": "கார்டில் பொருட்கள் சேர்த்து Pay பட்டன் கிடைக்கவில்லை. மட்டுமே 'View cart' மற்றும் 'Remove' பட்டன்கள் தான். Pay எங்கே இருக்கிறது? தகவல் இல்லை."
+  },
+  {
+   "lang": "ta",
+   "scenario": "bug:double_charge",
+   "text": "Pay பட்டனை இரு முறை அழுத்தினேன், ஏதாவது நடக்கவில்லை என்று நினைத்து. இப்போது இரு முறை கழுவப்பட்டது. மின்னஞ்சலில் இரண்டு பில్లు வருகின்றன. திரும்ப பெற எப்படி?"
+  },
+  {
+   "lang": "ta",
+   "scenario": "bug:double_charge",
+   "text": "Pay பட்டனை இரு முறை அழுத்தினேன், ஏதாவது நடக்கவில்லை. இப்போது இரு முறை கழுவப்பட்டது. மின்னஞ்சலில் இரண்டு பில్లు. தயவுசெய்து ஒரு முறை திரும்பவும்."
+  },
+  {
+   "lang": "ta",
+   "scenario": "bug:coupon",
+   "text": "கூப்பன் கارتில் 20% விற்பனை காட்டியது, ஆனால் திறந்து Pay பட்டனை அழுத்தினும் முழு விலை மட்டுமே கழுவப்பட்டது. கூப்பன் குறியீடு தவறாக இருக்கிறதா?"
+  },
+  {
+   "lang": "ta",
+   "scenario": "bug:coupon",
+   "text": "கூப்பன் கارتில் 100 ரூபாய் விற்பனை காட்டியது, ஆனால் Pay பட்டனை அழுத்தினும் முழு விலை மட்டுமே கழுவப்பட்டது. கூப்பன் செயல்படவில்லை. தகவல் இல்லை."
+  },
+  {
+   "lang": "ta",
+   "scenario": "bug:wrong_language",
+   "text": "அப் பிளிக்கேஷன் தமிழில் இருக்கிறது, ஆனால் தவறான பிழை plötzlich ஆங்கிலத்தில் வருகிறது: 'Payment failed'. இதை எப்படி தமிழில் காணலாம்?"
+  },
+  {
+   "lang": "ta",
+   "scenario": "bug:wrong_language",
+   "text": "அப் பிளிக்கேஷன் தமிழில் இருக்கிறது, ஆனால் பிழை ஆங்கிலத்தில் வருகிறது: 'Invalid coupon'. இதை எப்படி தமிழில் மாற்றலாம்? தகவல் இல்லை."
+  },
+  {
+   "lang": "ta",
+   "scenario": "bug:cart_screen_reader",
+   "text": "நான் ஸ்கிரீன் ரீடரைப் பயன்படுத்துகிறேன். கார்டு பட்டனை எண்ணாக மட்டும் வாசிக்கிறது: '3'. அதில் என்ன உள்ளதோ தெரியவில்லை. லேபেল இல்லை."
+  },
+  {
+   "lang": "ta",
+   "scenario": "bug:cart_screen_reader",
+   "text": "ஸ்கிரீன் ரீடரில் கார்டு பட்டனை எண்ணாக மட்டும் வாசிக்கிறது: '2'. அதில் என்ன உள்ளதோ தெரியவில்லை. ARIA label இல்லை."
+  },
+  {
+   "lang": "ta",
+   "scenario": "bug:stuck_loading",
+   "text": "ஆர்டர் பக்கம் ஏternally loading spinner காட்டுகிறது. 5 நிமிடம் காத்து இருந்தேன். மறுதலும் செயல்படவில்லை."
+  },
+  {
+   "lang": "ta",
+   "scenario": "bug:stuck_loading",
+   "text": "ஆர்டர் பக்கம் loading spinner காட்டி நிறுத்தியுள்ளது. மறுதலும், கேஷ் அழித்தும், இன்டர்நெட் சரிபார்த்தும், இல்லை. எப்போது திறக்கும்?"
+  },
+  {
+   "lang": "ta",
+   "scenario": "ux_confusion",
+   "text": "எனது திறவு முகவரியை எங்கு மாற்றலாம் தெரியவில்லை. சెట్టிங்கில், பروفைலில், ஆர்டர் பக்கத்தில் எல்லாவற்றையும் பார்த்தேன். தகவல் இல்லை."
+  },
+  {
+   "lang": "ta",
+   "scenario": "ux_confusion",
+   "text": "திறவு முகவரியை மாற்ற எங்கு இருக்கிறது தெரியவில்லை. 'Address' என்று தேடினும், 'Edit' பட்டன் கிடைக்கவில்லை. மட்டுமே 'Add new address' தான்."
+  },
+  {
+   "lang": "ta",
+   "scenario": "feature_request",
+   "text": "அப் பிளிக்கேஷனில் Дарк மோட் இருந்தால் நல்லது. இரவு நேரத்தில் வாசிக்க தளர்வு."
+  },
+  {
+   "lang": "ta",
+   "scenario": "feature_request",
+   "text": "நகட் விலக்கில் வாங்கும் விருப்பம் இருந்தால் நல்லது. அப் பிளிக்கேஷனில் இல்லை."
+  },
+  {
+   "lang": "ta",
+   "scenario": "spam",
+   "text": "ஹலோ"
+  },
+  {
+   "lang": "ta",
+   "scenario": "spam",
+   "text": "https://buypopularfollowers.com"
+  },
+  {
+   "lang": "te",
+   "scenario": "bug:otp",
+   "text": "OTP వస్తు లేదు, 10 నిమిషాలు వేచుకున్నాను, ఎరరర్ వస్తుంది. మళ్లీ ప్రయత్నించాను కాదు."
+  },
+  {
+   "lang": "te",
+   "scenario": "bug:otp",
+   "text": "లాగిన్ కోడ్ ఎవరూ వస్తు లేదు, స్క్రీన్‌లో 'సర్వర్ లోపం' వస్తుంది, నెమ్మదిగా నోటిఫికేషన్ కూడా లేదు."
+  },
+  {
+   "lang": "te",
+   "scenario": "bug:pay_missing",
+   "text": "కార్ట్‌లో আইటেম్స్ జోడించాను, కానీ 'పేయ్' బటన్ కనిపించదు, ముందుscroll్ చేసినా లేదు."
+  },
+  {
+   "lang": "te",
+   "scenario": "bug:pay_missing",
+   "text": "ఫోన్‌లో కర్ట్‌లో జోడించిన తర్వాత, 'పేయ్' ఎంపిక కనిపించదు, ముందు వస్తూ ఉండేది కాదు."
+  },
+  {
+   "lang": "te",
+   "scenario": "bug:double_charge",
+   "text": "పేయ్ బటన్ పని చేయలేదు, ద్వితీయంగా ట్యాప్ చేసాను, ఇప్పుడు డబ్బు రెండుసార్లు కట్టబడింది."
+  },
+  {
+   "lang": "te",
+   "scenario": "bug:double_charge",
+   "text": "లోడింగ్ అవుతూpoirింది, ప znovu ట్యాప్ చేసాను, ఇప్పుడు బ్యాంక్‌లో రెండు טרांజక్షన్ చూపుతోంది."
+  },
+  {
+   "lang": "te",
+   "scenario": "bug:coupon",
+   "text": "కూపన్ డిస్కౌంట్ కార్ట్‌లో చూపుతోంది, కానీ చెల్లింపు సమయంలో పూర్తి ధర కట్టబడింది."
+  },
+  {
+   "lang": "te",
+   "scenario": "bug:coupon",
+   "text": "10% ఆఫ్ కూపన్ లాగిన్ చేసి జోడించాను, కానీ ఫైనల్ బిల్‌లో దiscount లేదు, ముందు చూపిపోయింది."
+  },
+  {
+   "lang": "te",
+   "scenario": "bug:wrong_language",
+   "text": "అప్ తెలుగులో ఉంది, కానీ అचानక 'Network Error' అనే ఇంగ్లీష్ సందేశం వస్తుంది, భయపడుతున్నాను."
+  },
+  {
+   "lang": "te",
+   "scenario": "bug:wrong_language",
+   "text": "ఎరరర్ స్క్రీన్ ఇంగ్లీష్‌లో 'Payment Failed' వస్తుంది, అప్ మా భాషలో ఉండాలి, ఇది అసహ్యంగా ఉంది."
+  },
+  {
+   "lang": "te",
+   "scenario": "bug:cart_screen_reader",
+   "text": "స్క్రీన్ రీడర్ ఉపయోగిస్తున్నాను, కార్ట్ బటన్‌ను '5' అని మాత్రమే చదవుతుంది, అర్థం కాదు."
+  },
+  {
+   "lang": "te",
+   "scenario": "bug:cart_screen_reader",
+   "text": "వాయిస్ ओवर్‌లో కార్ట్ আইకన్‌ను సంఖ్యగా మాత్రమే చదవుతుంది, 'కార్ట్' అని చెబు లేదు, నవిగేట్ చేయలేను."
+  },
+  {
+   "lang": "te",
+   "scenario": "bug:stuck_loading",
+   "text": "ఆర్డర్లు పేజీలో లోడింగ్ స్పినర్ Forever చూపుతోంది, ముందు 20 నిమిషాలు వేచుకున్నాను."
+  },
+  {
+   "lang": "te",
+   "scenario": "bug:stuck_loading",
+   "text": "ఆర్డర్స్‌లో లోడింగ్ చక్రం நிறస్థంగా ఉంది, పునःలోడ్ చేసినా మారదు, ఐదోసారి ప్రయత్నించాను."
+  },
+  {
+   "lang": "te",
+   "scenario": "ux_confusion",
+   "text": "డెలివరీ చిరునామా మార్చడానికి ఎక్కడి ఉంది, ఎవరూ చూపలేదు, మెనూలో కనుగొనలేను."
+  },
+  {
+   "lang": "te",
+   "scenario": "ux_confusion",
+   "text": "డెలివరీ అడ్రెస్ అప్‌డేట్ చేయడానికి ఎవరూ ఎంపిక కనిపించదు, సెట్టింగ్స్‌లో కూడా లేదు."
+  },
+  {
+   "lang": "te",
+   "scenario": "feature_request",
+   "text": "డార్క్ మోడ్ ఉండాలి, రాత్రి‌లో చదవడం కష్టం, దయచేసి జోడించండి."
+  },
+  {
+   "lang": "te",
+   "scenario": "feature_request",
+   "text": "క్యాష్ آن్ డెలివరీ ఎంపిక ఉండాలి, కార్డ్ పని చేయకపోవడంతో, ఇది చాలా ఉపయోగకరంగా ఉంటుంది."
+  },
+  {
+   "lang": "te",
+   "scenario": "spam",
+   "text": "హలో, ఫాలోవర్లు కొనడానికి ఈ లింక్ క్లిక్ చేయండి: bit.ly/followers-now"
+  },
+  {
+   "lang": "te",
+   "scenario": "spam",
+   "text": "చాలా సుందరం! ఈ అప్‌ను మీ ఫ్రెండ్లతో షేర్ చేయండి, రీవార్డ్ మਿਲుతుంది."
+  },
+  {
+   "lang": "mr",
+   "scenario": "bug:otp",
+   "text": "ओटीपी येत नाही, 5 मिनिट वाटले पण स्क्रीनवर 'त्रुटी: ओटीपी वैध नाही' दिसतो. कृपया दुरुस्त करा!"
+  },
+  {
+   "lang": "mr",
+   "scenario": "bug:otp",
+   "text": "लॉगिन करण्यासाठी ओटीपी मागितले पण येत नाही, पुढे 'नेटवर्क त्रुटी' दिसतो. फोन चेक केला पण काही येत नाही."
+  },
+  {
+   "lang": "mr",
+   "scenario": "bug:pay_missing",
+   "text": "कार्ट मध्ये आइटम्स जोडले पान पेऐ बटन दिसत नाही. फक्त 'जारी राखा' व 'हटवा' बटन दिसतात, पेऐ कडे जाण्याचा मार्ग काय?"
+  },
+  {
+   "lang": "mr",
+   "scenario": "bug:pay_missing",
+   "text": "पेमेंट पेज ओपन केला पण पेऐ बटन फक्त गायब आहे. स्क्रीन खाली पण काही दिसत नाही, ऐप रीस्टार्ट केला पण सुधारले नाही."
+  },
+  {
+   "lang": "mr",
+   "scenario": "bug:double_charge",
+   "text": "पेऐ बटन दाबले पण काही घटित न झाल्यामुळे पुन्हा दाबला, पण दोन वेळा पैसे कटले. कृपया एका चार्जला परत करा."
+  },
+  {
+   "lang": "mr",
+   "scenario": "bug:double_charge",
+   "text": "पेमेंट प्रक्रिया मध्ये ऐप अटकला पण काही दिसला नाही, त्यामुळे दोन वेळा पेऐ दाबला. अब एकोर्डर पण दोन वेळा चार्ज झाले."
+  },
+  {
+   "lang": "mr",
+   "scenario": "bug:coupon",
+   "text": "कार्ट मध्ये कूपन 20% ऑफ दाखवला पण पेमेंट करते वेळा पूर्ण मूल्य काढला. कूपन कोड अंमलात आला नाही."
+  },
+  {
+   "lang": "mr",
+   "scenario": "bug:coupon",
+   "text": "कूपन लागू केला पण छूट दिसली नाही, पुढे बिल पूर्ण रक्कमचा दिसला. ऐप बग आहे काय?"
+  },
+  {
+   "lang": "mr",
+   "scenario": "bug:wrong_language",
+   "text": "ऐप मराठीत आहे पण अचानक स्क्रीनवर 'Error: Invalid token' इंग्रजीत दिसला. मला इंग्रजी समजत नाही."
+  },
+  {
+   "lang": "mr",
+   "scenario": "bug:wrong_language",
+   "text": "सर्व menyer मराठी आहे पण अचानक 'Payment failed' इंग्रजीत दिसला. भाषा सेटिंग्स मराठी असल्याने हे अजिब आहे."
+  },
+  {
+   "lang": "mr",
+   "scenario": "bug:cart_screen_reader",
+   "text": "स्क्रीन रिडर वापरत आहे पण कार्ट बटन फक्त '3' असे वाचतो, 'कार्ट, 3 आइटम्स' असे नाही. नेव्हिगेशन कठीण होत आहे."
+  },
+  {
+   "lang": "mr",
+   "scenario": "bug:cart_screen_reader",
+   "text": "कार्ट आइकन स्क्रीन रिडरद्वारा फक्त संख्या म्हणून ओळखली जाते, कार्य म्हणजे 'बटण' असे नाही. त्यामुळे मला पटले की हे कार्ट आहे की नाही."
+  },
+  {
+   "lang": "mr",
+   "scenario": "bug:stuck_loading",
+   "text": "आर्डर्स पेज खोलला पण लोडिंग स्पिनर अनंतपaryant चालत राहतो. पुढे काहीही लोड होत नाही, ऐप बंद केला पण वेळा वेळाने होतो."
+  },
+  {
+   "lang": "mr",
+   "scenario": "bug:stuck_loading",
+   "text": "माझे आर्डर्स पहायचे असताना पेज फक्त लोड होऊ लागला पण पूर्ण झाला नाही. 10 मिनिट वाटले पण बदल झाला नाही."
+  },
+  {
+   "lang": "mr",
+   "scenario": "ux_confusion",
+   "text": "डिलिव्हरी पत्ता बदलायचे आहे पण कडे जायचे अजिब नाही. सेटिंग्स, प्रोफाइल, सर्वत्र बघले पण पत्ता संपादित करण्याचा पर्याय दिसत नाही."
+  },
+  {
+   "lang": "mr",
+   "scenario": "ux_confusion",
+   "text": "नवीन पत्ता जोडायचे आहे पण ऐपमध्ये तो विकल्प फक्त शोधता येत नाही. मदत हवी आहे."
+  },
+  {
+   "lang": "mr",
+   "scenario": "feature_request",
+   "text": "कृपया डार्क मोड जोडा, रात्री वेळा ऐप वापरणे नेत्रांशी कष्टदायक होतो."
+  },
+  {
+   "lang": "mr",
+   "scenario": "feature_request",
+   "text": "कॅश ऑन डिलिव्हरी विकल्प उपलब्ध करा, ऑनलाइन पेमेंट करण्याबद्दल मला विसरते."
+  },
+  {
+   "lang": "mr",
+   "scenario": "spam",
+   "text": "नमस्कार, आपला स्वागत आहे! फॉलोअर्स वाढविण्यासाठी हे लिंक भेट द्या: buystars.com"
+  },
+  {
+   "lang": "mr",
+   "scenario": "spam",
+   "text": "हाय, कसे आहात? आजची विशेष पेशकश: फक्त 99 रुपय्यासाठी प्रीमियम सब्सक्रिप्शन. ऑफर चूकवा ना!"
+  },
+  {
+   "lang": "es",
+   "scenario": "bug:otp",
+   "text": "Ya llevo 10 minutos esperando el código y no llega, solo sale un error de tiempo agotado. No puedo entrar a mi cuenta."
+  },
+  {
+   "lang": "es",
+   "scenario": "bug:otp",
+   "text": "El OTP nunca llega, probé reiniciar el teléfono y nada. Aparece un mensaje diciendo que el código expiró aunque nunca lo recibí."
+  },
+  {
+   "lang": "es",
+   "scenario": "bug:pay_missing",
+   "text": "Agregué todo al carrito pero no aparece el botón de Pagar en mi celular, solo veo el total y nada más. ¿Dónde está?"
+  },
+  {
+   "lang": "es",
+   "scenario": "bug:pay_missing",
+   "text": "Después de elegir lo que quiero, no hay forma de pagar porque el botón de Pagar simplemente no está en la pantalla. Es frustrante."
+  },
+  {
+   "lang": "es",
+   "scenario": "bug:double_charge",
+   "text": "Toqué Pagar dos veces porque pensé que no había funcionado y ahora me cobraron el doble. Quiero un reembolso inmediato."
+  },
+  {
+   "lang": "es",
+   "scenario": "bug:double_charge",
+   "text": "Como no pasaba nada al tocar Pagar, lo intenté otra vez y ahora tengo dos cargos idénticos en mi tarjeta. Esto no debería pasar."
+  },
+  {
+   "lang": "es",
+   "scenario": "bug:coupon",
+   "text": "El cupón mostró un 20% de descuento en el carrito pero al final me cobraron el precio completo. ¿Qué pasó con la oferta?"
+  },
+  {
+   "lang": "es",
+   "scenario": "bug:coupon",
+   "text": "Aplicé el código de descuento y se veía el precio reducido, pero al pagar me cobraron lo mismo que antes. Engañoso."
+  },
+  {
+   "lang": "es",
+   "scenario": "bug:wrong_language",
+   "text": "De repente salió un error en inglés diciendo 'Something went wrong' aunque todo el resto de la app está en español. No entendí qué pasó."
+  },
+  {
+   "lang": "es",
+   "scenario": "bug:wrong_language",
+   "text": "Estoy usando la app en español pero apareció un mensaje en inglés que dice 'Payment failed'. No debería pasar esto."
+  },
+  {
+   "lang": "es",
+   "scenario": "bug:cart_screen_reader",
+   "text": "Uso lector de pantalla y el botón del carrito solo se lee como '2' en vez de decir 'carrito con 2 productos'. No sé qué es."
+  },
+  {
+   "lang": "es",
+   "scenario": "bug:cart_screen_reader",
+   "text": "Con TalkBack, el ícono del carrito se anuncia solo como un número, sin contexto. No puedo saber si es el carrito o una notificación."
+  },
+  {
+   "lang": "es",
+   "scenario": "bug:stuck_loading",
+   "text": "La página de mis órdenes se queda cargando para siempre con el girador. Nunca muestra nada, aunque intente recargar."
+  },
+  {
+   "lang": "es",
+   "scenario": "bug:stuck_loading",
+   "text": "Al entrar a ver mis pedidos, solo aparece el círculo de carga y nunca termina. Ya lo intenté tres veces y nada."
+  },
+  {
+   "lang": "es",
+   "scenario": "ux_confusion",
+   "text": "No encuentro dónde cambiar la dirección de entrega. Busqué en perfil, en ajustes, en el carrito y no está nada."
+  },
+  {
+   "lang": "es",
+   "scenario": "ux_confusion",
+   "text": "Quiero actualizar mi dirección para el próximo pedido pero no veo ninguna opción para hacerlo. Está escondido o no existe."
+  },
+  {
+   "lang": "es",
+   "scenario": "feature_request",
+   "text": "Sería genial si tuvieran modo oscuro, es muy cansante usar la app de noche con la pantalla blanca."
+  },
+  {
+   "lang": "es",
+   "scenario": "feature_request",
+   "text": "Ojalá pudieran agregar pago contra entrega, no siempre tengo tarjeta a mano y prefiero pagar en efectivo al recibir."
+  },
+  {
+   "lang": "es",
+   "scenario": "spam",
+   "text": "Hola, ¿cómo estás? Te mando un saludo desde mi tienda virtual."
+  },
+  {
+   "lang": "es",
+   "scenario": "spam",
+   "text": "Consigue 10k seguidores en Instagram al instante, link en mi bio. No es spam, es una oportunidad."
+  },
+  {
+   "lang": "pt",
+   "scenario": "bug:otp",
+   "text": "Já faz 10 minutos que estou esperando o código de confirmação e nada chega. Só aparece um erro dizendo que o tempo expirou. Isso é um absurdo, não consigo acessar minha conta!"
+  },
+  {
+   "lang": "pt",
+   "scenario": "bug:otp",
+   "text": "Tentei logar 3 vezes e o OTP simplesmente não chega no meu celular. Já verifiquei spam, número correto, tudo. O app trava dizendo 'código inválido' mesmo sem eu ter recebido nada. Por favor, arrumem isso!"
+  },
+  {
+   "lang": "pt",
+   "scenario": "bug:pay_missing",
+   "text": "Adicionei tudo ao carrinho, fui finalizar a compra e não tem o botão de Pagar em lugar nenhum. Só aparece o resumo e um espaço vazio embaixo. Como eu pago se o botão some?"
+  },
+  {
+   "lang": "pt",
+   "scenario": "bug:pay_missing",
+   "text": "Depois de escolher os produtos, o botão de pagar some na tela do meu Android. Já reiniciei o app, limpei cache, nada. Só fica o carrinho cheio e eu preso lá, sem jeito de avançar."
+  },
+  {
+   "lang": "pt",
+   "scenario": "bug:double_charge",
+   "text": "Toquei duas vezes no pagar porque achei que não tinha funcionado, e agora fui cobrado duas vezes pelo mesmo pedido. Já vi no extrato: duas cobranças idênticas. Quero o reembolso imediato de um dos valores!"
+  },
+  {
+   "lang": "pt",
+   "scenario": "bug:double_charge",
+   "text": "O app travou no pagamento, toquei de novo com medo de não ter ido, e acabou me cobrando duas vezes. Agora tenho que ligar pro banco pra contestar. Isso é um erro grave, me deixaram no prejuízo!"
+  },
+  {
+   "lang": "pt",
+   "scenario": "bug:coupon",
+   "text": "Apliquei o cupom de 20% e o carrinho mostrou o desconto certo, mas na hora de pagar cobrou o valor cheio. O cupom sumiu do resumo final. Enganação pura!"
+  },
+  {
+   "lang": "pt",
+   "scenario": "bug:coupon",
+   "text": "O desconto apareceu normalmente no carrinho, mas na tela de pagamento o valor voltou ao original. Nenhum aviso de que o cupom expirou ou algo assim. Senti que me enganaram no bico."
+  },
+  {
+   "lang": "pt",
+   "scenario": "bug:wrong_language",
+   "text": "Tava usando o app em português e de repente apareceu um erro em inglês: 'Payment failed. Try again later.' Fiquei confuso, não entendi direito o que aconteceu. Por que muda de idioma assim do nada?"
+  },
+  {
+   "lang": "pt",
+   "scenario": "bug:wrong_language",
+   "text": "Estava finalizando a compra e o app deu uma mensagem de erro toda em inglês, enquanto tudo o mais estava em português. Parece que algum trecho não foi traduzido. Isso deixa a experiência muito ruim."
+  },
+  {
+   "lang": "pt",
+   "scenario": "bug:cart_screen_reader",
+   "text": "Uso leitor de tela e o botão do carrinho só é lido como '2', sem dizer que é carrinho ou que tem dois itens. Não sei se é quantidade, preço ou o que. Precisa ser acessível pra gente que depende disso."
+  },
+  {
+   "lang": "pt",
+   "scenario": "bug:cart_screen_reader",
+   "text": "No meu celular com TalkBack, o ícone do carrinho só anuncia o número de produtos, tipo '3', mas não diz 'carrinho de compras' ou 'botão'. Fico perdido, não sei se é clicável ou o que significa aquele número."
+  },
+  {
+   "lang": "pt",
+   "scenario": "bug:stuck_loading",
+   "text": "Abri a página dos meus pedidos e ficou só o girando de carregamento, sem acabar nunca. Já esperei mais de 5 minutos, saí e entrei de novo, e continua travado. Não consigo ver nada do meu histórico."
+  },
+  {
+   "lang": "pt",
+   "scenario": "bug:stuck_loading",
+   "text": "A tela de pedidos está presa no carregamento infinito. O círculo gira e gira, nada aparece. Já reiniciei o celular, atualizei o app, nada resolve. É como se o servidor tivesse sumido."
+  },
+  {
+   "lang": "pt",
+   "scenario": "ux_confusion",
+   "text": "Quero mudar o endereço de entrega pra próxima compra, mas não encontro onde fazer isso no app. Procurei em perfil, nas configurações, no carrinho… nada. Por que é tão escondido?"
+  },
+  {
+   "lang": "pt",
+   "scenario": "ux_confusion",
+   "text": "Não acho a opção de editar meu endereço de entrega. Já tentei em todos os menus e só consigo ver o atual, mas não mudar. Será que tá em outro lugar ou simplesmente não existe?"
+  },
+  {
+   "lang": "pt",
+   "scenario": "feature_request",
+   "text": "Faltou um modo escuro no app. Fica muito claro à noite e me doeu os olhos. Por favor, adicionem essa opção, tá ficando padrão em todo lugar."
+  },
+  {
+   "lang": "pt",
+   "scenario": "feature_request",
+   "text": "Gostaria de poder pagar na entrega, em dinheiro. Às vezes não quero usar cartão no app ou não tenho limite. Várias lojas já oferecem, por que essa não tem?"
+  },
+  {
+   "lang": "pt",
+   "scenario": "spam",
+   "text": "Oi, tudo bem? Você já conhece o novo app que dá dinheiro por indicar amigos? É só baixar e ganhar R$50 por cada um. Link aqui: ganhe-agora.com"
+  },
+  {
+   "lang": "pt",
+   "scenario": "spam",
+   "text": "Compre 1000 seguidores reais pro seu Instagram hoje só por R$19,90! Entrega em 24h, garantido. Não perca essa promoção relâmpago! www.seguidoresfacil.com"
+  },
+  {
+   "lang": "fr",
+   "scenario": "bug:otp",
+   "text": "J'attends le code OTP depuis 10 minutes, rien n'arrive et l'écran affiche 'Erreur de vérification'. Je ne peux pas me connecter, c'est frustrant !"
+  },
+  {
+   "lang": "fr",
+   "scenario": "bug:otp",
+   "text": "Le code ne vient jamais, même après avoir réessayé 3 fois. Un message d'erreur apparaît : 'Code expiré'. Je suis bloqué dehors, aidez-moi svp."
+  },
+  {
+   "lang": "fr",
+   "scenario": "bug:pay_missing",
+   "text": "J'ai ajouté des articles au panier, mais il n'y a aucun bouton 'Payer' sur mon téléphone. Comment je fais pour finaliser ma commande ?"
+  },
+  {
+   "lang": "fr",
+   "scenario": "bug:pay_missing",
+   "text": "Après avoir mis des choses dans le panier, l'écran reste bloqué sur 'Continuer les achats'. Aucun bouton de paiement n'apparaît, c'est comme si l'appli était cassée."
+  },
+  {
+   "lang": "fr",
+   "scenario": "bug:double_charge",
+   "text": "J'ai tapé deux fois sur 'Payer' parce que rien ne se passait, et maintenant j'ai été prélevé deux fois pour la même commande. J'attends un remboursement urgent."
+  },
+  {
+   "lang": "fr",
+   "scenario": "bug:double_charge",
+   "text": "Le bouton ne réagissait pas, j'ai insisté et j'ai été facturé deux fois. Mon compte montre deux prélèvements identiques pour le même panier. C'est inacceptable."
+  },
+  {
+   "lang": "fr",
+   "scenario": "bug:coupon",
+   "text": "Le coupon affichait -20% dans le panier, mais au moment de payer, j'ai été chargé au prix plein. La réduction a disparu sans explication."
+  },
+  {
+   "lang": "fr",
+   "scenario": "bug:coupon",
+   "text": "J'ai appliqué le code promo, il semblait pris en compte, mais la facture finale ne montre aucune remise. J'ai payé plein pot alors que je croyais économiser."
+  },
+  {
+   "lang": "fr",
+   "scenario": "bug:wrong_language",
+   "text": "Tout d'un coup, un message d'erreur apparaît en anglais : 'Payment failed'. L'appli est pourtant en français, je ne comprends pas ce qui se passe."
+  },
+  {
+   "lang": "fr",
+   "scenario": "bug:wrong_language",
+   "text": "Je suis en train de payer et soudain une alerte en anglais dit 'Invalid card'. Pourquoi l'appli passe à l'anglais alors que je l'ai réglée en français ?"
+  },
+  {
+   "lang": "fr",
+   "scenario": "bug:cart_screen_reader",
+   "text": "J'utilise un lecteur d'écran et le bouton du panier n'est lu que comme '2' au lieu de 'bouton panier, 2 articles'. Je ne sais pas ce que c'est."
+  },
+  {
+   "lang": "fr",
+   "scenario": "bug:cart_screen_reader",
+   "text": "Avec TalkBack, le panier est annoncé uniquement comme un chiffre, sans contexte. Je ne sais pas si c'est un bouton, un indicateur ou quoi que ce soit d'autre."
+  },
+  {
+   "lang": "fr",
+   "scenario": "bug:stuck_loading",
+   "text": "La page des commandes tourne en rond avec le chargement infini. J'attends depuis 5 minutes, rien ne se charge, même après avoir redémarré l'appli."
+  },
+  {
+   "lang": "fr",
+   "scenario": "bug:stuck_loading",
+   "text": "Le spinner de chargement ne disparaît jamais sur la page des commandes. J'ai essayé de fermer et rouvrir l'appli, mais c'est toujours bloqué."
+  },
+  {
+   "lang": "fr",
+   "scenario": "ux_confusion",
+   "text": "Je veux changer mon adresse de livraison mais je ne trouve nulle part où le faire. Je tourne en rond dans les paramètres, rien n'est évident."
+  },
+  {
+   "lang": "fr",
+   "scenario": "ux_confusion",
+   "text": "Où est l'option pour modifier l'adresse de livraison ? Je ne vois rien dans mon compte ni lors du paiement. C'est trop caché."
+  },
+  {
+   "lang": "fr",
+   "scenario": "feature_request",
+   "text": "Serait-il possible d'ajouter un mode sombre ? L'écran blanc la nuit fait mal aux yeux, surtout quand je commande tard."
+  },
+  {
+   "lang": "fr",
+   "scenario": "feature_request",
+   "text": "J'aimerais pouvoir payer en espèces à la livraison. Je n'aime pas donner ma carte en ligne, ça me rassurerait beaucoup."
+  },
+  {
+   "lang": "fr",
+   "scenario": "spam",
+   "text": "hello"
+  },
+  {
+   "lang": "fr",
+   "scenario": "spam",
+   "text": "Cliquez ici pour acheter 10k abonnés Instagram : https://fakefollowers.com"
+  },
+  {
+   "lang": "de",
+   "scenario": "bug:otp",
+   "text": "Ich warte schon 10 Minuten auf den OTP-Code zum Einloggen, aber er kommt einfach nicht. Dann erscheint nur eine Fehlermeldung: 'Code ungültig oder abgelaufen'. Das ist zum Verzweifeln!"
+  },
+  {
+   "lang": "de",
+   "scenario": "bug:otp",
+   "text": "Nach dem Eingeben meiner Handynummer kommt kein Bestätigungscode. Ich habe es fünfmal versucht, immer nur der Ladekreis und dann Fehler. Ich kann mich nicht einloggen!"
+  },
+  {
+   "lang": "de",
+   "scenario": "bug:pay_missing",
+   "text": "Ich habe alles in den Warenkorb gelegt, aber es gibt keinen 'Jetzt bezahlen'-Button auf meinem Handy. Nur ein leeres Feld unten. Wie soll ich denn bezahlen?"
+  },
+  {
+   "lang": "de",
+   "scenario": "bug:pay_missing",
+   "text": "Nachdem ich Artikel ausgewählt habe, erscheint kein Zahlungsbutton. Ich scrolle hoch und runter, aber nichts. Die App scheint kaputt zu sein."
+  },
+  {
+   "lang": "de",
+   "scenario": "bug:double_charge",
+   "text": "Ich habe zweimal auf 'Bezahlen' getippt, weil nichts passierte, und jetzt wurde mir der Betrag doppelt abgebucht. Ich habe nur eine Bestellung gemacht!"
+  },
+  {
+   "lang": "de",
+   "scenario": "bug:double_charge",
+   "text": "Nach dem ersten Tap auf Bezahlen passierte nichts, also habe ich nochmal getippt. Jetzt sehe ich zwei Belastungen auf meinem Konto. Das ist ein Fehler!"
+  },
+  {
+   "lang": "de",
+   "scenario": "bug:coupon",
+   "text": "Der Gutschein zeigte im Warenkorb 20% Rabatt an, aber beim Bezahlen wurde der volle Preis berechnet. Der Rabatt wurde einfach ignoriert."
+  },
+  {
+   "lang": "de",
+   "scenario": "bug:coupon",
+   "text": "Ich habe den Rabattcode eingegeben, er wurde akzeptiert und der Preis im Cart war reduziert. Doch bei der Zahlung stand plötzlich der Originalpreis. Das ist unfair!"
+  },
+  {
+   "lang": "de",
+   "scenario": "bug:wrong_language",
+   "text": "Plötzlich erscheint eine Fehlermeldung auf Englisch: 'Something went wrong', obwohl meine ganze App auf Deutsch ist. Ich verstehe nicht, was los ist."
+  },
+  {
+   "lang": "de",
+   "scenario": "bug:wrong_language",
+   "text": "Warum bekomme ich plötzlich eine englische Error-Nachricht? Ich habe die Sprache nie geändert. Das ist verwirrend und unprofessionell."
+  },
+  {
+   "lang": "de",
+   "scenario": "bug:cart_screen_reader",
+   "text": "Ich nutze einen Screenreader und der Warenkorb-Button wird nur als 'Zahl 3' vorgelesen, nicht als Button oder mit Beschreibung. Ich kann nicht erkennen, dass es der Warenkorb ist."
+  },
+  {
+   "lang": "de",
+   "scenario": "bug:cart_screen_reader",
+   "text": "Beim Durchgehen mit VoiceOver wird der Einkaufswagen nur als Nummer angesagt, ohne Kontext. Ich weiß nicht, ob ich dort hineingehen soll oder was es bedeutet."
+  },
+  {
+   "lang": "de",
+   "scenario": "bug:stuck_loading",
+   "text": "Die Bestellseite zeigt nur einen endlosen Ladekreis an. Ich warte schon Minuten, aber nichts lädt. Ich kann meine alten Bestellungen nicht einsehen."
+  },
+  {
+   "lang": "de",
+   "scenario": "bug:stuck_loading",
+   "text": "Seit dem Update hängt sich die Orders-Seite immer beim Laden auf. Der Spinner dreht sich ewig, kein Inhalt kommt. Ich muss die App neu starten."
+  },
+  {
+   "lang": "de",
+   "scenario": "ux_confusion",
+   "text": "Ich möchte meine Lieferadresse ändern, aber ich finde einfach keinen Menüpunkt dafür. Wo ist die Option versteckt?"
+  },
+  {
+   "lang": "de",
+   "scenario": "ux_confusion",
+   "text": "Ich habe gesucht, aber ich kann nirgendwo meine Adresse bearbeiten. Ist das überhaupt möglich oder muss ich jedes Mal neu eingeben?"
+  },
+  {
+   "lang": "de",
+   "scenario": "feature_request",
+   "text": "Es wäre wirklich schön, wenn ihr einen Dark Mode hinzufügen könnt. Der helle Bildschirm blendet mich abends total."
+  },
+  {
+   "lang": "de",
+   "scenario": "feature_request",
+   "text": "Ich würde gerne per Nachnahme bezahlen können. Warum bietet ihr das nicht an? Viele andere Shops machen das doch."
+  },
+  {
+   "lang": "de",
+   "scenario": "spam",
+   "text": "Hey, schau mal hier: https://buypfollowers.com - 1000 Follower für 1€! Angebot nur heute!"
+  },
+  {
+   "lang": "de",
+   "scenario": "spam",
+   "text": "Hallo, wie geht's? Ich wollte nur mal Hallo sagen. Schönen Tag noch!"
+  },
+  {
+   "lang": "id",
+   "scenario": "bug:otp",
+   "text": "Kode OTP tidak pernah masuk, udah nunggu 10 menit terus muncul error 'gagal verifikasi'."
+  },
+  {
+   "lang": "id",
+   "scenario": "bug:otp",
+   "text": "Nunggu OTP dari tadi pagi, tidak ada sama sekali, malah keluar notif 'koneksi server timeout'."
+  },
+  {
+   "lang": "id",
+   "scenario": "bug:pay_missing",
+   "text": "Sudah tambahin barang ke keranjang, tapi tombol Bayar hilang kok, cuma ada tulisan 'Lanjutkan belanja'."
+  },
+  {
+   "lang": "id",
+   "scenario": "bug:pay_missing",
+   "text": "Di hp saya setelah checkout tidak ada tombol Bayar, hanya gambar keranjang yang masih bisa diklik tapi tidak ngaruh."
+  },
+  {
+   "lang": "id",
+   "scenario": "bug:double_charge",
+   "text": "Saya tekan tombol Bayar dua kali karena tidak ada respon, eh ternyata terpotong dua kali dari saldo dompet digital."
+  },
+  {
+   "lang": "id",
+   "scenario": "bug:double_charge",
+   "text": "Karena tampilan loading lama, saya klik Bayar lagi, dan sekarang tagihan saya dua kali lipat untuk pesanan yang sama."
+  },
+  {
+   "lang": "id",
+   "scenario": "bug:coupon",
+   "text": "Kupon diskon 20% muncul di keranjang, tapi pas checkout tagihannya tetap harga penuh, tidak ada potongan."
+  },
+  {
+   "lang": "id",
+   "scenario": "bug:coupon",
+   "text": "Saya pakai kode promo, tampilannya menunjukkan harga sudah diskon, tapi pembayaran akhir menunjukkan harga asli tanpa potongan."
+  },
+  {
+   "lang": "id",
+   "scenario": "bug:wrong_language",
+   "text": "Tiba-tiba muncul pesan error dalam bahasa Inggris: 'Payment failed', padahal saya pakai aplikasi dalam Bahasa Indonesia seluruhnya."
+  },
+  {
+   "lang": "id",
+   "scenario": "bug:wrong_language",
+   "text": "Notifikasi gagal login berbahasa Inggris 'Invalid credentials', padahal menu dan tulisan lain semua dalam Bahasa Indonesia."
+  },
+  {
+   "lang": "id",
+   "scenario": "bug:cart_screen_reader",
+   "text": "Saya pakai screen reader, tombol keranjang hanya dibaca sebagai 'angka 3', tidak ada keterangan seperti 'keranjang belanja'."
+  },
+  {
+   "lang": "id",
+   "scenario": "bug:cart_screen_reader",
+   "text": "Screen reader saya hanya mengumandangkan jumlah item di keranjang, misalnya 'dua', tanpa menjelaskan bahwa itu adalah tombol keranjang."
+  },
+  {
+   "lang": "id",
+   "scenario": "bug:stuck_loading",
+   "text": "Halaman pesanan saya hanya menampilkan loading spinner yang terus berputar, tidak pernah selesai meski sudah saya tunggu lebih dari 5 menit."
+  },
+  {
+   "lang": "id",
+   "scenario": "bug:stuck_loading",
+   "text": "Setelah saya login, halaman riwayat pesanan hanya menunjukkan lingkaran loading, tidak ada daftar pesanan yang muncul sama sekali."
+  },
+  {
+   "lang": "id",
+   "scenario": "ux_confusion",
+   "text": "Saya mau ubah alamat pengiriman tapi tidak tahu harus cari di mana, sudah coba cari di profil dan pengaturan tapi tidak ketemu."
+  },
+  {
+   "lang": "id",
+   "scenario": "ux_confusion",
+   "text": "Di aplikasi ini saya tidak bisa menemukan tempat untuk mengedit alamat rumah, padahal saya mau pesan lagi dengan alamat yang berbeda."
+  },
+  {
+   "lang": "id",
+   "scenario": "feature_request",
+   "text": "Mohon ditambahkan fitur dark mode biar lebih nyaman dipakai di malam hari, atau opsi pembayaran cash on delivery."
+  },
+  {
+   "lang": "id",
+   "scenario": "feature_request",
+   "text": "Saya harap aplikasi ini bisa memiliki mode gelap dan juga menerima pembayaran tunai saat pengiriman seperti toko lain."
+  },
+  {
+   "lang": "id",
+   "scenario": "spam",
+   "text": "Halo, ada yang mau beli follower Instagram murah? Klik link di bawah ini!"
+  },
+  {
+   "lang": "id",
+   "scenario": "spam",
+   "text": "Promo spesial: dapatkan bonus cashback 50% hanya hari ini, daftar sekarang di situs partner kami."
+  },
+  {
+   "lang": "sw",
+   "scenario": "bug:otp",
+   "text": "Nimejaribu kuingia kila saa siku hii lakini OTP haijatokea tu, baada ya kutaka muda mrefu unajaza error ya 'timeout'. Tafadhali msaidie!"
+  },
+  {
+   "lang": "sw",
+   "scenario": "bug:otp",
+   "text": "OTP ya kupatikana haijafika kwa simu yangu, nimejaribu tatu mara lakini tuona ujumbe wa 'kodha haijafiki'. Nimechoka!"
+  },
+  {
+   "lang": "sw",
+   "scenario": "bug:pay_missing",
+   "text": "Nimeongeza bidhaa kwenye karafu lakini hakuna kifungu cha 'Lipa' kuelekea kwenye simu yangu, nini kinachotokea?"
+  },
+  {
+   "lang": "sw",
+   "scenario": "bug:pay_missing",
+   "text": "Baada ya kuweka mali yote kwenye karafu, hakuna kifungu cha kulipa, tuona tu picha za bidhaa. Je, ni tatizo au ninahitaji kufanya nini?"
+  },
+  {
+   "lang": "sw",
+   "scenario": "bug:double_charge",
+   "text": "Nimepiga kifungu cha 'Lipa' mara mbili kwa sababu hakuna kile kilichotokea baada ya kwanza, sasa nimechukuliwa pesa mara mbili kwa zawadi moja!"
+  },
+  {
+   "lang": "sw",
+   "scenario": "bug:double_charge",
+   "text": "Nilikwenda kulipa, hakuna mabadiliko, nipige tena, sasa nimepata teksti za kulipa mbili kwa zawadi moja. Ni kosa gani?"
+  },
+  {
+   "lang": "sw",
+   "scenario": "bug:coupon",
+   "text": "Kuponi ilionyesha kupunguza kwenye karafu lakini baada ya kulipa nimechukuliwa bei kamili. Je, kuponi haikuwezesha?"
+  },
+  {
+   "lang": "sw",
+   "scenario": "bug:coupon",
+   "text": "Nimeweka kodi ya kupunguza, ilionyesha bei mpya lakini baada ya kulipa bei ilirudi kama kama ilivyo awali. Tafadhali tazama tatizo hilo!"
+  },
+  {
+   "lang": "sw",
+   "scenario": "bug:wrong_language",
+   "text": "Nimepiga simu ya programu na baadaye ninaona ujumbe wa kutoka kwa kisungu: 'Error 404' lakini programu yangu iko kiswahili. Nini kinachotokea?"
+  },
+  {
+   "lang": "sw",
+   "scenario": "bug:wrong_language",
+   "text": "Programu yangu iko kiswahili lakini baada ya kusubmitu order, ninaona ujumbe wa kisungu: 'Payment failed'. Je, ni kosa au ninahitaji kubadilisha lugha?"
+  },
+  {
+   "lang": "sw",
+   "scenario": "bug:cart_screen_reader",
+   "text": "Ninatumia screen reader na kifungu cha karafu kinasomwa tu kama namba, sijawezi kujua ni kifungu cha karafu. Tafadhali badilie kueleweka kwa kila kipande."
+  },
+  {
+   "lang": "sw",
+   "scenario": "bug:cart_screen_reader",
+   "text": "Kwa sababu ninatumia teknolojia ya kusoma skiri, kifungu cha karafu kinanisomwa tu kama '3' bila maana. Je, ni kufanyiwa kama kifungu au ni tu namba?"
+  },
+  {
+   "lang": "sw",
+   "scenario": "bug:stuck_loading",
+   "text": "Nimepiga kwenye ukurasa wa maagizo lakini mwindaji wa loading unapiga daima, hakuna kitu kinachotoka au ujumbe wa kesho. Nimechoka kukuanga."
+  },
+  {
+   "lang": "sw",
+   "scenario": "bug:stuck_loading",
+   "text": "Ukurasa wa maagizo unanipiga loading spinner saa zote, hakuna maagizo yanayotokana, hakuna ujumbe wa kesho. Je, ni tatizo au ninahitaji kufanya nini?"
+  },
+  {
+   "lang": "sw",
+   "scenario": "ux_confusion",
+   "text": "Ninataka kubadilie anwani ya kuwekelea lakini sinawezi kupata kifungu au menu yake. Tafadhali nionyeshe wapi ni kuelekea."
+  },
+  {
+   "lang": "sw",
+   "scenario": "ux_confusion",
+   "text": "Nimeangalia programu yote lakini sinawezi kupata kile kinacholenga kubadilisha anwani ya kuwekelea. Tafadhali nisaidie kuelekea."
+  },
+  {
+   "lang": "sw",
+   "scenario": "feature_request",
+   "text": "Nataka programu iwe na kiini cha kidark au wewe uweze kulipa pesa kwa mkono baada ya kuleta zawadi. Ni kifupi kile kinachotaka."
+  },
+  {
+   "lang": "sw",
+   "scenario": "feature_request",
+   "text": "Je, wewe ungeweza kuongeza kiini cha kidark au kutoa mpango wa kulipa pesa kwa mkono? Nitafurahia sana kuelewa."
+  },
+  {
+   "lang": "sw",
+   "scenario": "spam",
+   "text": "Hello, check this link to get more followers fast: buystars.com"
+  },
+  {
+   "lang": "sw",
+   "scenario": "spam",
+   "text": "Free gift! Click here to claim your prize now: winphone.xyz"
+  },
+  {
+   "lang": "tr",
+   "scenario": "bug:otp",
+   "text": "Giriş yapmak için kod bekliyorum ama hiç gelmiyor, 10 dakikadan uzun süredir bekliyorum ve ekranda hata mesajı çıkıyor. Lütfen yardımcı olun!"
+  },
+  {
+   "lang": "tr",
+   "scenario": "bug:otp",
+   "text": "OTP kodu gelmiyor, sürekli 'kod gönderilemedi' hatası alıyorum. Telefonumda sinyal var ama uygulama kod göndermiyor, çok sinir bozucu!"
+  },
+  {
+   "lang": "tr",
+   "scenario": "bug:pay_missing",
+   "text": "Sepete ürün ekledim ama ödeme butonu görünmüyor, sadece sepetteki ürünler listeleniyor. Telefonumda ekranı büyüttüm de olmadı, nereden ödeyeceğimi bulamadım."
+  },
+  {
+   "lang": "tr",
+   "scenario": "bug:pay_missing",
+   "text": "Alışverişimi tamamladım fakat 'Öde' butonu telefonumda yok, sadece 'Sepeti Görüntüle' ve 'Devam Et' gibi seçenekler var. Bu bir hata mı yoksa ben mi qualcosa yapamadım?"
+  },
+  {
+   "lang": "tr",
+   "scenario": "bug:double_charge",
+   "text": "Ödeme butonuna iki kez bastım çünkü bir şey olmuyordu ve şimdi iki kez ücret alındı. Hesabımda iki kez aynı tutar düşmüş, lütfen birini iade edin."
+  },
+  {
+   "lang": "tr",
+   "scenario": "bug:double_charge",
+   "text": "Ödeme yaparken buton tepkisiz kaldı, ikinci kez denedim ve iki kez faturalandırıldım. Banka bildirimimde iki ayrı işlem görünüyor, bu çok rahatsız edici."
+  },
+  {
+   "lang": "tr",
+   "scenario": "bug:coupon",
+   "text": "Sepette kupon indirimi gösteriyordu ama ödeme ekranına geldimde tam fiyat alındı. Kupon kodu doğruydı ama indirim uygulanmadı, bu çok kafa karıştırıcı."
+  },
+  {
+   "lang": "tr",
+   "scenario": "bug:coupon",
+   "text": "İndirim kuponu sepette %20 gösteriyordu ama ödeme yapınca indirim yoktu, tam ödeme yaptım. Kupon geçerliydi ama sistem onu tanımadı, lütfen düzeltin."
+  },
+  {
+   "lang": "tr",
+   "scenario": "bug:wrong_language",
+   "text": "Uygulamam Türkçe ama aniden bir hata mesajı İngilizce çıktı: 'Error 404: Not Found'. Dil ayarlarımda her şey Türkçe, bu çok tuhaf."
+  },
+  {
+   "lang": "tr",
+   "scenario": "bug:wrong_language",
+   "text": "Sepetteyken hata mesajı plötzlich İngilizce olarak gösterildi: 'Something went wrong'. Uygulamayı yeniden başlattım da dil değişmedi, sadece bu mesaj İngilizceydi."
+  },
+  {
+   "lang": "tr",
+   "scenario": "bug:cart_screen_reader",
+   "text": "Ekran okuyucu kullanıyorum ve sepet butonu sadece '2' olarak okunuyor, neyin 2 olduğunu söylemiyor. Butonun ne işe yaradığını anlamak zor, lütfen etiket ekleyin."
+  },
+  {
+   "lang": "tr",
+   "scenario": "bug:cart_screen_reader",
+   "text": "VoiceOver ile sepet simgesini tıkladım ama sadece '3' sayı okundu, 'sepet' veya '3 ürün' gibi bir açıklama yok. Bu erişilebilirlik sorunu yapıyor beni çok zor durumda bırakıyor."
+  },
+  {
+   "lang": "tr",
+   "scenario": "bug:stuck_loading",
+   "text": "Siparişlerim sayfası sürekli döngüde bekleme çarkı gösteriyor, asla yüklenmiyor. Uygulamayı kapatıp açtım da aynı sorun devam ediyor, geçmiş siparişlerimi göremiyorum."
+  },
+  {
+   "lang": "tr",
+   "scenario": "bug:stuck_loading",
+   "text": "Geçmiş siparişlerime girince ekran sonsuz loading gösteriyor, hiçbir şey yüklenmiyor. İnternetim iyi ama uygulama takılı kalmış gibi, bu çok sinir bozucu."
+  },
+  {
+   "lang": "tr",
+   "scenario": "ux_confusion",
+   "text": "Teslimat adresimi değiştirmek istiyorum ama nereden yapabileceğimi bulamadım. Profilimde, ayarlarda, siparişlerde aradım ama adres değiştirme seçeneği yoktu."
+  },
+  {
+   "lang": "tr",
+   "scenario": "ux_confusion",
+   "text": "Adresimi güncellemek için menüyü gezdim ama bulamadım, sadece mevcut adresimi görüyorum. 'Adres Ekle' veya 'Düzenle' gibi bir buton yok, bu çok kafa karıştırıcı."
+  },
+  {
+   "lang": "tr",
+   "scenario": "feature_request",
+   "text": "Uygulamada karanlık mod olsa çok iyi olur, gece alışveriş yaparken gözlerim yoruluyor. Ayrıca nakit ödeme seçeneği de eklerseniz harika olur."
+  },
+  {
+   "lang": "tr",
+   "scenario": "feature_request",
+   "text": "Karanlık tema ekleyebilir misiniz? Gün içinde de açık mod zorlayıcı oluyor. Ayrıca kapıda ödeme seçeneği de olsa, kart kullanmayanlar için çok faydalı olur."
+  },
+  {
+   "lang": "tr",
+   "scenario": "spam",
+   "text": "Selamlar! Takipçi satın almak için buraya tıklayın: https://fakefollowers.link"
+  },
+  {
+   "lang": "tr",
+   "scenario": "spam",
+   "text": "hello buyrun link: https://scamshop.xyz indirim kuponu"
+  },
+  {
+   "lang": "vi",
+   "scenario": "bug:otp",
+   "text": "Mình chờ mã OTP mãi không thấy, sau 5 phút hiện lỗi 'Không thể xác thực'. Lần này cũng vậy, app lỗi liên tục!"
+  },
+  {
+   "lang": "vi",
+   "scenario": "bug:otp",
+   "text": "Mã xác nhận không gửi đến SMS cả, mình đã thử lại 3 lần nhưng vẫn không có gì. Sau khi chờ lâu hiện thông báo lỗi mạng, nhưng mạng mình ổn định lắm."
+  },
+  {
+   "lang": "vi",
+   "scenario": "bug:pay_missing",
+   "text": "Sau khi thêm sản phẩm vào giỏ, mình không thấy nút Thanh toán ở đâu cả, chỉ có nút Quay lại và Xóa. Mình dùng điện thoại Android, phiên bản app mới nhất."
+  },
+  {
+   "lang": "vi",
+   "scenario": "bug:pay_missing",
+   "text": "Mình đã chọn hàng xong nhưng màn hình chỉ hiện tổng tiền và nút Tiếp tục mua sắm, không có nút Thanh toán để hoàn đơn. Mình đã thoát ra vào lại nhiều lần vẫn vậy."
+  },
+  {
+   "lang": "vi",
+   "scenario": "bug:double_charge",
+   "text": "Mình thấy nút Thanh toán không phản hồi nên bấm 2 lần, kết quả bị trừ 2 lần tiền đầy đủ. Lịch sử giao dịch hiện 2 đơn cùng mã, nhưng mình chỉ nhận được 1 đơn hàng."
+  },
+  {
+   "lang": "vi",
+   "scenario": "bug:double_charge",
+   "text": "Lần đầu bấm Thanh toán không có gì xảy ra nên mình bấm lại, sau đó thấy tin nhắn từ ngân hàng về 2 lần trừ tiền. App không hiển thị bất kỳ thông báo lỗi nào sau lần bấm đầu."
+  },
+  {
+   "lang": "vi",
+   "scenario": "bug:coupon",
+   "text": "Trong giỏ hàng mã giảm giá SHOW20 đã áp dụng và hiện giảm 20%, nhưng khi thanh toán lại được tính giá đầy đủ, không có bất kỳ giảm giá nào."
+  },
+  {
+   "lang": "vi",
+   "scenario": "bug:coupon",
+   "text": "Mình đã nhập coupon và thấy tổng tiền giảm xuống, nhưng sau khi xác nhận thanh toán, số tiền cuối cùng lại quay về giá gốc. Mình cảm thấy bị lừa."
+  },
+  {
+   "lang": "vi",
+   "scenario": "bug:wrong_language",
+   "text": "Đang dùng app bằng tiếng Việt nhưng đột nhiên hiện ra lỗi 'Network error. Please try again.' bằng tiếng Anh, làm mình rất bối rối vì không hiểu ý nghĩa."
+  },
+  {
+   "lang": "vi",
+   "scenario": "bug:wrong_language",
+   "text": "Màn hình xác nhận đơn hàng đột nhiên chuyển sang tiếng Anh với chữ 'Payment failed', trong khi toàn bộ app trước đó vẫn là tiếng Việt. Mình không biết phải làm gì tiếp theo."
+  },
+  {
+   "lang": "vi",
+   "scenario": "bug:cart_screen_reader",
+   "text": "Mình sử dụng TalkBack để đọc màn hình, nút giỏ hàng chỉ được đọc là '2' thay vì 'Nút giỏ hàng, 2 sản phẩm', khiến mình không biết đó là nút bấm gì."
+  },
+  {
+   "lang": "vi",
+   "scenario": "bug:cart_screen_reader",
+   "text": "Khi duyệt bằng VoiceOver, giỏ hàng được báo là chỉ một con số mà không có mô tả hành động, mình không thể biết đó là nút để vào giỏ hàng hay chỉ hiển thị số lượng."
+  },
+  {
+   "lang": "vi",
+   "scenario": "bug:stuck_loading",
+   "text": "Trang đơn hàng của mình chỉ hiện biểu tượng loading tròn mãi không tắt, mình đã chờ hơn 10 phút nhưng vẫn không thấy danh sách đơn hàng nào xuất hiện."
+  },
+  {
+   "lang": "vi",
+   "scenario": "bug:stuck_loading",
+   "text": "Mỗi lần vào mục Đơn hàng, app chỉ quay loading vô tận, không có thông báo lỗi hoặc nội dung nào. Mình đã khởi động lại điện thoại nhưng vẫn không khắc phục được."
+  },
+  {
+   "lang": "vi",
+   "scenario": "ux_confusion",
+   "text": "Mình muốn thay đổi địa chỉ giao hàng nhưng tìm遍 toàn bộ app cũng không thấy nơi để sửa. Các mục như Tài khoản, Đơn hàng đều không có tùy chọn này."
+  },
+  {
+   "lang": "vi",
+   "scenario": "ux_confusion",
+   "text": "Sau khi đặt hàng, mình nhận ra địa chỉ sai nhưng không biết đi vào đâu để cập nhật. Mình đã tìm trong Cài đặt, Hồ sơ và Lịch sử mua sắm nhưng đều không thấy."
+  },
+  {
+   "lang": "vi",
+   "scenario": "feature_request",
+   "text": "Mình rất muốn app có chế độ tối để dùng vàoกลางคืm không làm hại mắt, hiện tại màn hình quá sáng khi dùng trong phòng tối."
+  },
+  {
+   "lang": "vi",
+   "scenario": "feature_request",
+   "text": "Mong shop sẽ thêm tính năng thanh toán khi nhận hàng (COD) vì mình không thích để thông tin thẻ trên app, cảm thấy an toàn hơn khi trả tiền trực tiếp."
+  },
+  {
+   "lang": "vi",
+   "scenario": "spam",
+   "text": "Xin chào, bạn có muốn tăng follower trên Instagram không? Liên hệ ngay để được giá rẻ nhất!"
+  },
+  {
+   "lang": "vi",
+   "scenario": "spam",
+   "text": "hello, click here to get free diamonds in your game: https://scam-link.xyz"
+  },
+  {
+   "lang": "ru",
+   "scenario": "bug:otp",
+   "text": "Код не приходит уже 10 минут, жду, а потом пишет ошибку 'время истекло'. Опять не могу зайти!"
+  },
+  {
+   "lang": "ru",
+   "scenario": "bug:otp",
+   "text": "СМС с кодом не приходит, хотя номер правильный. После ожидания — ошибка сервера. Это уже второй раз за день!"
+  },
+  {
+   "lang": "ru",
+   "scenario": "bug:pay_missing",
+   "text": "Добавил всё в корзину, но кнопки 'Оплатить' нет! Только пустое место. Как теперь платить?"
+  },
+  {
+   "lang": "ru",
+   "scenario": "bug:pay_missing",
+   "text": "После добавления товаров в корзину на телефоне нет кнопки оплаты. Только продолжать покупки. Где она?"
+  },
+  {
+   "lang": "ru",
+   "scenario": "bug:double_charge",
+   "text": "Нажал 'Оплатить' два раза, потому что ничего не происходило, и теперь списали деньги дважды! Верните одну оплату!"
+  },
+  {
+   "lang": "ru",
+   "scenario": "bug:double_charge",
+   "text": "Думаю, что заказ не прошёл, нажал оплату ещё раз — и теперь два списания за один заказ. Это ошибка или моя вина?"
+  },
+  {
+   "lang": "ru",
+   "scenario": "bug:coupon",
+   "text": "В корзине показалось, что купон сработал — скидка 20%, но при оплате взяли полную цену. Обман?"
+  },
+  {
+   "lang": "ru",
+   "scenario": "bug:coupon",
+   "text": "Скидка по промокоду отображалась в корзине, но при оплате исчезла и начислили полную сумму. Почему так?"
+  },
+  {
+   "lang": "ru",
+   "scenario": "bug:wrong_language",
+   "text": "Всё время пользовался приложением на русском, а тут вдруг ошибка на английском: 'Something went wrong'. Почему так?"
+  },
+  {
+   "lang": "ru",
+   "scenario": "bug:wrong_language",
+   "text": "Выдало ошибку на английском языке, хотя я никогда не менял язык интерфейса. Это сбой?"
+  },
+  {
+   "lang": "ru",
+   "scenario": "bug:cart_screen_reader",
+   "text": "Я пользуюсь скринридером, и кнопка корзины читается только как '2' — без описания. Не понимаю, что это за элемент."
+  },
+  {
+   "lang": "ru",
+   "scenario": "bug:cart_screen_reader",
+   "text": "Скринридер не озвучивает кнопку корзины как кнопку, только произносит число товаров. Не могу ориентироваться в интерфейсе."
+  },
+  {
+   "lang": "ru",
+   "scenario": "bug:stuck_loading",
+   "text": "Страница с заказами показывает только крутящийся спиннер уже пять минут. Никаких заказов не видно, не могу ничего сделать."
+  },
+  {
+   "lang": "ru",
+   "scenario": "bug:stuck_loading",
+   "text": "Бесконечная загрузка на странице заказов. Спиннер крутится, но ничего не загружается. Перезапуск не помогает."
+  },
+  {
+   "lang": "ru",
+   "scenario": "ux_confusion",
+   "text": "Не могу найти, где изменить адрес доставки. Ищу везде в профиле и при оформлении — нигде нет такой опции."
+  },
+  {
+   "lang": "ru",
+   "scenario": "ux_confusion",
+   "text": "Хочу поменять адрес доставки, но не вижу кнопки или меню для этого. Где оно спрятано?"
+  },
+  {
+   "lang": "ru",
+   "scenario": "feature_request",
+   "text": "Очень не хватает тёмной темы в приложении. Глаза устают ночью при белом фоне."
+  },
+  {
+   "lang": "ru",
+   "scenario": "feature_request",
+   "text": "Было бы здорово добавить оплату наличными при доставке. Не всегда удобно платить картой онлайн."
+  },
+  {
+   "lang": "ru",
+   "scenario": "spam",
+   "text": "Привет! Хочешь увеличить подписчиков в инстаграме? Переходи по ссылке: fastfollowers.ru"
+  },
+  {
+   "lang": "ru",
+   "scenario": "spam",
+   "text": "Дешёвые лайки и подписчики! Только сегодня акция. Не упусти шанс стать популярным!"
+  },
+  {
+   "lang": "ja",
+   "scenario": "bug:otp",
+   "text": "ログインのコードが全然来ない。何分待ってもエラーになるだけ。"
+  },
+  {
+   "lang": "ja",
+   "scenario": "bug:otp",
+   "text": "OTPが届かなくてログインできない。画面にエラーが出てイライラする。"
+  },
+  {
+   "lang": "ja",
+   "scenario": "bug:pay_missing",
+   "text": "カートに入れたのに、支払いボタンがどこにも見当たらない。"
+  },
+  {
+   "lang": "ja",
+   "scenario": "bug:pay_missing",
+   "text": "スマホで買い物してカートに入れたけど、Payボタンが表示されなくて困ってる。"
+  },
+  {
+   "lang": "ja",
+   "scenario": "bug:double_charge",
+   "text": "反応がないからPayボタンを2回押したら、2回も引き落とされてた。"
+  },
+  {
+   "lang": "ja",
+   "scenario": "bug:double_charge",
+   "text": "何も起きないからもう一度タップしたら、二重で請求されてショック。"
+  },
+  {
+   "lang": "ja",
+   "scenario": "bug:coupon",
+   "text": "クーポンで割引になってるってカートに出てたのに、結局定価で請求された。"
+  },
+  {
+   "lang": "ja",
+   "scenario": "bug:coupon",
+   "text": "クーポン適用済みって表示されてたのに、支払い画面で元の価格に戻ってた。"
+  },
+  {
+   "lang": "ja",
+   "scenario": "bug:wrong_language",
+   "text": "急にエラーメッセージが英語で出てきて、意味が分からなくて焦った。"
+  },
+  {
+   "lang": "ja",
+   "scenario": "bug:wrong_language",
+   "text": "アプリは日本語なのに、突然英語のエラーが出てきて困惑した。"
+  },
+  {
+   "lang": "ja",
+   "scenario": "bug:cart_screen_reader",
+   "text": "スクリーンリーダーでカートボタンが『3』としか読み上げられなくて、何が入ってるか分からない。"
+  },
+  {
+   "lang": "ja",
+   "scenario": "bug:cart_screen_reader",
+   "text": "音声読み上げだとカートが数字しか言わなくて、操作に不安がある。"
+  },
+  {
+   "lang": "ja",
+   "scenario": "bug:stuck_loading",
+   "text": "注文履歴のページがずっと読み込み中のまま。スピナーが回りっぱなしで先に進めない。"
+  },
+  {
+   "lang": "ja",
+   "scenario": "bug:stuck_loading",
+   "text": "注文を見ようとしたら、永遠にローディング状態。アプリを再起動しても同じ。"
+  },
+  {
+   "lang": "ja",
+   "scenario": "ux_confusion",
+   "text": "配送先の住所を変えたいけど、どこをタップすればいいのか全然見つからない。"
+  },
+  {
+   "lang": "ja",
+   "scenario": "ux_confusion",
+   "text": "アプリの中で住所変更の場所が分からなくて、サポートに聞くしかない。"
+  },
+  {
+   "lang": "ja",
+   "scenario": "feature_request",
+   "text": "夜間でも見やすいダークモードが欲しい。目が疲れる。"
+  },
+  {
+   "lang": "ja",
+   "scenario": "feature_request",
+   "text": "代引き払いに対応してほしい。カードを使いたくない時がある。"
+  },
+  {
+   "lang": "ja",
+   "scenario": "spam",
+   "text": "こんにちは"
+  },
+  {
+   "lang": "ja",
+   "scenario": "spam",
+   "text": "フォロワー増やすならこちら→ [リンク]"
+  },
+  {
+   "lang": "zh",
+   "scenario": "bug:otp",
+   "text": "收不到验证码，等了好久还是没反应，提示说验证失败"
+  },
+  {
+   "lang": "zh",
+   "scenario": "bug:otp",
+   "text": "登录时一直收不到短信验证码，页面卡住不动，很着急"
+  },
+  {
+   "lang": "zh",
+   "scenario": "bug:pay_missing",
+   "text": "加完东西进购物车了，手机上根本找不到付款按钮，点来点去都没用"
+  },
+  {
+   "lang": "zh",
+   "scenario": "bug:pay_missing",
+   "text": "结算的时候没有出现‘去付款’的按钮，只有返回和继续购物，不知道怎么付钱"
+  },
+  {
+   "lang": "zh",
+   "scenario": "bug:double_charge",
+   "text": "点了付款没反应，着急又点了一次，结果被扣了两次钱，太坑了"
+  },
+  {
+   "lang": "zh",
+   "scenario": "bug:double_charge",
+   "text": "付款按钮没反应，我点了两下，现在订单显示两笔一样的费用，求退还"
+  },
+  {
+   "lang": "zh",
+   "scenario": "bug:coupon",
+   "text": "优惠券在购物车里显示能减20块，但提交订单的时候还是原价，没用上"
+  },
+  {
+   "lang": "zh",
+   "scenario": "bug:coupon",
+   "text": "明明选了满减券，结算页还是按全价算的，感觉被系统骗了"
+  },
+  {
+   "lang": "zh",
+   "scenario": "bug:wrong_language",
+   "text": "用着中文界面突然跳出一个英文错误码‘Error 403’，看不懂也很烦"
+  },
+  {
+   "lang": "zh",
+   "scenario": "bug:wrong_language",
+   "text": "app一直是中文的，结果支付失败时弹出了一段英文提示，特别不友好"
+  },
+  {
+   "lang": "zh",
+   "scenario": "bug:cart_screen_reader",
+   "text": "我用屏幕阅读器，购物车图标只被读成‘0件’或者‘1’，根本不知道是按钮还是什么"
+  },
+  {
+   "lang": "zh",
+   "scenario": "bug:cart_screen_reader",
+   "text": "盲人用户反馈：购物车控件没有语义标签，只读出数字，不知道怎么打开购物车"
+  },
+  {
+   "lang": "zh",
+   "scenario": "bug:stuck_loading",
+   "text": "打开订单页面就一直转圈圈，加载好几分钟也不见内容，刷新也没用"
+  },
+  {
+   "lang": "zh",
+   "scenario": "bug:stuck_loading",
+   "text": "我的订单列表永远在 loading，转圈图标一动不动，怀疑是不是服务器挂了"
+  },
+  {
+   "lang": "zh",
+   "scenario": "ux_confusion",
+   "text": "我想改收货地址，在个人中心里翻了半天也没找到哪里可以修改，好麻烦"
+  },
+  {
+   "lang": "zh",
+   "scenario": "ux_confusion",
+   "text": "找不到更改送货地址的入口，只能看到过去的地址，没地方编辑，是不是得重新下单？"
+  },
+  {
+   "lang": "zh",
+   "scenario": "feature_request",
+   "text": "希望能加个暗黑模式，晚上刷手机不那么刺眼，现在太亮了"
+  },
+  {
+   "lang": "zh",
+   "scenario": "feature_request",
+   "text": "能不能支持货到付款？有时候不想在线上付钱，怕不安全或者想先看货再付"
+  },
+  {
+   "lang": "zh",
+   "scenario": "spam",
+   "text": "hello"
+  },
+  {
+   "lang": "zh",
+   "scenario": "spam",
+   "text": "点击链接购买真实粉丝，快速涨到10k，限时优惠"
+  }
+ ]
+}

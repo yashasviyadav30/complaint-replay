@@ -11,8 +11,8 @@ RUN npm run build
 FROM mcr.microsoft.com/playwright/python:v1.63.0-noble
 COPY --from=ghcr.io/astral-sh/uv:0.10.9 /uv /usr/local/bin/uv
 WORKDIR /app
-ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=automatic PYTHONUNBUFFERED=1
-COPY pyproject.toml uv.lock README.md ./
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=automatic UV_PYTHON=3.13 PYTHONUNBUFFERED=1
+COPY pyproject.toml uv.lock README.md .python-version ./
 RUN uv sync --frozen --no-dev --no-install-project
 COPY replay/ replay/
 COPY server/ server/

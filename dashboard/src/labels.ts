@@ -23,6 +23,7 @@ export const STAGE: Record<Stage, { label: string; busy?: boolean; tone?: "ok" |
   fix_failed: { label: "Fix could not be applied", tone: "accent" },
   guarded: { label: "Guarded by a test", tone: "ok" },
   error: { label: "Something broke", tone: "accent" },
+  not_a_bug: { label: "Not a bug: not replayed", tone: "muted" },
 };
 
 export const EVIDENCE: Record<string, string> = {

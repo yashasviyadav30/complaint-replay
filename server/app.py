@@ -35,6 +35,7 @@ from replay.conditions import twin_condition
 from replay.grouping import find_duplicate
 from replay.langid import detect
 from replay.project import running_app
+from replay.triage import classify
 from server import github
 from server.intake import complaint_for_model, impact, mask_pii, sign, unsign
 from server.store import Store
@@ -55,6 +56,7 @@ PUBLIC_STATUS = {
     "heard": "received", "queued": "received", "reproducing": "checking", "reproduced": "found",
     "fixing": "fixing", "proving": "fixing", "fixed": "fixed", "guarded": "fixed", "fix_unproven": "found",
     "fix_failed": "found", "not_reproduced": "not_reproduced", "ux_confusion": "found", "error": "received",
+    "not_a_bug": "received",
 }
 log = logging.getLogger("complaint-replay")
 store = Store()
@@ -314,10 +316,14 @@ async def receive_report(report: ReportIn, request: Request) -> dict:
                 "kind": record["kind"], "complaint": complaint_for_model(record), "said": record["text"],
                 "lang": record["lang"], "page": record["page"],
                 "condition": {"label": cond.label, "persona": cond.persona}, "stage": "heard"}
-        save_case(case)
         if vec:
             store.put("vector", {"id": case["id"], "project": project["id"], "vector": vec, "created_at": now()})
-        await start_case(project, case, record["env"], public_url(request))
+            case["triage"] = classify(vec)
+        if case.get("triage", {}).get("replay", True):
+            save_case(case)
+            await start_case(project, case, record["env"], public_url(request))
+        else:  # spam or a clear feature wish: keep it for the team, don't spend a replay on it
+            save_case({**case, "stage": "not_a_bug"})
     return {"id": record["id"], "token": record["status_token"], "grouped_into": duplicate}
 
 
