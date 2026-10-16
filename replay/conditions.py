@@ -49,6 +49,7 @@ class Condition:
     screen_reader: bool = False
     keyboard_only: bool = False
     max_steps: int = 20
+    audit: bool = False  # run accessibility checks for every user (public-sector projects)
 
     @property
     def locale(self) -> str:

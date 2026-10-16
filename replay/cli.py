@@ -19,6 +19,7 @@ import sys
 import urllib.request
 import uuid
 from contextlib import nullcontext
+from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -47,8 +48,8 @@ DONE = {"guarded", "fixed", "reproduced", "not_reproduced", "ux_confusion"}
 
 
 def condition_from(args: argparse.Namespace, payload: dict | None):
-    if payload:
-        return twin_condition(payload["env"])
+    if payload:  # measured by the widget, plus what the project's sector pack asks for
+        return replace(twin_condition(payload["env"]), audit=bool((payload.get("pack") or {}).get("audit")))
     if args.user:
         return CONDITIONS[args.user]
     return profile(args.device, args.network, args.locale, args.timezone, "dark" if args.dark else "",
@@ -109,7 +110,8 @@ async def cmd_replay(args: argparse.Namespace) -> int:
     print(f"Replaying as: {cond.persona}\nComplaint: {complaint}", flush=True)
     with target(repo, args.url) as url:
         if args.fix:
-            case = await investigate(case, cond, url, repo, client, chat, save, out / "shots")
+            keep_shots = (payload or {}).get("pack", {}).get("screenshots", True)
+            case = await investigate(case, cond, url, repo, client, chat, save, out / "shots" if keep_shots else None)
         else:
             shot = f"{case['id']}-before.png"
             result = await replay(url, complaint, cond, llm_policy(chat), llm_matcher(chat), out / "shots" / shot,

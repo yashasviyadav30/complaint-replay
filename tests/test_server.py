@@ -243,3 +243,19 @@ def test_team_chat_hears_about_proven_bugs_once(client, monkeypatch) -> None:
     srv.save_case({**case, "stage": "guarded", "pr": "https://github.com/a/b/pull/1"})
     assert len(sent) == 1 and "pull/1" in sent[0][1] and sent[0][0] == "https://hooks.slack.com/x"
     assert client.post("/api/v1/projects", json={"name": "x", "notify_url": "http://insecure"}).status_code == 422
+
+
+def test_sector_packs_change_masking_checks_and_screenshots() -> None:
+    from server.intake import mask_pii, pack
+
+    assert mask_pii("policy 48213 was rejected") == "policy 48213 was rejected"
+    assert mask_pii("policy 48213 was rejected", strict=True) == "policy [number] was rejected"
+    assert pack({"sector": "public", "screenshots": True}) == {"strict_pii": True, "audit": True, "screenshots": False}
+    assert pack({"sector": "ecommerce", "screenshots": False})["screenshots"] is False
+
+
+def test_public_sector_twin_runs_accessibility_checks_for_everyone() -> None:
+    from replay.cli import condition_from, parser
+
+    cond = condition_from(parser().parse_args(["replay", "x"]), {"env": ENV, "pack": {"audit": True}})
+    assert cond.audit and not cond.screen_reader

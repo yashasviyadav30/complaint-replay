@@ -4,6 +4,7 @@ Real browser, no model. Pages live in tests/pages and are served as a plain stat
 """
 
 import asyncio
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -35,6 +36,7 @@ CASES = [
     ("unnamed.html", CONDITIONS["screen_reader"], [], "unclear_name"),
     ("dead_button.html", PHONE, [{"type": "click_css", "selector": "#pick"}], "no_response"),
     ("blocked.html", PHONE, [{"type": "click_css", "selector": "#date"}], "tap_blocked"),
+    ("no_label.html", replace(PHONE, audit=True), [], "a11y_violation"),  # public-sector pack: everyone audited
 ]
 # The same problem fixed: these must stay silent.
 CLEAN = [

@@ -40,7 +40,7 @@ from replay.langid import detect
 from replay.project import running_app
 from replay.triage import classify
 from server import github, notify
-from server.intake import complaint_for_model, impact, mask_pii, session_login, session_value, sign, unsign
+from server.intake import complaint_for_model, impact, mask_pii, pack, session_login, session_value, sign, unsign
 from server.store import Store
 
 HERE = Path(__file__).resolve().parent
@@ -230,6 +230,7 @@ async def start_case(project: dict, case: dict, env: dict, base_url: str) -> Non
         return  # collected only: the team replays by hand with `crp replay`
     payload = {"case_id": case["id"], "kind": case["kind"], "complaint": case["complaint"], "said": case["said"],
                "env": env, "reports": case.get("reports", 1), "token": case_token(case["id"]),
+               "pack": {k: v for k, v in pack(project).items() if k != "strict_pii"},
                "callback": f"{base_url}/api/v1/cases/{case['id']}/progress"}
     try:
         await asyncio.to_thread(github.dispatch, project["repo"], payload)
@@ -382,9 +383,10 @@ async def accept(project: dict, report: ReportIn, request: Request, source: str)
     """Every way in (widget, support inbox, Sentry) ends here: mask, tag, group, triage, replay."""
     record = report.model_dump()
     record["source"] = source
-    record["text"] = mask_pii(record["text"])
-    record["page"] = mask_pii(record["page"])
-    record["breadcrumbs"] = [mask_pii(b)[:80] for b in record["breadcrumbs"]]
+    strict = pack(project)["strict_pii"]
+    record["text"] = mask_pii(record["text"], strict)
+    record["page"] = mask_pii(record["page"], strict)
+    record["breadcrumbs"] = [mask_pii(b, strict)[:80] for b in record["breadcrumbs"]]
     record.update(id=secrets.token_hex(6), project=project["id"], received_at=now(), created_at=now(),
                   status_token=secrets.token_urlsafe(16))
     record["lang"] = detect(record["text"])[0] if record["text"].strip() else ""

@@ -37,12 +37,31 @@ SEVERITY = {
 ANY_DIGIT = re.compile(r"\d")
 
 
-def mask_pii(text: str) -> str:
+STRICT_NUMBER = re.compile(r"(?<!\d)\d(?:[ -]?\d){4,}(?!\d)")  # any 5+ digit number: account, policy, patient ids
+
+
+def mask_pii(text: str, strict: bool = False) -> str:
     # Digits typed in any script (Devanagari ९, Arabic-Indic ٩) become ASCII first, so every pattern sees them.
     text = ANY_DIGIT.sub(lambda m: str(unicodedata.digit(m.group())), text)
     for pattern, token in PII_PATTERNS:
         text = pattern.sub(token, text)
-    return text
+    return STRICT_NUMBER.sub("[number]", text) if strict else text
+
+
+# What a project's kind of product changes. Public services and health handle the most sensitive people and
+# must meet accessibility law, so they get every check and no screenshots; payments get the strictest masking.
+SECTOR_PACKS = {
+    "general": {},
+    "ecommerce": {},
+    "fintech": {"strict_pii": True},
+    "public": {"strict_pii": True, "audit": True, "screenshots": False},
+}
+
+
+def pack(project: dict) -> dict:
+    p = SECTOR_PACKS.get(project.get("sector", "general"), {})
+    return {"strict_pii": p.get("strict_pii", False), "audit": p.get("audit", False),
+            "screenshots": project.get("screenshots", True) and p.get("screenshots", True)}
 
 
 def impact(case: dict) -> int:

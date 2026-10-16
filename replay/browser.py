@@ -274,7 +274,7 @@ class Session:
             for u in obs["unnamed"]:
                 self.add("unclear_name", f"a {u['tag']}{at(u)} is announced only as '{u['label'] or '(nothing)'}', "
                                          "which does not say what it does")
-        if self.condition.screen_reader or self.condition.keyboard_only:
+        if self.condition.screen_reader or self.condition.keyboard_only or self.condition.audit:
             for v in await self._axe():
                 self.add("a11y_violation", f"{v['id']}: {v['help']} ({', '.join(v['targets'])})")
         return obs
