@@ -535,7 +535,9 @@ class Session:
     async def _remember_typed(self, field, name: str | None, text: str) -> None:
         if text.strip():
             try:
-                self._typed.append((await field.element_handle(timeout=2000), name or "a field", text))
+                handle = await field.element_handle(timeout=2000)
+                kind = await handle.evaluate(ELEMENT_JS)  # <input name="amount">: a clue for the fixer's code search
+                self._typed.append((handle, f"{name or 'a field'}' ({kind})", text))
             except Exception:  # the field went away at once; nothing to watch
                 pass
 
@@ -550,7 +552,7 @@ class Session:
             except Exception:
                 continue
             if value in ("", "0", "0.00", "0,00") and text.strip() not in ("0", "0.00"):
-                self.add("typed_value_lost", f"'{name}' held '{text[:40]}' the user typed; after tapping '{tapped}' it "
+                self.add("typed_value_lost", f"'{name} held '{text[:40]}' the user typed; after tapping '{tapped}' it "
                                              f"shows '{value or '(empty)'}'")
                 continue
             still.append((handle, name, text))

@@ -83,3 +83,12 @@ def test_twin_sees_what_each_past_click_hit() -> None:
            "complaint": "c", "step": 1, "last_result": "ok"}
     _, user = build_prompt(ctx)
     assert '{"type": "click", "target": 5} on \'Previous month\' -> ok' in user
+
+
+def test_twin_sees_a_few_items_per_kind_of_evidence() -> None:
+    from replay.agent import evidence_brief
+
+    items = [Evidence(f"E{i}", "slow_request", f"GET /{i} took 12 s", 0) for i in range(25)]
+    items.append(Evidence("E99", "typed_value_lost", "'Amount' held '100'", 3))
+    brief = evidence_brief(items)
+    assert brief.count("slow_request") == 4 and "(+22 more slow_request)" in brief and "E99" in brief

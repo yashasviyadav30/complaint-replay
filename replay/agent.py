@@ -150,6 +150,22 @@ KEYBOARD_ACTIONS = """{"type": "press", "key": "Tab" | "Shift+Tab" | "Enter" | "
 This user has no mouse. "Focused" shows where the keyboard is now; press Tab to move to the next control."""
 
 
+EVIDENCE_PER_KIND = 3
+
+
+def evidence_brief(evidence: list) -> str:
+    """Evidence for the twin, at most a few items per kind: 25 'slow request' lines from a cold page load made it
+    believe the app was still loading (cloud case 8733). The judge still sees every item."""
+    shown, extra = [], {}
+    for e in evidence:
+        if sum(1 for s in shown if s.kind == e.kind) < EVIDENCE_PER_KIND:
+            shown.append(e)
+        else:
+            extra[e.kind] = extra.get(e.kind, 0) + 1
+    lines = [f"{e.id} [{e.kind}] {e.detail}" for e in shown] + [f"(+{n} more {k})" for k, n in extra.items()]
+    return "\n".join(lines) or "(none yet)"
+
+
 def build_prompt(ctx: dict) -> tuple[str, str]:
     cond: Condition = ctx["condition"]
     actions = (KEYBOARD_ACTIONS if cond.keyboard_only else SCREEN_READER_ACTIONS if cond.screen_reader
@@ -169,7 +185,7 @@ def build_prompt(ctx: dict) -> tuple[str, str]:
         page = (f"Focused: {focus['tag']} '{focus['label']}'" if focus else "Focused: nothing yet") + \
             f"\n\nVisible text:\n{obs['text']}"
     about = f"About this app: {ctx['hints']}\n" if ctx.get("hints") else ""
-    evidence = "\n".join(f"{e.id} [{e.kind}] {e.detail}" for e in ctx["evidence"]) or "(none yet)"
+    evidence = evidence_brief(ctx["evidence"])
     # The name of what each action hit: with bare numbers, a twin "opening a transaction" pressed
     # 'Previous month' nine times without noticing (cloud case 9064).
     history = "\n".join(json.dumps({k: v for k, v in s["action"].items() if k != "why"}, ensure_ascii=False) +
