@@ -16,7 +16,7 @@ Phase 1 tasks 1.0-1.7 (except 1.8) and most of 1.9/1.10 are built and tested (`u
 | 1.4 Fix + PR | Evidence-guided file picking for big repos, CRLF-safe patches, PR from a bot identity to `origin` only, guard JSON committed; proof = exact steps replayed on the fix (no model) |
 | 1.5 Action + service | `action.yml`, `crp` CLI, workflow template (`crp init`), multi-project server with widget keys, signed callbacks, GitHub App + login code (untested live: needs the user's App), Docker self-host (built and smoke-tested) |
 | 1.6 Languages | 400 synthetic complaints in 20 languages; triage 98% held-out; cross-language grouping 97% top-1 (`benchmarks/triage.md`) |
-| 1.7 Dashboard | Projects, setup wizard, impact-ranked board, PR links, sign-in; guideline review done |
+| 1.7 Dashboard | Projects, setup wizard, impact-ranked board, PR links, sign-in; guideline review done; Lighthouse at 360 px (Oct 16): accessibility 100, best practices 100, no sideways scroll on any view |
 | 1.9 Close the loop | Widget in 17 languages with RTL; reporter sees status ("fixed"); sector field on projects (no sector rules yet) |
 | 1.10 Hardening | Security review done and fixed (commit "security: ..."); not deployed yet |
 | 1.8 Real-bug benchmark | Running in GitHub Actions on 8 real Actual Budget fixes (see status below); score not final |
