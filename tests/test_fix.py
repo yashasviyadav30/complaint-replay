@@ -87,6 +87,7 @@ def test_the_app_under_test_gets_no_secrets(monkeypatch) -> None:
     monkeypatch.setenv("NODE_ENV", "development")
     env = app_env()
     assert "NEBIUS_API_KEY" not in env and "GH_TOKEN" not in env and env["NODE_ENV"] == "development"
+    assert env["BROWSER"] == "none"  # dev servers must not open tabs in the developer's own browser
 
 
 def test_picker_finds_a_shared_component_from_the_element_kind(tmp_path) -> None:

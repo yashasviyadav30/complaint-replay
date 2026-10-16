@@ -66,7 +66,9 @@ def load_project(root: Path) -> Project:
 
 def app_env() -> dict[str, str]:
     """The app under test never sees model keys or the GitHub token: it is untrusted code on a fix branch."""
-    return {k: v for k, v in os.environ.items() if not any(w in k.upper() for w in SECRET_WORDS)}
+    env = {k: v for k, v in os.environ.items() if not any(w in k.upper() for w in SECRET_WORDS)}
+    # Dev servers (Vite, Create React App) open the developer's own browser on start; every replay left a tab.
+    return env | {"BROWSER": "none"}
 
 
 def free_port() -> int:
