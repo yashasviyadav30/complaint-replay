@@ -155,8 +155,9 @@ def with_needs(cond: Condition, needs: dict) -> Condition:
     if not words:
         return cond
     return replace(cond, persona=cond.persona.rstrip(".") + "; the user says they " + " and ".join(words) + ".",
-                   screen_reader=bool(needs.get("screen_reader")), keyboard_only=bool(needs.get("keyboard_only")),
-                   zoom=needs.get("zoom", 1.0) or 1.0)
+                   screen_reader=cond.screen_reader or bool(needs.get("screen_reader")),
+                   keyboard_only=cond.keyboard_only or bool(needs.get("keyboard_only")),
+                   zoom=max(cond.zoom, needs.get("zoom", 1.0) or 1.0))
 
 
 CONDITIONS = {

@@ -5,6 +5,8 @@ name: Complaint Replay
 on:
   repository_dispatch:
     types: [complaint]        # sent by the Complaint Replay service when a user reports a problem
+  issues:
+    types: [labeled]          # label a bug report "replay" (add "mobile", "screen-reader"... to pick the user)
   workflow_dispatch:          # or start one by hand from the Actions tab
     inputs:
       complaint:
@@ -22,10 +24,13 @@ permissions:
 
 jobs:
   replay:
-    if: github.event_name == 'repository_dispatch' || github.event_name == 'workflow_dispatch'
+    if: >-
+      github.event_name == 'repository_dispatch' || github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issues' && github.event.label.name == 'replay')
     permissions:
       contents: write        # push the fix branch
       pull-requests: write   # open the pull request
+      issues: write          # reply on the issue, or open one when the fix needs a person
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:

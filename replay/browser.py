@@ -43,6 +43,8 @@ try {
     .observe({ type: 'layout-shift', buffered: true });
 } catch (e) {}
 """
+# Playwright's click error names what took the tap: "- <div class=...> intercepts pointer events".
+INTERCEPTS = re.compile(r"(<[^>]{1,200}>)[^\n]*intercepts pointer events")
 # Everything a tap could change that a user (or assistive tech) would notice. Same before and after = dead control.
 FINGERPRINT_JS = """
 () => {
@@ -373,12 +375,24 @@ class Session:
             else:
                 return f"error: unknown action type {kind!r}"
         except Exception as e:  # report to the model; a failed click is information, not a crash
+            self._blocked(action, kind, str(e))
             return f"error: {str(e).splitlines()[0][:200]}"
         await self.settle()
         if before is not None and await self._fingerprint() == before and self._requests == requests_before:
             name = self.last_target or action.get("selector") or action.get("key") or "a control"
             self.add("no_response", f"tapped '{name}' but nothing happened: no change on screen, no request sent")
         return "ok"
+
+    def _blocked(self, action: dict, kind: str, error: str) -> None:
+        """A tap the user could not make is evidence too: Playwright says what got in the way."""
+        if kind not in ("click", "click_role", "click_css", "fill", "fill_role"):
+            return
+        name = self.last_target or action.get("name") or action.get("selector") or "a control"
+        blocker = INTERCEPTS.search(error)
+        if blocker:
+            self.add("tap_blocked", f"tapping '{name}' hit {blocker.group(1)[:120]} instead")
+        elif "not visible" in error or "not enabled" in error or "not stable" in error or "Timeout" in error:
+            self.add("tap_blocked", f"'{name}' could not be tapped: it never became visible, enabled and still")
 
     async def _fingerprint(self) -> str | None:
         try:

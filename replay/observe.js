@@ -53,7 +53,11 @@
     // Covered: fully on screen, yet the point at its centre belongs to something else (overlay, banner).
     if ((!modal || modal.contains(el)) && r.top >= 0 && r.bottom <= vh && r.left >= 0 && r.right <= vw) {
       const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
-      if (top && top !== el && !el.contains(top) && !top.contains(el) && !ours(top)) {
+      // Something from the control's own parent on top is usually by design (drag handles, overlaid labels).
+      const row = el.parentElement;
+      const sameParent = row && row !== document.body && row.contains(top)
+        && row.getBoundingClientRect().height < 3 * r.height + 40;  // a row, not the whole page
+      if (top && top !== el && !el.contains(top) && !top.contains(el) && !ours(top) && !sameParent) {
         const cls = typeof top.className === 'string' && top.className ? '.' + top.className.split(' ')[0] : '';
         covered.push({ label: name(el), by: (top.id ? '#' + top.id : top.tagName.toLowerCase()) + cls, where: where(el) });
       }

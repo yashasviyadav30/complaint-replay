@@ -106,7 +106,7 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
         case.setdefault("shots", {})[name] = f"{case['id']}-{name}.png"
         return shots / case["shots"][name]
 
-    if cond.key == "twin":  # measured by the widget: add what the user said about themselves
+    if not (cond.screen_reader or cond.keyboard_only):  # add what the user said about themselves
         cond = with_needs(cond, await stated_needs(chat, case.get("said") or complaint))
         case["condition"] = {"label": cond.label, "persona": cond.persona}
 

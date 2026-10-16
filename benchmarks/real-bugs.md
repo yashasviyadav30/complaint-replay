@@ -4,4 +4,4 @@ Measured 2026-10-16 with `uv run python scripts/bench_real.py <actual checkout>`
 
 | Upstream fix | Complaint | User | Result | Proof (evidence kinds) | Same file as real fix | Time |
 |---|---|---|---|---|---|---|
-| [#9071](https://github.com/actualbudget/actual/pull/9071) | On my Android phone, when I add a transaction and tap the date, the ca… | Pixel 7 | error | - |  | 0 min |
+| [#9071](https://github.com/actualbudget/actual/pull/9071) | On my Android phone, when I add a transaction and tap the date, the ca… | Pixel 7 (412x839) | fixed | covered_control | no | 22 min |

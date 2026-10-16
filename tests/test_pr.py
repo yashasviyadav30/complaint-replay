@@ -58,3 +58,10 @@ def test_failed_fix_becomes_a_complete_task_with_an_acceptance_test() -> None:
     case = {**CASE, "stage": "fix_failed", "fix": {"explanation": "Tried a longer timeout.", "error": "edit did not apply"}}
     text = issue_body(case)
     assert "Acceptance test" in text and '"steps": []' in text and "edit did not apply" in text
+
+
+def test_issue_reply_says_what_happened_and_where_the_fix_is() -> None:
+    from replay.pr import issue_comment
+
+    text = issue_comment({**CASE, "stage": "guarded", "pr": "https://github.com/a/b/pull/7"})
+    assert text.startswith("**Reproduced, fixed and guarded**") and "pull/7" in text and "`request_failed`" in text

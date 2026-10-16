@@ -74,10 +74,11 @@ def row(spec: dict, case: dict, real: list[str], seconds: float) -> str:
     stage = case.get("stage", "error")
     ours = edited_files(case)
     same = "yes" if ours and set(ours) & set(real) else ("no" if ours else "")
+    solved = "**yes**" if stage in ("guarded", "fixed") and same == "yes" else "no"
     rep = case.get("replay") or {}
     cited = [e["kind"] for e in rep.get("evidence", []) if e["id"] in rep.get("cited", [])]
     return (f"| [#{spec['pr']}](https://github.com/actualbudget/actual/pull/{spec['pr']}) | {spec['complaint'][:70]}… | "
-            f"{case['condition']['label']} | {stage} | {', '.join(cited) or '-'} | {same} | {seconds / 60:.0f} min |")
+            f"{case['condition']['label']} | {stage} | {', '.join(cited) or '-'} | {same} | {solved} | {seconds / 60:.0f} min |")
 
 
 async def main() -> None:
@@ -107,8 +108,11 @@ async def main() -> None:
         f"`{chat.model}`. Each bug was fixed upstream; it is re-created by reverse-applying that fix to today's code, "
         "and the complaint is written from the real report. \"Same file\" means our fix edited a file the real fix "
         "edited. Every case is listed, misses included.", "",
-        "| Upstream fix | Complaint | User | Result | Proof (evidence kinds) | Same file as real fix | Time |",
-        "|---|---|---|---|---|---|---|", *rows, ""]), encoding="utf-8")
+        f"**Solved {sum('**yes**' in r for r in rows)} of {len(rows)}.** Solved means fixed and guarded AND our fix edited "
+        "a file the real fix edited. A \"fixed\" with a different file is counted as a miss: the guard may have "
+        "proven the wrong thing.", "",
+        "| Upstream fix | Complaint | User | Result | Proof (evidence kinds) | Same file as real fix | Solved | Time |",
+        "|---|---|---|---|---|---|---|---|", *rows, ""]), encoding="utf-8")
     print(REPORT.read_text(encoding="utf-8"))
 
 

@@ -60,6 +60,21 @@ runs:
           # payload holds the callback token. Mask it in case anything prints it later.
           python3 -c 'import json,os,sys; p=json.load(open(os.environ["GITHUB_EVENT_PATH"]))["client_payload"]; print("::add-mask::"+p.get("token","")); json.dump(p, open(sys.argv[1],"w"))' "$RUNNER_TEMP/payload.json"
           crp replay --payload "$RUNNER_TEMP/payload.json" "${args[@]}"
+        elif [ "$GITHUB_EVENT_NAME" = "issues" ]; then
+          # A maintainer labelled an issue "replay": the issue text is the complaint, a label can pick the user.
+          python3 - "$RUNNER_TEMP" <<'PY'
+        import json, os, sys
+        issue = json.load(open(os.environ["GITHUB_EVENT_PATH"]))["issue"]
+        users = {"mobile": "slow_3g_android", "screen-reader": "screen_reader", "keyboard": "keyboard",
+                 "hindi": "hindi", "arabic": "arabic", "elderly": "elderly", "slow-network": "flaky_network"}
+        labels = [l["name"].lower() for l in issue.get("labels", [])]
+        user = next((users[l] for l in labels if l in users), "fast_desktop")
+        text = (issue["title"] + chr(10) + (issue.get("body") or ""))[:1500]
+        open(os.path.join(sys.argv[1], "complaint.txt"), "w", encoding="utf-8").write(text)
+        open(os.path.join(sys.argv[1], "user.txt"), "w").write(user)
+        open(os.path.join(sys.argv[1], "issue.txt"), "w").write(str(issue["number"]))
+        PY
+          crp replay "$(cat "$RUNNER_TEMP/complaint.txt")" --user "$(cat "$RUNNER_TEMP/user.txt")"             --issue "$(cat "$RUNNER_TEMP/issue.txt")" "${args[@]}"
         elif [ -n "$PAYLOAD" ] && [ "$PAYLOAD" != "null" ]; then
           printf '%s' "$PAYLOAD" > "$RUNNER_TEMP/payload.json"
           crp replay --payload "$RUNNER_TEMP/payload.json" "${args[@]}"

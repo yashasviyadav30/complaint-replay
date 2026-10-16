@@ -34,6 +34,7 @@ CASES = [
     ("shift.html", CONDITIONS["fast_desktop"], [{"type": "wait", "ms": 1200}], "layout_shift"),
     ("unnamed.html", CONDITIONS["screen_reader"], [], "unclear_name"),
     ("dead_button.html", PHONE, [{"type": "click_css", "selector": "#pick"}], "no_response"),
+    ("blocked.html", PHONE, [{"type": "click_css", "selector": "#date"}], "tap_blocked"),
 ]
 # The same problem fixed: these must stay silent.
 CLEAN = [

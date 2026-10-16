@@ -91,6 +91,39 @@ def body(case: dict, image_url: str = "") -> str:
     return "\n".join(lines)
 
 
+VERDICT = {
+    "guarded": "Reproduced, fixed and guarded", "fixed": "Reproduced and fixed", "reproduced": "Reproduced",
+    "fix_failed": "Reproduced; the automatic fix could not be applied", "fix_unproven": "Reproduced; the automatic fix did not hold",
+    "not_reproduced": "Could not reproduce yet", "ux_confusion": "Works, but confusing for this user",
+}
+
+
+def issue_comment(case: dict) -> str:
+    """The reply on the issue that asked for a replay: the verdict, the proof, and where the fix is."""
+    rep = case.get("replay") or {}
+    cited = [e for e in rep.get("evidence", []) if e["id"] in rep.get("cited", [])]
+    lines = [f"**{VERDICT.get(case['stage'], case['stage'])}** by Complaint Replay.", "",
+             f"Replayed as: {case['condition']['persona']}", ""]
+    if cited:
+        lines += ["Proof (collected by the browser):", *[f"- `{e['kind']}` {quoted(e['detail'])}" for e in cited], ""]
+    elif rep.get("summary"):
+        lines += [quoted(rep["summary"]), ""]
+    if case.get("pr"):
+        lines.append(f"Fix and guard test: {case['pr']}")
+    if case.get("issue"):
+        lines.append(f"Task for a person or coding agent: {case['issue']}")
+    if case["stage"] == "not_reproduced":
+        lines.append("Steps, device or network details in a comment help the next replay.")
+    return "\n".join(lines)
+
+
+def comment_on_issue(repo: Path, number: int, case: dict) -> None:
+    slug = origin_slug(Path(run(["git", "rev-parse", "--show-toplevel"], repo)))
+    body_file = Path(tempfile.gettempdir()) / f"crp-{case['id']}-comment.md"
+    body_file.write_text(issue_comment(case), encoding="utf-8")
+    run(["gh", "issue", "comment", str(number), "--repo", slug, "--body-file", str(body_file)], repo)
+
+
 def issue_body(case: dict) -> str:
     """A complete task for a person or a coding agent: what broke, for whom, the proof, and the acceptance test."""
     rep, fix, guard = case["replay"], case.get("fix") or {}, case["guard"]

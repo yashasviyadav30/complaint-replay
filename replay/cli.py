@@ -129,6 +129,10 @@ async def cmd_replay(args: argparse.Namespace) -> int:
         case["issue"] = open_issue(repo, case)  # the bug is proven; hand the fix to a person or a coding agent
         save(case)
         print(f"Issue for a person or coding agent: {case['issue']}")
+    if args.issue:
+        from replay.pr import comment_on_issue
+
+        comment_on_issue(repo, args.issue, case)
     return 0 if case["stage"] in DONE else 1
 
 
@@ -271,6 +275,7 @@ def parser() -> argparse.ArgumentParser:
     r.add_argument("--fix", action="store_true", help="also fix, prove and guard (needs the source)")
     r.add_argument("--pr", action="store_true", help="open a pull request when the fix is guarded")
     r.add_argument("--base", default="", help="branch the pull request targets (default: current)")
+    r.add_argument("--issue", type=int, help="post the result as a comment on this GitHub issue")
     g = sub.add_parser("guard", help="run every guard test (for CI)")
     g.add_argument("--repo", default=".")
     g.add_argument("--url")
