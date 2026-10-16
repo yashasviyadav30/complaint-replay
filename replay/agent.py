@@ -98,6 +98,7 @@ async def _drive(session: Session, complaint: str, condition: Condition, policy:
             return judge(action, session.evidence, steps)
         last_result = await session.act(action)
         steps.append({"action": action, "result": last_result, "target": session.last_target, "idx": session.last_idx})
+        last_result += revisit_note(steps)
     await session.observe()
     if matcher and len(session.evidence) > judged:
         match = await matcher(complaint, list(session.evidence))
@@ -149,6 +150,21 @@ KEYBOARD_ACTIONS = """{"type": "press", "key": "Tab" | "Shift+Tab" | "Enter" | "
    (add "times": 2-15 to press it several times, like holding Tab to move down the page)
 {"type": "type", "text": "..."}   (types into the focused field)
 This user has no mouse. "Focused" shows where the keyboard is now; press Tab to move to the next control."""
+
+
+REVISIT_LIMIT = 3
+
+
+def revisit_note(steps: list[dict]) -> str:
+    """A loop the stuck rule can't see (open X, Close, open X, Close): name the control tapped again and again.
+    Cloud case 9064 (run 8) reopened one scheduled payment eight times looking for a transaction's edit screen."""
+    target = steps[-1].get("target") if steps[-1]["action"].get("type") == "click" else None
+    if not target:
+        return ""
+    n = sum(1 for s in steps if s.get("target") == target and s["action"].get("type") == "click")
+    if n < REVISIT_LIMIT:
+        return ""
+    return f" (you have tapped '{target}' {n} times already; it does not lead where you want: try a different control)"
 
 
 EVIDENCE_PER_KIND = 3

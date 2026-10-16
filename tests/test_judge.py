@@ -111,3 +111,12 @@ def test_load_speed_evidence_is_dropped_unless_the_complaint_is_about_speed() ->
     slow = [Evidence("E1", "slow_page", "main content appeared after 28.6 s", 1)]
     result = asyncio.run(llm_matcher(fake_chat)("The calendar never opens", slow))
     assert result == {"evidence": []} and not seen  # the judge never even sees it
+
+
+def test_a_control_tapped_again_and_again_gets_a_note() -> None:
+    from replay.agent import revisit_note
+
+    open_it = {"action": {"type": "click", "target": 4}, "result": "ok", "target": "Upcoming Utilities"}
+    close = {"action": {"type": "click", "target": 9}, "result": "ok", "target": "Close"}
+    assert revisit_note([open_it, close, open_it]) == ""
+    assert "tapped 'Upcoming Utilities' 3 times" in revisit_note([open_it, close, open_it, close, open_it])
