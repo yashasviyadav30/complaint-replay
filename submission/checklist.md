@@ -22,4 +22,6 @@ Deadline: **Oct 30, 2026, 10:00 am PDT = 10:30 pm IST.** Target: submit Oct 29. 
 - [ ] Repo searched for secrets once more (`git grep -n "nvapi-\|sk-"` returns nothing)
 - [ ] Video link opens in a private window
 - [ ] Demo link opens when logged out
-- [ ] Every number in the write-up matches `results/bench.md`
+- [ ] Every number in the write-up matches `benchmarks/demo-shop.md`, `benchmarks/real-bugs.md` and `benchmarks/triage.md`
+- [ ] No `[FILL]` left in `writeup.md`
+- [ ] Product name final in the write-up, README, widget and video
