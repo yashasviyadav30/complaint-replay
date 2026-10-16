@@ -120,3 +120,23 @@ def test_a_control_tapped_again_and_again_gets_a_note() -> None:
     close = {"action": {"type": "click", "target": 9}, "result": "ok", "target": "Close"}
     assert revisit_note([open_it, close, open_it]) == ""
     assert "tapped 'Upcoming Utilities' 3 times" in revisit_note([open_it, close, open_it, close, open_it])
+
+
+def test_the_twins_own_reproduced_claim_goes_through_the_judge(tmp_path) -> None:
+    import asyncio
+
+    from replay.agent import replay
+    from replay.conditions import CONDITIONS
+    from replay.project import running_app
+
+    (tmp_path / "index.html").write_text("<button>Pay</button><img src=missing.png alt=x>", encoding="utf-8")  # E1
+
+    async def policy(ctx: dict) -> dict:
+        return {"type": "verdict", "verdict": "reproduced", "evidence": ["E1"], "summary": "slow"}
+
+    async def strict_judge(complaint: str, evidence: list) -> dict:
+        return {"evidence": []}
+
+    with running_app(tmp_path) as url:
+        result = asyncio.run(replay(url, "Pay does nothing", CONDITIONS["fast_desktop"], policy, strict_judge))
+    assert result.verdict == "not_reproduced"

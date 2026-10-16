@@ -95,6 +95,13 @@ async def _drive(session: Session, complaint: str, condition: Condition, policy:
             "evidence": list(session.evidence), "steps": steps, "last_result": last_result, "hints": hints, "visited": visited,
         })
         if action.get("type") == "verdict":
+            if action.get("verdict") == "reproduced" and matcher:
+                # The twin's own claim goes through the same checks as the judge's (speed filter, skeptic question):
+                # it cited "page loaded slowly" for a payee bug, skipping them (cloud case 8926, run 8).
+                match = await matcher(complaint, list(session.evidence))
+                action = ({"verdict": "reproduced", **match} if match.get("evidence") else
+                          {"verdict": "not_reproduced",
+                           "summary": str(action.get("summary", "")) + " [The judge found no evidence of this problem.]"})
             return judge(action, session.evidence, steps)
         last_result = await session.act(action)
         steps.append({"action": action, "result": last_result, "target": session.last_target, "idx": session.last_idx})
