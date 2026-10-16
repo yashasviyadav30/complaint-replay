@@ -222,3 +222,14 @@ def test_controls_sharing_a_name_get_their_row(site) -> None:
 
     labels = asyncio.run(body())
     assert labels[0].startswith("✓ in row '") and "Dominion Power" in labels[0] and "Home Depot" in labels[1]
+
+
+def test_a_link_that_opens_a_new_tab_is_not_a_dead_button(site) -> None:
+    async def body() -> tuple[str, list]:
+        async with browser.Session(f"{site}/popover.html", PHONE) as s:
+            await s.page.set_content(f'<a href="{site}/dialog.html" target="_blank">guided tour</a>')
+            obs = await s.observe()
+            return await s.act({"type": "click", "target": obs["elements"][0]["idx"]}), [e.kind for e in s.evidence]
+
+    result, seen = asyncio.run(body())
+    assert result.startswith("ok, it opened a new tab") and "no_response" not in seen

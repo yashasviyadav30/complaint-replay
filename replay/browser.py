@@ -168,6 +168,7 @@ class Session:
         self._busy_since: dict[str, float] = {}
         self._loaded = False  # flaky / dropping networks spare the first page load, or nothing would open
         self._after_load = 0  # requests since the page loaded; every Nth fails, so a replay is repeatable
+        self._new_tabs: list[str] = []  # URLs of tabs the app opened (external links)
 
     def add(self, kind: str, detail: str) -> None:
         if (kind, evidence_key(kind, detail)) in self._seen:
@@ -181,6 +182,7 @@ class Session:
         extra = {"storage_state": str(self.storage_state)} if self.storage_state else {}
         context = self._context = await self._browser.new_context(**self.condition.context, **extra)
         await context.add_init_script(VITALS_JS)
+        context.on("page", lambda p: self._new_tabs.append(p.url))
         if self.condition.zoom != 1.0:
             await context.add_init_script(
                 f"addEventListener('DOMContentLoaded', () => document.documentElement.style.zoom = '{self.condition.zoom}')"
@@ -432,6 +434,7 @@ class Session:
         opened, self._opened = self._opened, None
         before = await self._fingerprint() if taps else None
         requests_before = self._requests
+        tabs_before = len(self._new_tabs)
         try:
             if kind == "click":
                 await tap(page.locator(f'[data-bc-idx="{int(action["target"])}"]'), action)
@@ -507,6 +510,11 @@ class Session:
             return "ok, and nothing on this screen is loading any more (no spinner, network quiet): act on what you see"
         if kind not in ("fill", "fill_role", "fill_css", "type"):
             await self._check_typed(self.last_target or action.get("selector") or action.get("key") or "a control")
+        if len(self._new_tabs) > tabs_before:
+            # An external link opened a new tab: a response, not a dead button (cloud case 9038's "guided tour"
+            # docs link was cited as proof). The twin stays on the app.
+            await asyncio.sleep(0.5)
+            return f"ok, it opened a new tab outside this app ({self._new_tabs[-1][:100] or 'a link'}); you are still on the app"
         if before is not None and await self._fingerprint() == before and self._requests == requests_before:
             name = self.last_target or action.get("selector") or action.get("key") or "a control"
             self.add("no_response", f"tapped '{name}' but nothing happened: no change on screen, no request sent")
