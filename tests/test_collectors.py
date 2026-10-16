@@ -211,3 +211,14 @@ def test_a_key_press_says_where_the_focus_went(site) -> None:
             return await s.act({"type": "press", "key": "Tab"})
 
     assert asyncio.run(body()) == "ok, focus is now on button 'Try the demo'"
+
+
+def test_controls_sharing_a_name_get_their_row(site) -> None:
+    async def body() -> list[str]:
+        async with browser.Session(f"{site}/popover.html", PHONE) as s:
+            await s.page.set_content("<table><tr><td><button>✓</button></td><td>Dominion Power -120.00</td></tr>"
+                                     "<tr><td><button>✓</button></td><td>Home Depot -4.72</td></tr></table>")
+            return [e["label"] for e in (await s.observe())["elements"]]
+
+    labels = asyncio.run(body())
+    assert labels[0].startswith("✓ in row '") and "Dominion Power" in labels[0] and "Home Depot" in labels[1]

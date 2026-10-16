@@ -45,13 +45,14 @@
   // An open dialog is meant to cover the page: then only controls inside it are checked for being covered.
   const modal = [...document.querySelectorAll('dialog[open], [aria-modal=true], [role=dialog], .modal.show, .offcanvas.show')]
     .find((d) => !ours(d) && visible(d));
-  const elements = [], offscreen = [], covered = [], clipped = [], unnamed = [];
+  const elements = [], offscreen = [], covered = [], clipped = [], unnamed = [], els = [];
   let i = 0;
   for (const el of document.querySelectorAll(CONTROLS)) {
     if (ours(el) || !visible(el)) continue;
     const r = el.getBoundingClientRect();
     if (r.left >= vw || r.right <= 0) { offscreen.push({ label: name(el), left: Math.round(r.left), vw, where: where(el) }); continue; }
     el.setAttribute('data-bc-idx', i);
+    els.push(el);
     elements.push({ idx: i++, tag: el.tagName.toLowerCase(), role: el.getAttribute('role') || '',
       label: name(el) || (nearText(el) ? `(no name) near '${nearText(el)}'` : ''),
       value: (el.type === 'password' ? '' : el.value) || '', disabled: !!el.disabled });
@@ -89,6 +90,17 @@
     if (el.parentElement && getComputedStyle(el.parentElement).cursor === 'pointer') continue;
     unreachable.push(name(el) || el.tagName.toLowerCase());
   }
+
+  // Several controls with one name ("✓" on every row) can't be told apart: add their row. The twin ticked the same
+  // checkbox six times believing it was selecting several transactions (cloud case 8765).
+  const counts = {};
+  elements.forEach((e) => { counts[e.label] = (counts[e.label] || 0) + 1; });
+  elements.forEach((e, k) => {
+    if (counts[e.label] < 2) return;
+    const row = els[k].closest('[role=row], tr, li, [data-testid=row]');
+    const text = row ? row.innerText.trim().replace(/\s+/g, ' ').slice(0, 50) : '';
+    if (text && text !== e.label) e.label = `${e.label} in row '${text}'`;
+  });
 
   const brokenImages = [...document.images].filter((img) => !ours(img) && visible(img) && img.complete && img.naturalWidth === 0)
     .slice(0, 5).map((img) => img.getAttribute('src') || '');
