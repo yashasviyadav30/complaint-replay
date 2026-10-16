@@ -1,6 +1,8 @@
 """Benchmark on real bugs: re-create each one by reverse-applying its real upstream fix, then run the whole chain.
 
 Usage: uv run python scripts/bench_real.py <path to the app's git checkout> [pr ...]
+       uv run python scripts/bench_real.py --report     (rebuild the table from saved results)
+In CI: .github/workflows/real-bugs.yml runs one job per bug.
 Cases: benchmarks/real-bugs.json. Results: benchmarks/real-bugs.md (every case, misses included) and
 results/real-bugs/<pr>.json (the full case: evidence, steps, fix, guard).
 The checkout's files are restored after each case, whatever happens.
@@ -106,7 +108,7 @@ async def main() -> None:
     write_report(repo)
 
 
-def write_report(repo: Path) -> None:
+def write_report(repo: Path | None) -> None:
     """Every case in the cases file that has a saved result, so re-running a few cases updates only their rows."""
     rows, model = [], ""
     for spec in json.loads(CASES.read_text(encoding="utf-8"))["cases"]:
@@ -116,7 +118,7 @@ def write_report(repo: Path) -> None:
         case = json.loads(saved.read_text(encoding="utf-8"))
         bench = case.get("bench", {})
         model = bench.get("model", model)
-        real = bench.get("real_files") or fix_files(repo, spec["commit"])  # results saved before "bench" existed
+        real = bench.get("real_files") or (fix_files(repo, spec["commit"]) if repo else [])  # older results
         rows.append(row(spec, case, real, bench.get("seconds", 0)))
     REPORT.write_text("\n".join([
         "# Real bugs: Actual Budget", "",
@@ -133,4 +135,7 @@ def write_report(repo: Path) -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    if sys.argv[1:2] == ["--report"]:  # combine results downloaded from parallel CI jobs, no app needed
+        write_report(None)
+    else:
+        asyncio.run(main())

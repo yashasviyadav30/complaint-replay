@@ -1,0 +1,93 @@
+# Real-bug benchmark: each Actual Budget bug re-created from its real upstream fix and replayed, one job per bug.
+# Start it from the Actions tab. Results: an artifact per bug plus the combined table (benchmarks/real-bugs.md).
+name: Real-bug benchmark
+
+on:
+  workflow_dispatch:
+    inputs:
+      prs:
+        description: "Upstream fix PRs to run, comma separated (empty = all)"
+        default: ""
+
+permissions:
+  contents: read
+
+env:
+  ACTUAL_COMMIT: d5d6035a8f5867717a80635d270fbe64e370ea08  # the Actual Budget version every result was measured on
+
+jobs:
+  cases:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      max-parallel: 3          # all jobs share one free model key; more in parallel only hits its rate limit
+      matrix:
+        pr: [9071, 9064, 8926, 9107, 8733, 8570, 8765, 9038]
+    steps:
+      - name: Skip unless asked for
+        id: want
+        run: |
+          if [ -z "${{ inputs.prs }}" ] || echo ",${{ inputs.prs }}," | grep -q ",${{ matrix.pr }},"; then echo "run=yes" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/checkout@v4
+        if: steps.want.outputs.run == 'yes'
+      - uses: actions/checkout@v4
+        if: steps.want.outputs.run == 'yes'
+        with:
+          repository: actualbudget/actual
+          ref: ${{ env.ACTUAL_COMMIT }}
+          fetch-depth: 400       # the upstream fix commits must be in history to reverse-apply them
+          path: actual
+      - uses: astral-sh/setup-uv@v6
+        if: steps.want.outputs.run == 'yes'
+      - uses: actions/setup-node@v4
+        if: steps.want.outputs.run == 'yes'
+        with:
+          node-version: 22
+      - name: Install
+        if: steps.want.outputs.run == 'yes'
+        run: |
+          uv sync --frozen
+          uv run playwright install --with-deps chromium
+          cp benchmarks/actual-complaint-replay.toml actual/complaint-replay.toml
+          cd actual && corepack enable && yarn install --immutable
+      - name: Replay the bug
+        if: steps.want.outputs.run == 'yes'
+        env:
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+          NEBIUS_API_KEY: ${{ secrets.NEBIUS_API_KEY }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          REPLAY_MAX_RPM: "10"
+          CRP_START_TIMEOUT: "300"
+          CRP_APP_LOG: ${{ github.workspace }}/results/app-${{ matrix.pr }}.log
+        run: mkdir -p results && uv run python scripts/bench_real.py actual ${{ matrix.pr }}
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.want.outputs.run == 'yes'
+        with:
+          name: case-${{ matrix.pr }}
+          path: |
+            results/real-bugs/
+            results/app-${{ matrix.pr }}.log
+          if-no-files-found: ignore
+
+  report:
+    needs: cases
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: case-*
+          path: downloaded
+      - name: Combine
+        run: |
+          mkdir -p results/real-bugs
+          find downloaded -path '*real-bugs/pr*.json' -exec cp {} results/real-bugs/ \;
+          uv run python scripts/bench_real.py --report
+          cat benchmarks/real-bugs.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: report
+          path: benchmarks/real-bugs.md
