@@ -116,10 +116,14 @@ def running_app(root: Path, port: int | None = None) -> Iterator[str]:
     port = port or free_port()
     url = f"http://127.0.0.1:{port}"
     cmd = project.start.format(port=port, python=f'"{sys.executable}"')
+    # CRP_APP_LOG=<file>: keep the app's own output, to see why it did not start.
+    log = open(os.environ["CRP_APP_LOG"], "a", encoding="utf-8") if os.getenv("CRP_APP_LOG") else subprocess.DEVNULL
     proc = subprocess.Popen(cmd, shell=True, cwd=project.root, start_new_session=os.name != "nt", env=app_env(),
-                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                            stdout=log, stderr=subprocess.STDOUT)
     try:
         _wait_ready(url + project.ready, proc, START_TIMEOUT_S)
         yield url
     finally:
         _kill_tree(proc)
+        if log is not subprocess.DEVNULL:
+            log.close()
