@@ -161,6 +161,8 @@ def llm_matcher(chat: Chat) -> Matcher:
 SKEPTIC_SYSTEM = """A user complained about a website. One piece of machine evidence from a replay is shown.
 Does it show THE PROBLEM THE USER DESCRIBES, in the place they describe it? Or is it something else: a different
 control, a different screen, or an obstacle that only got in the way of reaching what they talk about?
+Evidence about how fast the page loaded (slow_page, slow_request, layout_shift) proves only complaints about
+slowness or jumping pages, never a control that does nothing or a value that is wrong.
 Reply with ONE JSON object and nothing else: {"answer": "problem"} or {"answer": "other"}"""
 
 

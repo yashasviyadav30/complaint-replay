@@ -26,7 +26,7 @@ BRANCHES = Path(tempfile.gettempdir()) / "complaint-replay" / "branches"
 # Installed dependencies are linked into the branch copy, not copied (node_modules can be gigabytes).
 LINKED = {"node_modules", ".venv", "venv"}
 GUARDS = ".complaint-replay/guards"
-FIX_ATTEMPTS = 2
+FIX_ATTEMPTS = 3  # the third catches a malformed reply after a rejected edit (cloud case 9064)
 Update = Callable[[dict], None]
 
 

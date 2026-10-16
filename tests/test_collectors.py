@@ -191,3 +191,14 @@ def test_keyboard_twin_can_hold_tab(site) -> None:
             return await s.page.evaluate("document.activeElement.id")
 
     assert asyncio.run(body()) == "d"
+
+
+def test_a_tap_behind_an_open_dialog_is_not_evidence(site) -> None:
+    async def body() -> tuple[str, list]:
+        async with browser.Session(f"{site}/dialog.html", PHONE) as s:
+            obs = await s.observe()
+            idx = next(e["idx"] for e in obs["elements"] if e["label"] == "Upcoming Utilities")
+            return await s.act({"type": "click", "target": idx}), [e.kind for e in s.evidence]
+
+    result, seen = asyncio.run(body())
+    assert result.startswith("error: a dialog or menu is open") and "tap_blocked" not in seen

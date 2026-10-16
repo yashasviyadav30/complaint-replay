@@ -74,6 +74,9 @@ CHOSEN_JS = """
 }
 """
 READY_TIMEOUT_S = 20
+# An open dialog or menu sheet: taps behind it land on its backdrop, as designed.
+DIALOG_OPEN_JS = """() => [...document.querySelectorAll('[role=dialog], [role=alertdialog], [aria-modal=true], dialog[open]')]
+  .some((e) => e.getBoundingClientRect().width > 0)"""
 MAX_KEY_REPEAT = 15
 READY_TEXT_TIMEOUT_S = 180
 BUSY_JS = """() => [...document.querySelectorAll('[aria-busy=true], [role=progressbar], [class*=spinner], [class*=loading]')]
@@ -479,6 +482,9 @@ class Session:
                 # Cloud cases 8926 and 9071 "proved" bugs by tapping fields the app had disabled on purpose.
                 return ("error: that control is disabled right now (greyed out), so a user can't tap it either; "
                         "finish or close what is open first")
+            if covered and await self._dialog_open():
+                return ("error: a dialog or menu is open on top of the page; use its controls (marked (new)) "
+                        "or close it first")
             if covered:
                 return (f"error: the tap hit {covered.group(1)[:120]} instead: something is on top of it "
                         "(a menu or dialog may have opened; look for (new) controls)")
@@ -496,6 +502,12 @@ class Session:
         elif taps:
             self._opened = self.last_target or action.get("name") or action.get("selector")
         return "ok"
+
+    async def _dialog_open(self) -> bool:
+        try:
+            return await self.page.evaluate(DIALOG_OPEN_JS)
+        except Exception:
+            return False
 
     async def _element(self) -> str:
         """' (<input type="date">)' for the control last acted on, or '' when it cannot be read."""
@@ -517,6 +529,8 @@ class Session:
         blocker = INTERCEPTS.search(error)
         if blocker and name == opened:
             return  # the last tap on this control opened something that now covers it: a menu working as made
+        if blocker and await self._dialog_open():
+            return  # a tap behind an open dialog hits its backdrop by design (cloud cases 9064, 8733, run 6)
         if blocker:
             self.add("tap_blocked", f"tapping '{name}'{await self._element()} hit {blocker.group(1)[:120]} instead")
         elif "element is not enabled" in error:
