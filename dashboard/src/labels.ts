@@ -51,6 +51,7 @@ export const EVIDENCE: Record<string, string> = {
   no_response: "Tap did nothing",
   tap_blocked: "Tap blocked",
   typed_value_lost: "Typed value lost",
+  wrong_option_chosen: "Wrong option chosen",
 };
 
 export const LANGUAGE = new Intl.DisplayNames(undefined, { type: "language" });

@@ -111,3 +111,17 @@ def test_a_control_without_a_name_is_described_by_the_text_beside_it(site) -> No
             return [e["label"] for e in (await s.observe())["elements"]]
 
     assert "(no name) near 'Reconciled'" in asyncio.run(labels())
+
+
+
+def test_keyboard_choice_must_be_the_highlighted_option(site) -> None:
+    from replay.browser import Session
+
+    async def run(page: str) -> list[str]:
+        async with Session(f"{site}/{page}", CONDITIONS["keyboard"]) as s:
+            await s.act({"type": "press", "key": "ArrowDown"})
+            await s.act({"type": "press", "key": "Enter"})
+            return [e.kind for e in s.evidence]
+
+    assert "wrong_option_chosen" in asyncio.run(run("combo.html#buggy"))
+    assert "wrong_option_chosen" not in asyncio.run(run("combo.html"))

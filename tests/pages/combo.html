@@ -1,0 +1,17 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"></head><body>
+<label for="cat">Category</label>
+<input id="cat" role="combobox" aria-expanded="true" aria-controls="list" aria-activedescendant="o0">
+<ul id="list" role="listbox"><li role="option" id="o0" aria-selected="true">Food</li><li role="option" id="o1" aria-selected="false">Rent</li><li role="option" id="o2" aria-selected="false">Travel</li></ul>
+<script>
+  const opts = ['Food', 'Rent', 'Travel'];
+  const buggy = location.hash === '#buggy';  // the shown order and the order used on Enter differ (Actual #8570)
+  let i = 0;
+  const input = document.getElementById('cat');
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown') { i = Math.min(i + 1, 2); }
+    if (e.key === 'Enter') { input.value = opts[buggy ? (i + 1) % 3 : i]; return; }
+    document.querySelectorAll('[role=option]').forEach((o, k) => o.setAttribute('aria-selected', k === i));
+    input.setAttribute('aria-activedescendant', 'o' + i);
+  });
+  input.focus();
+</script></body></html>

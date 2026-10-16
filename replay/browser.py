@@ -43,6 +43,27 @@ try {
     .observe({ type: 'layout-shift', buffered: true });
 } catch (e) {}
 """
+# The option a keyboard user sees highlighted in a dropdown, and the field it belongs to (for wrong_option_chosen).
+HIGHLIGHTED_JS = """
+() => {
+  const a = document.activeElement;
+  if (!a) return null;
+  const id = a.getAttribute('aria-activedescendant');
+  let opt = id ? document.getElementById(id) : null;
+  if (!opt) opt = document.querySelector('[role=listbox] [role=option][aria-selected=true]');
+  if (!opt) return null;
+  a.setAttribute('data-crp-field', '1');
+  return { option: (opt.innerText || '').trim().replace(/\\s+/g, ' ').slice(0, 60), field: true };
+}
+"""
+CHOSEN_JS = """
+() => {
+  const f = document.querySelector('[data-crp-field]');
+  if (!f) return null;
+  f.removeAttribute('data-crp-field');
+  return ('value' in f && f.value !== undefined) ? String(f.value) : (f.innerText || '');
+}
+"""
 # Playwright's click error names what took the tap: "- <div class=...> intercepts pointer events".
 INTERCEPTS = re.compile(r"(<[^>]{1,200}>)[^\n]*intercepts pointer events")
 # Everything a tap could change that a user (or assistive tech) would notice. Same before and after = dead control.
@@ -375,7 +396,10 @@ class Session:
                 key = str(action.get("key", ""))
                 if key not in KEYS:
                     return f"error: key must be one of {sorted(KEYS)}"
+                highlighted = await page.evaluate(HIGHLIGHTED_JS) if key == "Enter" else None
                 await page.keyboard.press(key)
+                if highlighted:
+                    await self._check_choice(highlighted)
             elif kind == "type":
                 await page.keyboard.type(str(action.get("text", "")), delay=30)
             elif kind == "click_css":  # scripted tests only
@@ -416,6 +440,17 @@ class Session:
             self.add("tap_blocked", f"tapping '{name}' hit {blocker.group(1)[:120]} instead")
         elif "not visible" in error or "not enabled" in error or "not stable" in error or "Timeout" in error:
             self.add("tap_blocked", f"'{name}' could not be tapped: it never became visible, enabled and still")
+
+    async def _check_choice(self, highlighted: dict) -> None:
+        """Enter on a highlighted option must pick that option (ARIA combobox pattern)."""
+        await asyncio.sleep(0.3)
+        try:
+            value = await self.page.evaluate(CHOSEN_JS, highlighted["field"])
+        except Exception:
+            return
+        if value is not None and highlighted["option"] and highlighted["option"].lower() not in value.lower():
+            self.add("wrong_option_chosen", f"'{highlighted['option']}' was highlighted when Enter was pressed, "
+                                            f"but the field now holds '{value[:60]}'")
 
     async def _remember_typed(self, field, name: str | None, text: str) -> None:
         if text.strip():
