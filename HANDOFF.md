@@ -19,7 +19,7 @@ Phase 1 tasks 1.0-1.7 (except 1.8) and most of 1.9/1.10 are built and tested (`u
 | 1.7 Dashboard | Projects, setup wizard, impact-ranked board, PR links, sign-in; guideline review done |
 | 1.9 Close the loop | Widget in 17 languages with RTL; reporter sees status ("fixed"); sector field on projects (no sector rules yet) |
 | 1.10 Hardening | Security review done and fixed (commit "security: ..."); not deployed yet |
-| 1.8 Real-bug benchmark | NOT done. Excalidraw was a poor fit (canvas bugs, old a11y fixes). Pick an app with DOM-level bugs and recent fix commits; reverse-apply real fixes to recreate real bugs |
+| 1.8 Real-bug benchmark | Running in GitHub Actions on 8 real Actual Budget fixes (see status below); score not final |
 
 ## Oct 17 (day): Phase 1 finish + Phase 2 started
 
@@ -44,7 +44,11 @@ Phase 1 tasks 1.0-1.7 (except 1.8) and most of 1.9/1.10 are built and tested (`u
   controls labelled by nearby text, chrome bars not "covering", scroll from screen centre, new evidence
   (no_response, tap_blocked, typed_value_lost, wrong_option_chosen), judge rule + per-item skeptic check against
   "obstacle on the way" proofs, fix retries see the full files the first attempt tried to edit, tolerant JSON.
-- Pass 3 running (started before the skeptic and retry fixes). Next: pass 4 with everything, then README numbers.
+- Pass 3 (local) stopped part way: the laptop is too slow and short on memory for a big dev server.
+- Moved to GitHub Actions: `.github/workflows/real-bugs.yml` (start it from the Actions tab; one job per bug,
+  report job writes the table). Cases run one at a time: three jobs sharing the free NVIDIA key got
+  "503 ResourceExhausted"; model calls now wait 30/60/120/240 s on a busy server (`patiently` in `replay/llm.py`).
+  With a Token Factory key, raise `max-parallel`.
 - Memory: the laptop ran out once (Chrome + Docker + two Actual dev servers). Docker Desktop is stopped; don't
   run heavy jobs during a pass. Restart a killed pass only when the user says so.
 
@@ -85,7 +89,7 @@ the server with `PUBLIC_URL=<tunnel url>` and `GITHUB_TOKEN=$(gh auth token)`, p
 
 ## Next, in order
 
-1. Real-bug benchmark (1.8): choose 1-2 apps with DOM-level bugs and recent fix commits; reverse-apply fixes.
+1. Real-bug benchmark (1.8): read the cloud run's table, fix what the misses teach, rerun, publish the score (misses too).
 2. Hosting (1.10): decide the host (Nebius VM if the card works, else a free tier) and deploy with `PUBLIC_URL`,
    `SECRET_KEY`, `ADMIN_LOGIN`, then create the GitHub App via `/setup/github-app` (user clicks).
 3. Re-run benchmarks on Nebius Token Factory once `NEBIUS_API_KEY` exists; update README numbers.
