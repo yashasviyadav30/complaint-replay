@@ -21,6 +21,21 @@ Phase 1 tasks 1.0-1.7 (except 1.8) and most of 1.9/1.10 are built and tested (`u
 | 1.10 Hardening | Security review done and fixed (commit "security: ..."); not deployed yet |
 | 1.8 Real-bug benchmark | NOT done. Excalidraw was a poor fit (canvas bugs, old a11y fixes). Pick an app with DOM-level bugs and recent fix commits; reverse-apply real fixes to recreate real bugs |
 
+## Oct 17 (day): Phase 1 finish + Phase 2 started
+
+- New evidence: taps that did nothing (no_response), taps something else intercepted (tap_blocked).
+- Monorepos: dependency folders linked at any depth in branch copies.
+- Phase 2: bring-your-own model (REPLAY_BASE_URL), failed fixes become GitHub issues with the guard as
+  acceptance test, replay from issues labelled `replay` with a reply on the issue (proven: demo issue #5 -> PR #6),
+  team chat notifications (Slack-compatible), support-desk inbox and Sentry webhook intake (project secret).
+- Sector packs: public (audit everyone, strict masking, no screenshots), fintech (strict masking).
+- Teams' own checks: `checks = ["checks/x.js"]` in complaint-replay.toml.
+- Hosting prep: Dockerfile.server (920 MB, no browser), render.yaml, DEPLOY.md, Postgres extra.
+- Real-bug benchmark harness `scripts/bench_real.py` on Actual Budget (`benchmarks/real-bugs.json`, 8 real fixes
+  reverse-applied). First try exposed a false "fixed" (judge cited unrelated evidence) -> stricter "solved" =
+  fixed AND same file as the real fix. Do not run heavy jobs (tests, docker builds) while it runs: Actual's dev
+  server then misses its start timeout (`CRP_START_TIMEOUT=300`).
+
 ## Proven end to end (all real, all reproducible)
 
 Demo repo (private): `yashasviyadav30/crp-demo-shopping-cart`, an unchanged copy of an MIT app with real a11y bugs.
