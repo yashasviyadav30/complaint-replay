@@ -23,7 +23,8 @@ Reply with ONE JSON object and nothing else:
 Rules:
 - Make the smallest change that fixes the root cause for this user. Do not touch unrelated code.
 - "find" must be copied exactly from the file and appear exactly once in it.
-- Fix the cause, not the symptom: do not hide error messages or delete checks."""
+- Fix the cause, not the symptom: do not hide error messages or delete checks.
+- Change the app's own code. Never edit tests, mocks or test setup: they judge the fix."""
 
 
 # Reasoning is on for the fixer, and on a big repo it used all of 12k tokens before writing a patch (Actual,
