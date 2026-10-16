@@ -33,7 +33,7 @@ GUARDS = ".complaint-replay/guards"
 WORKFLOW = Path(__file__).with_name("workflow.yml")
 CONFIG_TEMPLATE = """[app]
 # How to start the app from the repo root. {port} is filled in with a free port.
-start = "npm run dev -- --port {port}"
+start = "__START__"
 ready = "/"
 # Or replay an already running site (staging, preview) instead of starting one:
 # url = "https://staging.example.com"
@@ -246,11 +246,25 @@ def cmd_setup(_: argparse.Namespace) -> int:
     return subprocess.call([sys.executable, "-m", "playwright", "install", *extra, "chromium"])
 
 
+def guess_start(repo: Path) -> str:
+    """The start command `init` writes: the package's dev script with its package manager, else a static server."""
+    try:
+        scripts = json.loads((repo / "package.json").read_text(encoding="utf-8")).get("scripts") or {}
+    except (OSError, ValueError):
+        return "{python} -m http.server {port} --bind 127.0.0.1"  # no package.json: serve the files as they are
+    script = "dev" if "dev" in scripts or "start" not in scripts else "start"
+    if (repo / "pnpm-lock.yaml").exists():
+        return f"pnpm {script} --port {{port}}"
+    if (repo / "yarn.lock").exists():
+        return f"yarn {script} --port {{port}}"
+    return f"npm run {script} -- --port {{port}}"
+
+
 def cmd_init(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
     written = []
     if not (repo / CONFIG).exists():
-        (repo / CONFIG).write_text(CONFIG_TEMPLATE, encoding="utf-8")
+        (repo / CONFIG).write_text(CONFIG_TEMPLATE.replace("__START__", guess_start(repo)), encoding="utf-8")
         written.append(CONFIG)
     wf = repo / ".github" / "workflows" / "complaint-replay.yml"
     if not wf.exists():
@@ -261,7 +275,7 @@ def cmd_init(args: argparse.Namespace) -> int:
     lines = ignore.read_text(encoding="utf-8").splitlines() if ignore.exists() else []
     lines += [e for e in (".complaint-replay/runs/", ".complaint-replay/auth.json") if e not in lines]
     ignore.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    print("Wrote: " + (", ".join(written) or "nothing new") + ".\nNext: set `start` in " + CONFIG +
+    print("Wrote: " + (", ".join(written) or "nothing new") + ".\nNext: check `start` in " + CONFIG +
           ", add NEBIUS_API_KEY as a repository secret, and commit.")
     return 0
 

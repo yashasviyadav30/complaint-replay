@@ -65,3 +65,13 @@ def test_issue_reply_says_what_happened_and_where_the_fix_is() -> None:
 
     text = issue_comment({**CASE, "stage": "guarded", "pr": "https://github.com/a/b/pull/7"})
     assert text.startswith("**Reproduced, fixed and guarded**") and "pull/7" in text and "`request_failed`" in text
+
+
+def test_init_guesses_how_to_start_the_app(tmp_path) -> None:
+    from replay.cli import guess_start
+
+    assert guess_start(tmp_path).startswith("{python} -m http.server {port}")
+    (tmp_path / "package.json").write_text('{"scripts": {"dev": "vite"}}', encoding="utf-8")
+    assert guess_start(tmp_path) == "npm run dev -- --port {port}"
+    (tmp_path / "yarn.lock").write_text("", encoding="utf-8")
+    assert guess_start(tmp_path) == "yarn dev --port {port}"
