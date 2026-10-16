@@ -141,3 +141,12 @@ def test_a_menu_covering_the_control_that_opened_it_is_not_a_blocked_tap(site) -
     # Cloud case 9071: the second tap on a month picker hit its own open popover and was cited as the bug.
     taps = [{"type": "click_css", "selector": "#month"}] * 2
     assert not [k for k in kinds(f"{site}/popover.html", PHONE, taps) if k.startswith("tap_blocked")]
+
+
+def test_a_made_up_control_number_gets_a_clear_error_fast(site) -> None:
+    async def body() -> str:
+        async with browser.Session(f"{site}/popover.html", PHONE) as s:
+            await s.observe()
+            return await s.act({"type": "click", "target": 999})
+
+    assert asyncio.run(body()).startswith("error: there is no control [999]")

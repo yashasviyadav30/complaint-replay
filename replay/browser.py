@@ -414,6 +414,9 @@ class Session:
         self.last_idx = idx if kind in ("click", "fill") and idx >= 0 else None
         if self.condition.keyboard_only and kind in ("click", "fill", "click_role", "fill_role"):
             return "error: this user has no mouse; use press (Tab, Enter, Space) and type"
+        if kind in ("click", "fill") and idx not in self._labels:
+            # Cloud case 9064: the model tapped made-up numbers 13 times, each a vague 5 s timeout.
+            return f"error: there is no control [{idx}] on this screen; use a number from 'Controls you can see'"
         taps = kind in ("click", "click_role", "click_css") or (kind == "press" and action.get("key") in ("Enter", "Space"))
         opened, self._opened = self._opened, None
         before = await self._fingerprint() if taps else None
