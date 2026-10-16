@@ -88,7 +88,7 @@ async def main() -> None:
     specs = [s for s in json.loads(CASES.read_text(encoding="utf-8"))["cases"] if not wanted or s["pr"] in wanted]
     client = make_client()
     chat = Chat(client, await pick_model(client))
-    rows = []
+    OUT.mkdir(parents=True, exist_ok=True)
     for spec in specs:
         files = fix_files(repo, spec["commit"])
         started = time.monotonic()
@@ -101,11 +101,27 @@ async def main() -> None:
             print(f"  pr{spec['pr']}: error {e!r}", flush=True)
         finally:
             restore(repo, files)
-        rows.append(row(spec, case, files, time.monotonic() - started))
+        case["bench"] = {"real_files": files, "seconds": round(time.monotonic() - started), "model": chat.model}
+        (OUT / f"pr{spec['pr']}.json").write_text(json.dumps(case, ensure_ascii=False, indent=2), encoding="utf-8")
+    write_report(repo)
+
+
+def write_report(repo: Path) -> None:
+    """Every case in the cases file that has a saved result, so re-running a few cases updates only their rows."""
+    rows, model = [], ""
+    for spec in json.loads(CASES.read_text(encoding="utf-8"))["cases"]:
+        saved = OUT / f"pr{spec['pr']}.json"
+        if not saved.exists():
+            continue
+        case = json.loads(saved.read_text(encoding="utf-8"))
+        bench = case.get("bench", {})
+        model = bench.get("model", model)
+        real = bench.get("real_files") or fix_files(repo, spec["commit"])  # results saved before "bench" existed
+        rows.append(row(spec, case, real, bench.get("seconds", 0)))
     REPORT.write_text("\n".join([
         "# Real bugs: Actual Budget", "",
         f"Measured {time.strftime('%Y-%m-%d')} with `uv run python scripts/bench_real.py <actual checkout>`, model "
-        f"`{chat.model}`. Each bug was fixed upstream; it is re-created by reverse-applying that fix to today's code, "
+        f"`{model}`. Each bug was fixed upstream; it is re-created by reverse-applying that fix to today's code, "
         "and the complaint is written from the real report. \"Same file\" means our fix edited a file the real fix "
         "edited. Every case is listed, misses included.", "",
         f"**Solved {sum('**yes**' in r for r in rows)} of {len(rows)}.** Solved means fixed and guarded AND our fix edited "
