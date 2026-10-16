@@ -202,3 +202,12 @@ def test_a_tap_behind_an_open_dialog_is_not_evidence(site) -> None:
 
     result, seen = asyncio.run(body())
     assert result.startswith("error: a dialog or menu is open") and "tap_blocked" not in seen
+
+
+def test_a_key_press_says_where_the_focus_went(site) -> None:
+    async def body() -> str:
+        async with browser.Session(f"{site}/popover.html", PHONE) as s:
+            await s.page.set_content("<button>Try the demo</button><button>Start fresh</button>")
+            return await s.act({"type": "press", "key": "Tab"})
+
+    assert asyncio.run(body()) == "ok, focus is now on button 'Try the demo'"

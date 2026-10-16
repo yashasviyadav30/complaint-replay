@@ -74,6 +74,10 @@ CHOSEN_JS = """
 }
 """
 READY_TIMEOUT_S = 20
+FOCUS_JS = r"""() => { const a = document.activeElement;
+  if (!a || a === document.body) return 'nothing';
+  const name = (a.getAttribute('aria-label') || a.innerText || a.value || a.placeholder || '').trim().replace(/\s+/g, ' ');
+  return `${a.tagName.toLowerCase()} '${name.slice(0, 60)}'`; }"""
 # An open dialog or menu sheet: taps behind it land on its backdrop, as designed.
 DIALOG_OPEN_JS = """() => [...document.querySelectorAll('[role=dialog], [role=alertdialog], [aria-modal=true], dialog[open]')]
   .some((e) => e.getBoundingClientRect().width > 0)"""
@@ -490,6 +494,13 @@ class Session:
                         "(a menu or dialog may have opened; look for (new) controls)")
             return f"error: {str(e).splitlines()[0][:200]}"
         await self.settle()
+        if kind == "press":
+            # Where the key took the focus: told only "ok", the keyboard twin pressed Tab ~200 times without
+            # ever pressing Enter (cloud case 8570).
+            try:
+                return f"ok, focus is now on {await self.page.evaluate(FOCUS_JS)}"
+            except Exception:
+                return "ok"
         if kind == "wait" and self._inflight == 0 and not await self.page.evaluate(BUSY_JS):
             # Cloud case 9107: slow-page evidence ("appeared after 24.8 s") made the twin wait 25 times on a
             # page that had finished loading. Say so plainly.
