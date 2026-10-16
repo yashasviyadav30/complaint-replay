@@ -15,13 +15,15 @@ import logging
 import os
 import random
 import secrets
+import threading
+import re
 import time
 from collections import defaultdict, deque
 from contextlib import ExitStack, asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-import re
 from typing import Annotated, Literal
+from urllib.parse import urlparse
 from zoneinfo import available_timezones
 
 from dotenv import load_dotenv
@@ -37,7 +39,7 @@ from replay.grouping import find_duplicate
 from replay.langid import detect
 from replay.project import running_app
 from replay.triage import classify
-from server import github
+from server import github, notify
 from server.intake import complaint_for_model, impact, mask_pii, session_login, session_value, sign, unsign
 from server.store import Store
 
@@ -111,6 +113,14 @@ class ProjectIn(BaseModel):
     sector: Literal["general", "ecommerce", "fintech", "public"] = "general"
     retention_days: int = Field(30, ge=1, le=365)
     screenshots: bool = True
+    notify_url: str = Field("", max_length=300)  # Slack-compatible incoming webhook for the team's chat
+
+    @field_validator("notify_url")
+    @classmethod
+    def https_only(cls, url: str) -> str:
+        if url and not url.startswith("https://"):
+            raise ValueError("the chat webhook must be an https:// URL")
+        return url
 
     @field_validator("repo")
     @classmethod
@@ -154,7 +164,13 @@ def save_case(case: dict) -> dict:
         case["also_reported"] = stored.get("also_reported", [])
     case["impact"] = impact(case)
     case["updated_at"] = now()
-    return store.put("case", case)
+    saved = store.put("case", case)
+    if case.get("stage") in notify.WORTH_SAYING and (not stored or stored.get("stage") != case["stage"]):
+        project = store.get("project", case.get("project", "")) or {}
+        if project.get("notify_url"):
+            text = notify.message(case, project, os.getenv("PUBLIC_URL", ""))
+            threading.Thread(target=notify.send, args=(project["notify_url"], text), daemon=True).start()
+    return saved
 
 
 # --- running investigations ---
@@ -359,7 +375,13 @@ async def receive_report(report: ReportIn, request: Request) -> dict:
     origin = request.headers.get("origin", "")
     if project["origins"] and origin and origin not in project["origins"]:
         raise HTTPException(403, "this site is not allowed to send reports to this project")
+    return await accept(project, report, request, source="widget")
+
+
+async def accept(project: dict, report: ReportIn, request: Request, source: str) -> dict:
+    """Every way in (widget, support inbox, Sentry) ends here: mask, tag, group, triage, replay."""
     record = report.model_dump()
+    record["source"] = source
     record["text"] = mask_pii(record["text"])
     record["page"] = mask_pii(record["page"])
     record["breadcrumbs"] = [mask_pii(b)[:80] for b in record["breadcrumbs"]]
@@ -386,6 +408,50 @@ async def receive_report(report: ReportIn, request: Request) -> dict:
         else:  # spam or a clear feature wish: keep it for the team, don't spend a replay on it
             save_case({**case, "stage": "not_a_bug"})
     return {"id": record["id"], "token": record["status_token"], "grouped_into": duplicate}
+
+
+def project_by_secret(project_id: str, secret: str) -> dict:
+    project = store.get("project", project_id)
+    if not project or not project.get("secret") or not secrets.compare_digest(project["secret"].encode(), secret.encode()):
+        raise HTTPException(403, "wrong project or secret")
+    return project
+
+
+class InboxIn(BaseModel):
+    """A complaint forwarded by a support desk (Zendesk, Intercom, a mail-to-webhook bridge, a Zap)."""
+    text: str = Field(min_length=1, max_length=1000)
+    page: str = Field("/", max_length=300)
+    language: str = Field("en", max_length=35)
+    device: Literal["phone", "desktop"] = "phone"  # support tickets rarely say; most complaints come from phones
+
+
+@app.post("/api/v1/projects/{project_id}/inbox", status_code=201)
+async def inbox(project_id: str, body: InboxIn, request: Request) -> dict:
+    project = project_by_secret(project_id, request.headers.get("authorization", "").removeprefix("Bearer "))
+    if rate_limited("project:" + project["id"]):
+        raise HTTPException(429, "too many reports, slow down")
+    viewport = {"width": 390, "height": 844} if body.device == "phone" else {"width": 1280, "height": 800}
+    report = ReportIn(project=project["key"], kind="spoken", text=body.text, page=body.page,
+                      env=Env(viewport=viewport, language=body.language, touch=body.device == "phone"))
+    return await accept(project, report, request, source="inbox")
+
+
+@app.post("/api/v1/projects/{project_id}/sentry", status_code=201)
+async def sentry(project_id: str, secret: str, request: Request) -> dict:
+    """A Sentry issue alert webhook, as a silent signal (Sentry can't set headers, so the secret is in the URL)."""
+    project = project_by_secret(project_id, secret)
+    if rate_limited("project:" + project["id"]):
+        raise HTTPException(429, "too many reports, slow down")
+    event = ((await request.json()).get("data") or {}).get("event") or {}
+    contexts = event.get("contexts") or {}
+    device = (contexts.get("device") or {}).get("family", "")
+    page = urlparse(str((event.get("request") or {}).get("url") or "/")).path or "/"
+    text = f"Sentry: {event.get('title') or 'error'} ({event.get('culprit') or 'unknown place'})"[:1000]
+    phone = device.lower() not in ("", "other", "mac", "pc")
+    report = ReportIn(project=project["key"], kind="js_error", text=text, page=page[:300],
+                      env=Env(viewport={"width": 390, "height": 844} if phone else {"width": 1280, "height": 800},
+                              touch=phone, user_agent=str((contexts.get("browser") or {}).get("name", ""))[:200]))
+    return await accept(project, report, request, source="sentry")
 
 
 @app.get("/api/v1/reports/{report_id}")
@@ -418,15 +484,16 @@ async def case_progress(case_id: str, request: Request) -> dict:
     update = json.loads(raw)
     if not isinstance(update, dict):
         raise HTTPException(422, "progress must be a JSON object")
-    for key in ("stage", "condition", "replay", "fix", "proof", "guard", "shots", "pr", "error"):
+    for key in ("stage", "condition", "replay", "fix", "proof", "guard", "shots", "pr", "issue", "error"):
         if key in update:
             case[key] = update[key]
     # Anything shown as a link or used as a file name must be what it claims to be.
     if not isinstance(case.get("shots"), dict) or not all(isinstance(v, str) and SHOT_NAME.fullmatch(v)
                                                          for v in case["shots"].values()):
         case.pop("shots", None)
-    if case.get("pr") and not str(case["pr"]).startswith("https://github.com/"):
-        case.pop("pr")
+    for link in ("pr", "issue"):
+        if case.get(link) and not str(case[link]).startswith("https://github.com/"):
+            case.pop(link)
     if isinstance(case.get("fix"), dict):
         case["fix"]["sources"] = [s for s in case["fix"].get("sources") or []
                                   if isinstance(s, dict) and str(s.get("url", "")).startswith("https://")]
@@ -463,6 +530,7 @@ def create_project(body: ProjectIn, request: Request, user: str = Depends(requir
         if not github.user_can_push(body.repo, token):
             raise HTTPException(403, f"you need write access to {body.repo} to connect it")
     project = {"id": secrets.token_hex(5), "key": "crp_" + secrets.token_urlsafe(12), "owner": user,
+               "secret": "crp_sk_" + secrets.token_urlsafe(24),  # for server-to-server intake (inbox, Sentry)
                "mode": "github", "created_at": now(), **body.model_dump()}
     return store.put("project", project)
 

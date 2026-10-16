@@ -1,0 +1,22 @@
+{
+  "_about": "Real bugs from Actual Budget (github.com/actualbudget/actual, MIT). Each was fixed upstream in 2026; the benchmark re-creates it by reverse-applying the real fix to today's code, then replays a complaint written from the real report. The real fix is the answer key.",
+  "app": "actualbudget/actual",
+  "cases": [
+    {"pr": 9071, "commit": "5e39105f59", "user": {"device": "Pixel 7"},
+     "complaint": "On my Android phone, when I add a transaction and tap the date, the calendar never opens. I can't change the date at all."},
+    {"pr": 9064, "commit": "167bae44f5", "user": {"device": "Pixel 7"},
+     "complaint": "On my phone the Reconciled switch on a transaction does nothing when I tap it. The Cleared switch works fine."},
+    {"pr": 8926, "commit": "34597d703f", "user": {"device": "Pixel 7"},
+     "complaint": "On my phone I picked the wrong payee for a new transaction and now there is no way to clear the payee again."},
+    {"pr": 9107, "commit": "ccdd1cff1c", "user": {"device": "Pixel 7"},
+     "complaint": "On my phone, with hide reconciled transactions turned on, the balance next to the oldest transaction in an account is wrong. It just shows that transaction's own amount."},
+    {"pr": 8733, "commit": "fa3cced1d1", "user": {"device": "Pixel 7"},
+     "complaint": "On my phone I type the amount for a new transaction and then tap the Cleared switch, and the amount I typed disappears."},
+    {"pr": 8570, "commit": "008c609424", "user": {"keyboard": true},
+     "complaint": "I only use the keyboard. When I choose a category for a transaction with the arrow keys and press Enter, a different category gets saved than the one that was highlighted."},
+    {"pr": 8765, "commit": "1372f7b564", "user": {},
+     "complaint": "When I select several transactions and use bulk edit to change the date, the date field looks broken and squashed."},
+    {"pr": 9038, "commit": "6da9f6ac78", "user": {},
+     "complaint": "In the guided tour, the To Budget step highlights nothing I can see. The highlight points somewhere off the screen."}
+  ]
+}

@@ -102,6 +102,17 @@ export function SetupSteps({ project, me, onTested }: { project: Project; me: Me
           </button>
           {error && <p role="alert" className="text-sm text-accent">{error}</p>}
         </Step>
+        {project.secret && (
+          <Step n={5} title="Connect Your Other Tools">
+            <p className="text-sm text-muted">
+              Complaints that reach your support desk can come in too. Forward them from Zendesk, Intercom or an email
+              bridge with this request. Keep the secret private.
+            </p>
+            <CopyBlock label="support inbox request" code={`curl -X POST ${window.location.origin}/api/v1/projects/${project.id}/inbox   -H "Authorization: Bearer ${project.secret}" -H "Content-Type: application/json"   -d '{"text": "The pay button does nothing on my phone", "language": "en"}'`} />
+            <p className="text-sm text-muted">Sentry: add an issue alert with a webhook to this address, and new errors arrive as silent signals.</p>
+            <CopyBlock label="Sentry webhook address" code={`${window.location.origin}/api/v1/projects/${project.id}/sentry?secret=${project.secret}`} />
+          </Step>
+        )}
       </ol>
     </section>
   );
@@ -131,6 +142,7 @@ export function NewProject({ onCreated }: { onCreated: (p: Project) => void }) {
         sector: f.get("sector") as ProjectIn["sector"],
         retention_days: Number(f.get("retention")),
         screenshots: f.get("screenshots") === "on",
+        notify_url: String(f.get("notify_url") ?? "").trim(),
       }));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not create the project.");
@@ -174,6 +186,12 @@ export function NewProject({ onCreated }: { onCreated: (p: Project) => void }) {
               {[7, 30, 90, 365].map((d) => <option key={d} value={d}>{d} days</option>)}
             </select>
           </div>
+        </div>
+        <div className="grid gap-2">
+          <label htmlFor="notify_url" className="text-sm font-medium text-ink">Team chat webhook</label>
+          <input id="notify_url" name="notify_url" type="url" pattern="https://.*" autoComplete="off" spellCheck={false}
+            className={`${field} font-mono`} placeholder="https://hooks.slack.com/services/…" aria-describedby="notify-help" />
+          <p id="notify-help" className="text-xs text-muted">Slack, Mattermost or Discord (add /slack). Told when a bug is proven, fixed, or needs a person.</p>
         </div>
         <label className="flex items-center gap-2 text-sm text-ink">
           <input type="checkbox" name="screenshots" defaultChecked className="size-4 accent-[var(--accent)]" />

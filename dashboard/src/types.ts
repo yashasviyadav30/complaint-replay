@@ -55,10 +55,12 @@ export interface Project {
   sector: "general" | "ecommerce" | "fintech" | "public";
   retention_days: number;
   screenshots: boolean;
+  notify_url?: string;
+  secret?: string;
   created_at: string;
 }
 
-export type ProjectIn = Pick<Project, "name" | "repo" | "origins" | "sector" | "retention_days" | "screenshots">;
+export type ProjectIn = Pick<Project, "name" | "repo" | "origins" | "sector" | "retention_days" | "screenshots" | "notify_url">;
 
 export interface Me { login: string | null; login_enabled: boolean; github_app: string | null }
 

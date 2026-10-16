@@ -215,3 +215,31 @@ def test_traffic_through_a_tunnel_is_not_local(monkeypatch) -> None:
     monkeypatch.delenv("LOCAL_ADMIN", raising=False)
     local = TestClient(srv.app)
     assert local.get("/api/v1/projects", headers={"CF-Connecting-IP": "203.0.113.9"}).status_code == 401
+
+
+def test_support_inbox_and_sentry_need_the_project_secret(client) -> None:
+    project = client.post("/api/v1/projects", json={"name": "Shop"}).json()
+    url = f"/api/v1/projects/{project['id']}/inbox"
+    assert client.post(url, json={"text": "Pay fails"}, headers={"Authorization": "Bearer wrong"}).status_code == 403
+    ok = client.post(url, json={"text": "Pay fails on my phone", "language": "es"},
+                     headers={"Authorization": f"Bearer {project['secret']}"})
+    assert ok.status_code == 201
+    sentry = {"data": {"event": {"title": "TypeError: x is undefined", "culprit": "checkout.js",
+                                 "request": {"url": "https://shop.example/checkout"},
+                                 "contexts": {"device": {"family": "Pixel 7"}}}}}
+    r = client.post(f"/api/v1/projects/{project['id']}/sentry", params={"secret": project["secret"]}, json=sentry)
+    case = client.get(f"/api/v1/cases/{r.json()['id']}").json()
+    assert case["kind"] == "js_error" and case["page"] == "/checkout" and "TypeError" in case["said"]
+
+
+def test_team_chat_hears_about_proven_bugs_once(client, monkeypatch) -> None:
+    sent = []
+    monkeypatch.setattr(srv.notify, "send", lambda url, text: sent.append((url, text)))
+    monkeypatch.setattr(srv.threading, "Thread", lambda target, args, daemon: type("T", (), {"start": lambda self: target(*args)})())
+    project = client.post("/api/v1/projects", json={"name": "Shop", "notify_url": "https://hooks.slack.com/x"}).json()
+    case = {"id": "n1", "project": project["id"], "stage": "reproducing", "said": "Pay fails", "condition": {"persona": "p"}}
+    srv.save_case(dict(case))
+    srv.save_case({**case, "stage": "guarded", "pr": "https://github.com/a/b/pull/1"})
+    srv.save_case({**case, "stage": "guarded", "pr": "https://github.com/a/b/pull/1"})
+    assert len(sent) == 1 and "pull/1" in sent[0][1] and sent[0][0] == "https://hooks.slack.com/x"
+    assert client.post("/api/v1/projects", json={"name": "x", "notify_url": "http://insecure"}).status_code == 422
