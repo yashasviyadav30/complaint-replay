@@ -49,6 +49,12 @@ Phase 1 tasks 1.0-1.7 (except 1.8) and most of 1.9/1.10 are built and tested (`u
   report job writes the table). Cases run one at a time: three jobs sharing the free NVIDIA key got
   "503 ResourceExhausted"; model calls now wait 30/60/120/240 s on a busy server (`patiently` in `replay/llm.py`).
   With a Token Factory key, raise `max-parallel`.
+- Cloud runs 3-4 (Oct 16) taught, each now fixed with a test: fixer missed shared components (evidence now
+  names the element, picker follows imports incl. `#alias/` paths, 100k-char file cap); twin history showed
+  bare numbers (now names); cold Vite page hung after reload (twin refreshes once); a tap's own popover
+  counted as "tap blocked"; made-up control numbers (clear error now); fixer ran out of tokens while reasoning
+  (32k, says so); slow-page evidence read as "still loading" (wait result says when nothing loads).
+- Run 5 (38911600083) has all of these. Read each case with `gh run download <run> -n case-<pr>`.
 - Memory: the laptop ran out once (Chrome + Docker + two Actual dev servers). Docker Desktop is stopped; don't
   run heavy jobs during a pass. Restart a killed pass only when the user says so.
 
