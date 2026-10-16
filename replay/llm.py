@@ -85,6 +85,21 @@ async def throttle(now=time.monotonic, sleep=asyncio.sleep) -> None:
         await sleep(60 - (t - _calls[0]) + 0.05)
 
 
+BUSY_WAITS_S = (30, 60, 120, 240)  # a shared free endpoint can be full for minutes ("503 ResourceExhausted")
+
+
+async def patiently(call, sleep=asyncio.sleep):
+    """Run a model call; when the server is busy or overloaded, wait and try again before giving up."""
+    from openai import APIConnectionError, InternalServerError, RateLimitError
+
+    for wait in BUSY_WAITS_S:
+        try:
+            return await call()
+        except (InternalServerError, RateLimitError, APIConnectionError):
+            await sleep(wait)
+    return await call()
+
+
 class TokenBudgetExceeded(RuntimeError):
     pass
 
@@ -103,10 +118,10 @@ class Chat:
         # Thinking off: one step at a time doesn't need it, and long thinking used up
         # max_tokens before any answer (empty replies in the first risk test).
         await throttle()
-        resp = await self.client.chat.completions.create(
+        resp = await patiently(lambda: self.client.chat.completions.create(
             model=self.model, messages=messages, temperature=0.2, max_tokens=max_tokens,
             extra_body={"chat_template_kwargs": {"enable_thinking": False}},
-        )
+        ))
         self.used += resp.usage.total_tokens if resp.usage else 0
         return resp.choices[0].message.content or ""
 

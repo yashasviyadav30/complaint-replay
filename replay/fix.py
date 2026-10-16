@@ -11,7 +11,7 @@ from openai import AsyncOpenAI
 from replay.agent import ReplayResult
 from replay.conditions import Condition
 from replay import sources as src
-from replay.llm import parse_json, throttle
+from replay.llm import parse_json, patiently, throttle
 
 FIX_SYSTEM = """You fix one bug in a web app.
 You get a user's complaint, the user's real conditions, machine evidence of the failure, the steps that triggered it,
@@ -79,10 +79,10 @@ async def propose_fix(client: AsyncOpenAI, model: str, complaint: str, condition
          "enough surrounding lines that it appears exactly once." if rejected else "")
     )
     await throttle()
-    resp = await client.chat.completions.create(
+    resp = await patiently(lambda: client.chat.completions.create(
         model=model, temperature=0.1, max_tokens=12000,
         messages=[{"role": "system", "content": FIX_SYSTEM}, {"role": "user", "content": user}],
-    )
+    ))
     data = parse_json(resp.choices[0].message.content or "")
     return Patch(str(data.get("explanation", "")), tuple(data.get("edits", [])))
 

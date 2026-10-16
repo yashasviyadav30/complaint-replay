@@ -33,3 +33,25 @@ def test_own_model_server_wins_when_configured(monkeypatch) -> None:
     monkeypatch.setenv("REPLAY_BASE_URL", "http://10.0.0.5:8000/v1")
     monkeypatch.setenv("NEBIUS_API_KEY", "k")
     assert str(make_client().base_url).startswith("http://10.0.0.5:8000/v1")
+
+
+def test_busy_model_server_is_retried_patiently() -> None:
+    import asyncio
+
+    from openai import InternalServerError
+
+    from replay.llm import patiently
+
+    calls, waits = [], []
+    busy = InternalServerError.__new__(InternalServerError)  # a 503 "ResourceExhausted", without building a response
+
+    async def call():
+        calls.append(1)
+        if len(calls) < 3:
+            raise busy
+        return "ok"
+
+    async def sleep(s):
+        waits.append(s)
+
+    assert asyncio.run(patiently(call, sleep)) == "ok" and waits == [30, 60]

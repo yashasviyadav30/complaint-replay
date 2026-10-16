@@ -21,7 +21,7 @@ jobs:
     timeout-minutes: 75
     strategy:
       fail-fast: false
-      max-parallel: 3          # all jobs share one free model key; more in parallel only hits its rate limit
+      max-parallel: 1          # one shared free model key: parallel jobs overload it (503). Raise with a Token Factory key.
       matrix:
         pr: [9071, 9064, 8926, 9107, 8733, 8570, 8765, 9038]
     steps:
@@ -57,7 +57,7 @@ jobs:
           NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
           NEBIUS_API_KEY: ${{ secrets.NEBIUS_API_KEY }}
           TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
-          REPLAY_MAX_RPM: "10"
+          REPLAY_MAX_RPM: "25"
           CRP_START_TIMEOUT: "300"
           CRP_APP_LOG: ${{ github.workspace }}/results/app-${{ matrix.pr }}.log
         run: mkdir -p results && uv run python scripts/bench_real.py actual ${{ matrix.pr }}
