@@ -55,3 +55,19 @@ def test_busy_model_server_is_retried_patiently() -> None:
         waits.append(s)
 
     assert asyncio.run(patiently(call, sleep)) == "ok" and waits == [30, 60]
+
+
+def test_default_model_is_nemotron_super_not_a_nano_model(monkeypatch) -> None:
+    import asyncio
+    from types import SimpleNamespace
+
+    from replay.llm import pick_model
+
+    monkeypatch.delenv("REPLAY_MODEL", raising=False)
+    ids = ["nvidia/nemotron-3-nano-omni-30b-a3b-reasoning", "nvidia/nemotron-3-super-120b-a12b", "nvidia/nemotron-nano-9b"]
+
+    class Models:
+        async def list(self):
+            return SimpleNamespace(data=[SimpleNamespace(id=i) for i in ids])
+
+    assert asyncio.run(pick_model(SimpleNamespace(models=Models()))) == "nvidia/nemotron-3-super-120b-a12b"

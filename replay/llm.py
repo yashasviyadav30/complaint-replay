@@ -58,8 +58,10 @@ async def pick_model(client: AsyncOpenAI) -> str:
     models = await nemotron_models(client)
     if not models:
         raise RuntimeError("no Nemotron model in the Token Factory catalog; set REPLAY_MODEL")
-    # Prefer a fast tier for step-by-step browsing.
-    return next((m for m in models if "nano" in m.lower()), models[0])
+    # Nemotron 3 Super, as the docs say. The old "prefer nano" default picked a small multimodal reasoning model
+    # in CI and in every customer's Action (no REPLAY_MODEL there), and the twin wandered on a real app.
+    return next((m for m in models if "nemotron-3-super" in m.lower()),
+                next((m for m in models if "super" in m.lower()), models[0]))
 
 
 _calls: deque[float] = deque()  # start times of recent model requests, process-wide
