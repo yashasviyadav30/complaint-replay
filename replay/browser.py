@@ -185,10 +185,19 @@ class Session:
         await self.page.goto(self.base_url, wait_until="load", timeout=60_000)
         await self._wait_until_ready()
         if self.ready_text:  # the project says what "loaded" looks like: wait for it like a patient user
-            try:
-                await self.page.get_by_text(self.ready_text).first.wait_for(timeout=READY_TEXT_TIMEOUT_S * 1000)
-            except Exception:  # still not there: let the twin see the screen as it is
-                pass
+            for attempt in range(2):
+                try:
+                    await self.page.get_by_text(self.ready_text).first.wait_for(timeout=READY_TEXT_TIMEOUT_S * 1000)
+                    break
+                except Exception:
+                    # A user refreshes a page that never finishes loading. Seen in CI: a cold Vite dev server
+                    # reloads the page after bundling, and the second load hung on a spinner.
+                    if attempt == 0:
+                        try:
+                            await self.page.reload(wait_until="load", timeout=60_000)
+                        except Exception:  # still not there: let the twin see the screen as it is
+                            break
+                        await self._wait_until_ready()
         self._loaded = True
         return self
 

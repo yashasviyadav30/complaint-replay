@@ -125,3 +125,13 @@ def test_keyboard_choice_must_be_the_highlighted_option(site) -> None:
 
     assert "wrong_option_chosen" in asyncio.run(run("combo.html#buggy"))
     assert "wrong_option_chosen" not in asyncio.run(run("combo.html"))
+
+
+def test_twin_reloads_a_page_that_never_finishes_loading(site, monkeypatch) -> None:
+    monkeypatch.setattr(browser, "READY_TEXT_TIMEOUT_S", 2)
+
+    async def body() -> str:
+        async with browser.Session(f"{site}/reload.html", PHONE, ready_text="Try the demo") as s:
+            return await s.page.inner_text("body")
+
+    assert "Try the demo" in asyncio.run(body())
