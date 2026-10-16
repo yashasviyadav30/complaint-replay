@@ -181,3 +181,13 @@ def test_a_disabled_control_is_not_evidence_and_the_twin_hears_why(site, monkeyp
 
     result, kinds_seen = asyncio.run(body())
     assert result.startswith("error: that control is disabled") and "tap_blocked" not in kinds_seen
+
+
+def test_keyboard_twin_can_hold_tab(site) -> None:
+    async def body() -> str:
+        async with browser.Session(f"{site}/popover.html", PHONE) as s:
+            await s.page.set_content("<button>a</button><button>b</button><button>c</button><button id=d>d</button>")
+            await s.act({"type": "press", "key": "Tab", "times": 4})
+            return await s.page.evaluate("document.activeElement.id")
+
+    assert asyncio.run(body()) == "d"

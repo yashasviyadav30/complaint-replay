@@ -146,6 +146,7 @@ SCREEN_READER_ACTIONS = """{"type": "click_role", "role": "button", "name": "<ex
 {"type": "fill_role", "role": "textbox", "name": "<exact accessible name>", "text": "..."}
 You can only use controls that have a name in the accessibility tree."""
 KEYBOARD_ACTIONS = """{"type": "press", "key": "Tab" | "Shift+Tab" | "Enter" | "Space" | "Escape" | "ArrowDown" | "ArrowUp"}
+   (add "times": 2-15 to press it several times, like holding Tab to move down the page)
 {"type": "type", "text": "..."}   (types into the focused field)
 This user has no mouse. "Focused" shows where the keyboard is now; press Tab to move to the next control."""
 
@@ -182,8 +183,10 @@ def build_prompt(ctx: dict) -> tuple[str, str]:
     )
     if cond.keyboard_only:
         focus = obs.get("focus")
+        # A keyboard-only user still sees the screen: show the controls, which they reach only with keys.
         page = (f"Focused: {focus['tag']} '{focus['label']}'" if focus else "Focused: nothing yet") + \
-            f"\n\nVisible text:\n{obs['text']}"
+            "\n\nControls you can see (in page order, roughly the Tab order; reach them only with keys):\n" + \
+            "\n".join(f"- {e['tag']} '{e['label']}'" for e in obs["elements"]) + f"\n\nVisible text:\n{obs['text']}"
     about = f"About this app: {ctx['hints']}\n" if ctx.get("hints") else ""
     evidence = evidence_brief(ctx["evidence"])
     # The name of what each action hit: with bare numbers, a twin "opening a transaction" pressed

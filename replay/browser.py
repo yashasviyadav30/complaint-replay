@@ -74,6 +74,7 @@ CHOSEN_JS = """
 }
 """
 READY_TIMEOUT_S = 20
+MAX_KEY_REPEAT = 15
 READY_TEXT_TIMEOUT_S = 180
 BUSY_JS = """() => [...document.querySelectorAll('[aria-busy=true], [role=progressbar], [class*=spinner], [class*=loading]')]
   .some((e) => e.getBoundingClientRect().width > 0)"""
@@ -162,9 +163,9 @@ class Session:
         self._after_load = 0  # requests since the page loaded; every Nth fails, so a replay is repeatable
 
     def add(self, kind: str, detail: str) -> None:
-        if (kind, detail) in self._seen:
-            return
-        self._seen.add((kind, detail))
+        if (kind, evidence_key(kind, detail)) in self._seen:
+            return  # the same problem again; ids with fresh random numbers on every page don't make it new
+        self._seen.add((kind, evidence_key(kind, detail)))
         self.evidence.append(Evidence(f"E{len(self.evidence) + 1}", kind, detail, self.step))
 
     async def __aenter__(self) -> "Session":
@@ -446,7 +447,10 @@ class Session:
                 if key not in KEYS:
                     return f"error: key must be one of {sorted(KEYS)}"
                 highlighted = await page.evaluate(HIGHLIGHTED_JS) if key == "Enter" else None
-                await page.keyboard.press(key)
+                # "times": holding Tab to get through a big page; one key per step left the keyboard twin stranded
+                # on the first screen of a real app (cloud case 8570).
+                for _ in range(max(1, min(int(action.get("times", 1)), MAX_KEY_REPEAT))):
+                    await page.keyboard.press(key)
                 if highlighted:
                     await self._check_choice(highlighted)
             elif kind == "type":
