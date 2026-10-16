@@ -71,7 +71,8 @@ def test_triage_picks_the_nearest_class_and_skips_only_clear_non_bugs() -> None:
     assert spam["label"] == "spam" and not spam["replay"]
 
 
-@pytest.mark.parametrize("name", ["complaint-replay.toml", ".github/workflows/ci.yml", "package.json", "run.sh", ".env"])
+@pytest.mark.parametrize("name", ["complaint-replay.toml", ".github/workflows/ci.yml", "package.json", "run.sh", ".env",
+                                  "src/Table.test.tsx", "src/__tests__/a.ts", ".complaint-replay/guards/g.json"])
 def test_a_fix_can_never_touch_build_or_secret_files(tmp_path, name) -> None:
     (tmp_path / name).parent.mkdir(parents=True, exist_ok=True)
     (tmp_path / name).write_text("start = 'npm run dev'", encoding="utf-8")
