@@ -40,6 +40,7 @@ class Project:
     auth: str = ""
     edit: tuple[str, ...] = ()
     checks: tuple[str, ...] = ()  # your own evidence: JS files, each `() => [problem, ...]`, run on every page
+    ready_text: str = ""  # text that shows once the app is usable (big dev builds load for minutes)
 
     @property
     def check_scripts(self) -> dict[str, str]:

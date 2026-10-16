@@ -46,6 +46,8 @@ edit = []
 # Your own checks, run on every page the twin sees: each file holds `() => [ "problem", ... ]`.
 # Example: checks = ["checks/invoice_total.js"]
 checks = []
+# Text that shows once the app is usable, if it loads slowly (the twin waits for it, up to 3 minutes):
+ready_text = ""
 """
 DONE = {"guarded", "fixed", "reproduced", "not_reproduced", "ux_confusion"}
 
@@ -118,7 +120,8 @@ async def cmd_replay(args: argparse.Namespace) -> int:
         else:
             shot = f"{case['id']}-before.png"
             result = await replay(url, complaint, cond, llm_policy(chat), llm_matcher(chat), out / "shots" / shot,
-                                  hints=project.hints, storage_state=project.auth_file, checks=project.check_scripts)
+                                  hints=project.hints, storage_state=project.auth_file, checks=project.check_scripts,
+                                  ready_text=project.ready_text)
             case.update(replay=as_dict(result), stage=result.verdict, shots={"before": shot})
             save(case)
     show(case)
@@ -167,7 +170,8 @@ async def cmd_guard(args: argparse.Namespace) -> int:
         print(f"No guard tests in {GUARDS}. Nothing to check.")
         return 0
     with target(repo, args.url) as url:
-        results = await run_all(url, guards, load_project(repo).auth_file, load_project(repo).check_scripts)
+        results = await run_all(url, guards, load_project(repo).auth_file, load_project(repo).check_scripts,
+                                    load_project(repo).ready_text)
     failed = [k for k, v in results.items() if not v["passed"]]
     for name, r in results.items():
         print(("PASS " if r["passed"] else "FAIL ") + name + "".join(f"\n     {e['kind']}: {e['detail']}" for e in r["evidence"]))
@@ -197,7 +201,8 @@ async def guards_catch_bug_on_base(repo: Path, base: str, guards: list[Path]) ->
     old = branch_copy(work, Path(tempfile.mkdtemp(prefix="crp-old-")) / "app", deps=repo)  # base has no deps installed
     try:
         with running_app(old) as url:
-            results = await run_all(url, new, load_project(repo).auth_file, load_project(repo).check_scripts)
+            results = await run_all(url, new, load_project(repo).auth_file, load_project(repo).check_scripts,
+                                    load_project(repo).ready_text)
     finally:
         remove_branch(old)
         run(["git", "worktree", "remove", "--force", str(work)], repo)

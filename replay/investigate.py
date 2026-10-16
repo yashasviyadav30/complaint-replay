@@ -98,7 +98,8 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
     complaint = case["complaint"]
     policy, matcher = llm_policy(chat), llm_matcher(chat)
     project = load_project(source)
-    target = {"hints": project.hints, "storage_state": project.auth_file, "checks": project.check_scripts}
+    target = {"hints": project.hints, "storage_state": project.auth_file, "checks": project.check_scripts,
+              "ready_text": project.ready_text}
 
     def shot(name: str) -> Path | None:
         if not shots:
@@ -151,8 +152,9 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
     guard_file.parent.mkdir(parents=True, exist_ok=True)
     guard_file.write_text(json.dumps(guard, ensure_ascii=False, indent=2), encoding="utf-8")
     with running_app(branch) as url:
-        on_fix = await run_guard(url, guard, project.auth_file, shot("after"), project.check_scripts)
-    on_bug = await run_guard(live_url, guard, project.auth_file, checks=project.check_scripts)
+        on_fix = await run_guard(url, guard, project.auth_file, shot("after"), project.check_scripts, project.ready_text)
+    on_bug = await run_guard(live_url, guard, project.auth_file, checks=project.check_scripts,
+                             ready_text=project.ready_text)
     case["proof"] = {"passed": on_fix["passed"], "evidence": on_fix["evidence"], "steps": len(guard["steps"])}
     case["guard"] = {"file": f"{GUARDS}/{case['id']}.json", "steps": len(guard["steps"]), "test": guard,
                      "passes_on_fix": on_fix["passed"], "catches_bug": not on_bug["passed"]}

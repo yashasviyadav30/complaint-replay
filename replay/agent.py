@@ -44,13 +44,14 @@ Matcher = Callable[[str, list[Evidence]], Awaitable[dict]]
 
 async def replay(base_url: str, complaint: str, condition: Condition, policy: Policy,
                  matcher: Matcher | None = None, screenshot: Path | None = None, hints: str = "",
-                 storage_state: Path | None = None, checks: dict[str, str] | None = None) -> ReplayResult:
+                 storage_state: Path | None = None, checks: dict[str, str] | None = None,
+                 ready_text: str = "") -> ReplayResult:
     """Replay a complaint. If `screenshot` is given, save what the user sees at the moment of the verdict.
 
     `hints` are facts about the app the twin may need (test accounts, test data), from the project config.
     `storage_state` is a saved login, so the twin starts signed in.
     """
-    async with Session(base_url, condition, storage_state, checks) as session:
+    async with Session(base_url, condition, storage_state, checks, ready_text) as session:
         result = await _drive(session, complaint, condition, policy, matcher, hints)
         if screenshot:
             screenshot.parent.mkdir(parents=True, exist_ok=True)
@@ -76,7 +77,8 @@ async def _drive(session: Session, complaint: str, condition: Condition, policy:
                   for s in steps[-REPEAT_LIMIT:]}
         last_few = {json.dumps({k: v for k, v in s["action"].items() if k != "why"}, sort_keys=True)
                     for s in steps[-STUCK_LIMIT:]}
-        moving = bool(steps) and steps[-1]["action"].get("type") == "press"  # Tab, Tab, Tab is how keyboards move
+        # Tab, Tab, Tab is how keyboard users move, and waiting for a slow app is what a patient user does.
+        moving = bool(steps) and steps[-1]["action"].get("type") in ("press", "wait")
         if len(steps) >= STUCK_LIMIT and len(last_few) == 1 and not moving:
             stop = {"verdict": "not_reproduced", "summary": f"Stuck: the same action {STUCK_LIMIT} times in a row."}
             return judge(stop, session.evidence, steps)

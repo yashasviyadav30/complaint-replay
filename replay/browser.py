@@ -65,6 +65,7 @@ CHOSEN_JS = """
 }
 """
 READY_TIMEOUT_S = 20
+READY_TEXT_TIMEOUT_S = 180
 BUSY_JS = """() => [...document.querySelectorAll('[aria-busy=true], [role=progressbar], [class*=spinner], [class*=loading]')]
   .some((e) => e.getBoundingClientRect().width > 0)"""
 # Playwright's click error names what took the tap: "- <div class=...> intercepts pointer events".
@@ -127,11 +128,12 @@ class Session:
     """Async context manager: one browser page under one condition."""
 
     def __init__(self, base_url: str, condition: Condition, storage_state: Path | None = None,
-                 checks: dict[str, str] | None = None):
+                 checks: dict[str, str] | None = None, ready_text: str = ""):
         self.base_url = base_url
         self.condition = condition
         self.storage_state = storage_state
         self.checks = checks or {}  # the project's own evidence checks: {name: JS returning a list of problems}
+        self.ready_text = ready_text
         self.evidence: list[Evidence] = []
         self.step = 0
         self._seen: set[tuple[str, str]] = set()
@@ -173,6 +175,11 @@ class Session:
             await cdp.send("Emulation.setCPUThrottlingRate", {"rate": self.condition.cpu_slowdown})
         await self.page.goto(self.base_url, wait_until="load", timeout=60_000)
         await self._wait_until_ready()
+        if self.ready_text:  # the project says what "loaded" looks like: wait for it like a patient user
+            try:
+                await self.page.get_by_text(self.ready_text).first.wait_for(timeout=READY_TEXT_TIMEOUT_S * 1000)
+            except Exception:  # still not there: let the twin see the screen as it is
+                pass
         self._loaded = True
         return self
 

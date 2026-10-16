@@ -37,9 +37,9 @@ def build_guard(case_id: str, complaint: str, cond: Condition, steps: list[dict]
 
 
 async def run_guard(url: str, guard: dict, storage_state: Path | None = None, screenshot: Path | None = None,
-                    checks: dict[str, str] | None = None) -> dict:
+                    checks: dict[str, str] | None = None, ready_text: str = "") -> dict:
     cond = Condition(**guard["condition"])
-    async with Session(url, cond, storage_state, checks) as session:
+    async with Session(url, cond, storage_state, checks, ready_text) as session:
         for step in guard["steps"]:
             obs = await session.observe()
             action = {k: v for k, v in step.items() if k not in ("do", "label", "idx")} | {"type": step["do"]}
@@ -67,11 +67,11 @@ async def run_guard(url: str, guard: dict, storage_state: Path | None = None, sc
 
 
 async def run_all(url: str, guards: list[Path], storage_state: Path | None = None,
-                  checks: dict[str, str] | None = None) -> dict[str, dict]:
+                  checks: dict[str, str] | None = None, ready_text: str = "") -> dict[str, dict]:
     """Every guard against one running app: {guard file name: result}."""
     results = {}
     for path in guards:
-        results[path.name] = await run_guard(url, json.loads(path.read_text(encoding="utf-8")), storage_state, checks=checks)
+        results[path.name] = await run_guard(url, json.loads(path.read_text(encoding="utf-8")), storage_state, checks=checks, ready_text=ready_text)
     return results
 
 
