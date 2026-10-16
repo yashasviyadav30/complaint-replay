@@ -245,3 +245,18 @@ def test_the_twin_hears_what_a_new_dialog_says(site) -> None:
             return await s.act({"type": "click", "target": obs["elements"][0]["idx"]})
 
     assert asyncio.run(body()) == "ok, a dialog opened: 'Upcoming Utilities Post transaction'"
+
+
+def test_a_switch_drawn_as_a_label_for_a_hidden_checkbox_is_a_control(site) -> None:
+    async def body() -> tuple[list, bool]:
+        async with browser.Session(f"{site}/popover.html", PHONE) as s:
+            await s.page.set_content(
+                "<div><span>Cleared</span><div><input id=cleared type=checkbox style='width:0;height:0;opacity:0'>"
+                "<label for=cleared style='display:block;width:32px;height:16px;background:#888'></label></div></div>")
+            obs = await s.observe()
+            switch = [e for e in obs["elements"] if e["tag"] == "switch"]
+            await s.act({"type": "click", "target": switch[0]["idx"]})
+            return switch, await s.page.is_checked("#cleared")
+
+    switch, checked = asyncio.run(body())
+    assert switch[0]["value"] == "off" and "Cleared" in switch[0]["label"] and checked

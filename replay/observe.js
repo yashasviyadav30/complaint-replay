@@ -91,6 +91,18 @@
     unreachable.push(name(el) || el.tagName.toLowerCase());
   }
 
+  // A switch drawn as a <label> for a hidden checkbox (0x0, opacity 0) is what the user taps. Without this, the
+  // Cleared and Reconciled switches on Actual's transaction screen were missing from the list (cloud case 8733).
+  for (const lab of document.querySelectorAll('label[for]')) {
+    const box = document.getElementById(lab.getAttribute('for'));
+    if (!box || ours(lab) || !visible(lab) || visible(box) || !['checkbox', 'radio'].includes(box.type)) continue;
+    lab.setAttribute('data-bc-idx', i);
+    els.push(lab);
+    elements.push({ idx: i++, tag: box.type === 'radio' ? 'radio' : 'switch', role: 'switch',
+      label: (box.getAttribute('aria-label') || '').trim() || name(lab) || (nearText(lab) ? `(no name) near '${nearText(lab)}'` : ''),
+      value: box.checked ? 'on' : 'off', disabled: !!box.disabled });
+  }
+
   // Several controls with one name ("✓" on every row) can't be told apart: add their row. The twin ticked the same
   // checkbox six times believing it was selecting several transactions (cloud case 8765).
   const counts = {};
