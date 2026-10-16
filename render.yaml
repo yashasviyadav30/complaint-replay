@@ -1,0 +1,19 @@
+# One-click hosting on Render (free plan): New > Blueprint > pick this repo. Fill the secrets it asks for.
+services:
+  - type: web
+    name: complaint-replay
+    runtime: docker
+    dockerfilePath: ./Dockerfile.server
+    plan: free
+    healthCheckPath: /api/v1/me
+    envVars:
+      - key: PUBLIC_URL          # this service's https address, e.g. https://complaint-replay.onrender.com
+        sync: false
+      - key: SECRET_KEY          # signs logins and callback tokens
+        generateValue: true
+      - key: ADMIN_LOGIN         # your GitHub username: only you may create the GitHub App
+        sync: false
+      - key: DATABASE_URL        # free Postgres (Neon or Supabase); without it data is lost on every restart
+        sync: false
+      - key: NEBIUS_API_KEY      # for duplicate grouping and triage at intake
+        sync: false

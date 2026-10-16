@@ -40,6 +40,7 @@ The dashboard walks you through the same four steps.
 docker compose up          # API, dashboard, widget and the built-in demo shop on http://localhost:8200
 ```
 
+Hosting it for a team: see [DEPLOY.md](DEPLOY.md) (a free Render blueprint and a slim image with no browser inside).
 SQLite by default; set `DATABASE_URL=postgresql://...` for Postgres. Set `PUBLIC_URL` to the address GitHub Actions can reach. GitHub login and per-repo installs need a GitHub App: open `/setup/github-app` and GitHub creates one from a manifest in one click (or set `GITHUB_APP_*` and `GITHUB_CLIENT_*`).
 
 ### Or use the command line
@@ -53,6 +54,17 @@ crp guard                                                      # run every guard
 crp auth --url https://staging.example.com                     # save a test login the twin reuses
 crp devices pixel                                              # 207 device profiles
 ```
+
+## Works with the tools you already use
+
+- **GitHub issues**: label a bug report `replay` (add `mobile`, `screen-reader`, `keyboard`, `hindi`, `arabic`... to pick the user). The Action replays the issue text and replies on the issue with the verdict, the proof and the pull request.
+- **Support desks**: forward tickets from Zendesk, Intercom or an email bridge to the project's inbox address with its secret.
+- **Sentry**: point an issue-alert webhook at the project's Sentry address; new errors arrive as silent signals.
+- **Team chat**: a Slack-compatible webhook (Slack, Mattermost, Discord) hears when a bug is proven, fixed, or needs a person.
+- **Coding agents**: when the automatic fix fails or doesn't hold, the proven bug becomes a GitHub issue with the evidence, the steps and the guard test as its acceptance check, ready for GitHub Copilot's coding agent or a teammate.
+- **Your own model**: set `REPLAY_BASE_URL` and `REPLAY_API_KEY` to use any OpenAI-compatible server (vLLM, NVIDIA NIM, Ollama) instead of Token Factory.
+
+Each project also has a kind of product. Government, health and education projects get accessibility checks for every user, strict masking of any long number, and no screenshots; payments projects get strict masking.
 
 ## What the twin can be
 
@@ -69,7 +81,7 @@ Conditions come from the widget (measured on the real user's device) plus what t
 
 ## What counts as evidence
 
-Code watching the browser records: failed requests, HTTP errors, console errors, slow requests, controls off screen or covered by something else, text cut off, the page wider than the screen, missing images, slow pages and layout jumps (web vitals), spinners stuck for 15 s, redirect loops, messages not in the user's language (fastText language ID on CPU), right-to-left pages laid out left-to-right, invisible keyboard focus, things a keyboard can't reach, controls a screen reader announces only as "1" or "+", accessibility violations (axe-core, WCAG 2.2 AA), money values that disagree between API calls, and the same payment sent twice. Every item says where on the page it happened ("in the navigation", "near 'Book $10.99'").
+Code watching the browser records: failed requests, HTTP errors, console errors, slow requests, controls off screen or covered by something else, text cut off, the page wider than the screen, missing images, slow pages and layout jumps (web vitals), spinners stuck for 15 s, redirect loops, taps that did nothing at all, taps that something else intercepted, messages not in the user's language (fastText language ID on CPU), right-to-left pages laid out left-to-right, invisible keyboard focus, things a keyboard can't reach, controls a screen reader announces only as "1" or "+", accessibility violations (axe-core, WCAG 2.2 AA), money values that disagree between API calls, and the same payment sent twice. Every item says where on the page it happened ("in the navigation", "near 'Book $10.99'").
 
 ## Results
 
