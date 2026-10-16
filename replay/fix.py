@@ -3,6 +3,7 @@
 import difflib
 import fnmatch
 import os
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -107,6 +108,17 @@ def protected(rel: str) -> bool:
     return any(fnmatch.fnmatch(rel, g) or fnmatch.fnmatch(name, g) for g in PROTECTED)
 
 
+def loose_match(text: str, find: str) -> tuple[int, int] | None:
+    """Where `find` appears once if spacing and indentation are ignored, else None.
+
+    Models copy code with changed indentation or line breaks; on Actual both fix attempts for case 9071 failed
+    on that alone, in the right file.
+    """
+    pattern = r"\s+".join(re.escape(word) for word in find.split())
+    found = list(re.finditer(pattern, text))
+    return found[0].span() if len(found) == 1 else None
+
+
 def apply_patch(patch: Patch, root: Path, allowed: tuple[str, ...] = ()) -> str:
     """Apply all edits or none. Returns a unified diff; raises ValueError on an unsafe or ambiguous edit.
 
@@ -130,9 +142,13 @@ def apply_patch(patch: Patch, root: Path, allowed: tuple[str, ...] = ()) -> str:
         if "\r\n" in current[path]:
             find, replace = (t.replace("\r\n", "\n").replace("\n", "\r\n") for t in (find, replace))
         count = current[path].count(find) if find else 0
-        if count != 1:
+        if count == 1:
+            current[path] = current[path].replace(find, replace)
+            continue
+        span = loose_match(current[path], find) if count == 0 and find.strip() else None
+        if not span:
             raise ValueError(f"'find' text must appear exactly once in {edit.get('file')}, but it appears {count} times")
-        current[path] = current[path].replace(find, replace)
+        current[path] = current[path][:span[0]] + replace + current[path][span[1]:]
     diff = []
     for path, after in current.items():
         rel = path.relative_to(root).as_posix()

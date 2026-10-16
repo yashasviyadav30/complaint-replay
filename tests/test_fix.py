@@ -112,3 +112,13 @@ def test_picker_follows_alias_imports(tmp_path) -> None:
     texts = {"src/a/Edit.tsx": "import { X } from '#components/mobile/Forms';\nimport React from 'react';",
              "src/components/mobile/Forms.tsx": "", "src/other/Forms.tsx": ""}
     assert local_imports("src/a/Edit.tsx", texts) == ["src/components/mobile/Forms.tsx"]
+
+
+def test_patch_tolerates_changed_indentation_but_not_ambiguity(tmp_path) -> None:
+    (tmp_path / "Field.tsx").write_text("function F() {\n    return (\n        <input type={type} />\n    );\n}\n",
+                                        encoding="utf-8")
+    edit = {"file": "Field.tsx", "find": "return (\n  <input type={type} />", "replace": "return (\n  <input type={type} onClick={open} />"}
+    assert "onClick={open}" in apply_patch(Patch("", (edit,)), tmp_path)
+    (tmp_path / "Two.tsx").write_text("a  b\na b\n", encoding="utf-8")
+    with pytest.raises(ValueError):
+        apply_patch(Patch("", ({"file": "Two.tsx", "find": "a   b", "replace": "c"},)), tmp_path)

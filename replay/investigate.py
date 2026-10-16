@@ -142,7 +142,7 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
             errors.append(rejected)
     else:
         case["fix"] = {"model": fix_model, "explanation": patch.explanation if patch else "", "error": rejected,
-                       "errors": errors}
+                       "errors": errors, "edits": list(patch.edits) if patch else []}  # what it tried, to learn from
         stage("fix_failed")
         return case
     case["fix"] = {"model": fix_model, "explanation": patch.explanation, "diff": diff, "edits": list(patch.edits),
