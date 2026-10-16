@@ -169,7 +169,11 @@ def build_prompt(ctx: dict) -> tuple[str, str]:
             f"\n\nVisible text:\n{obs['text']}"
     about = f"About this app: {ctx['hints']}\n" if ctx.get("hints") else ""
     evidence = "\n".join(f"{e.id} [{e.kind}] {e.detail}" for e in ctx["evidence"]) or "(none yet)"
-    history = "\n".join(json.dumps(s["action"]) + " -> " + s["result"] for s in ctx["steps"][-6:]) or "(none)"
+    # The name of what each action hit: with bare numbers, a twin "opening a transaction" pressed
+    # 'Previous month' nine times without noticing (cloud case 9064).
+    history = "\n".join(json.dumps({k: v for k, v in s["action"].items() if k != "why"}, ensure_ascii=False) +
+                        (f" on '{s['target']}'" if s.get("target") else "") + " -> " + s["result"]
+                        for s in ctx["steps"][-6:]) or "(none)"
     user = (
         f"Complaint: {ctx['complaint']}\nUser: {cond.persona}\n{about}"
         f"Step {ctx['step'] + 1} of {cond.max_steps}. Last action result: {ctx['last_result']}\n"

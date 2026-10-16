@@ -71,3 +71,15 @@ def test_skeptic_drops_obstacles_the_judge_cited() -> None:
 
     result = asyncio.run(llm_matcher(chat)("The Reconciled switch does nothing", [switch, obstacle]))
     assert result["evidence"] == ["E1"]
+
+
+def test_twin_sees_what_each_past_click_hit() -> None:
+    from replay.agent import build_prompt
+    from replay.conditions import profile
+
+    steps = [{"action": {"type": "click", "target": 5, "why": "open a transaction"}, "result": "ok",
+              "target": "Previous month"}]
+    ctx = {"condition": profile("Pixel 7"), "obs": {"elements": [], "text": ""}, "evidence": [], "steps": steps,
+           "complaint": "c", "step": 1, "last_result": "ok"}
+    _, user = build_prompt(ctx)
+    assert '{"type": "click", "target": 5} on \'Previous month\' -> ok' in user
