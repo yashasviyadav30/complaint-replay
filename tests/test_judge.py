@@ -54,3 +54,20 @@ def test_model_reply_with_raw_line_breaks_in_a_string_still_parses() -> None:
 
     reply = '{"explanation": "x", "edits": [{"file": "a.js", "find": "if (a) {\n  b()\n}", "replace": "c"}]}'
     assert parse_json(reply)["edits"][0]["find"].startswith("if (a)")
+
+
+def test_skeptic_drops_obstacles_the_judge_cited() -> None:
+    import asyncio
+
+    from replay.browser import Evidence
+    from replay.llm import llm_matcher
+
+    switch = Evidence("E1", "no_response", "tapped 'Reconciled' but nothing happened", 3)
+    obstacle = Evidence("E2", "tap_blocked", "tapping 'Upcoming Utilities' hit <div> instead", 2)
+    replies = iter(['{"evidence": ["E1", "E2"], "summary": "s"}', '{"answer": "problem"}', '{"answer": "other"}'])
+
+    async def chat(messages):
+        return next(replies)
+
+    result = asyncio.run(llm_matcher(chat)("The Reconciled switch does nothing", [switch, obstacle]))
+    assert result["evidence"] == ["E1"]

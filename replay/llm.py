@@ -132,9 +132,28 @@ def llm_matcher(chat: Chat) -> Matcher:
             data = parse_json(reply)
         except ValueError:
             return {"evidence": []}
-        return {"evidence": list(data.get("evidence") or []), "summary": str(data.get("summary", ""))}
+        by_id = {e.id: e for e in evidence}
+        cited = [i for i in data.get("evidence") or [] if i in by_id]
+        # A second, narrower question per item: the judge alone kept citing obstacles on the way as proof.
+        kept = [i for i in cited if await is_the_problem(chat, complaint, by_id[i])]
+        return {"evidence": kept, "summary": str(data.get("summary", "")) if kept else ""}
 
     return matcher
+
+
+SKEPTIC_SYSTEM = """A user complained about a website. One piece of machine evidence from a replay is shown.
+Does it show THE PROBLEM THE USER DESCRIBES, in the place they describe it? Or is it something else: a different
+control, a different screen, or an obstacle that only got in the way of reaching what they talk about?
+Reply with ONE JSON object and nothing else: {"answer": "problem"} or {"answer": "other"}"""
+
+
+async def is_the_problem(chat: Chat, complaint: str, item) -> bool:
+    reply = await chat([{"role": "system", "content": SKEPTIC_SYSTEM},
+                        {"role": "user", "content": f"Complaint: {complaint}\n\nEvidence: [{item.kind}] {item.detail}"}])
+    try:
+        return parse_json(reply).get("answer") == "problem"
+    except ValueError:
+        return False  # unreadable means unproven: never call a bug proven on a guess
 
 
 NEEDS_SYSTEM = """A user complained about a website. Some needs no device can report: a screen reader, using only
