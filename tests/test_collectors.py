@@ -37,6 +37,8 @@ CASES = [
     ("dead_button.html", PHONE, [{"type": "click_css", "selector": "#pick"}], "no_response"),
     ("blocked.html", PHONE, [{"type": "click_css", "selector": "#date"}], "tap_blocked"),
     ("no_label.html", replace(PHONE, audit=True), [], "a11y_violation"),  # public-sector pack: everyone audited
+    ("amount.html", PHONE, [{"type": "fill_css", "selector": "#amount", "text": "42.50"},
+                            {"type": "click_css", "selector": "#buggy-cleared"}], "typed_value_lost"),
 ]
 # The same problem fixed: these must stay silent.
 CLEAN = [
@@ -47,6 +49,8 @@ CLEAN = [
     ("spanish_ok.html", profile(locale="es-ES"), []),
     ("modal_open.html", PHONE, []),  # an open dialog is meant to cover the page
     ("chrome.html", PHONE, []),  # a fixed top bar over the list is page chrome, not a covered control
+    ("amount.html", PHONE, [{"type": "fill_css", "selector": "#amount", "text": "42.50"},
+                            {"type": "click_css", "selector": "#cleared"}]),  # the working toggle keeps the amount
     ("clean.html", PHONE, [{"type": "click_css", "selector": "button"}]),  # the button changes its text
     ("dead_button.html", PHONE, [{"type": "click_css", "selector": "#toggle"}]),  # a toggle that toggles
 ]

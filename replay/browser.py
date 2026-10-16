@@ -113,6 +113,7 @@ class Session:
         self._seen: set[tuple[str, str]] = set()
         self._inflight = 0
         self._requests = 0  # every request the page sent, for "tapped, nothing happened"
+        self._typed: list[tuple[object, str, str]] = []  # (element handle, field name, what the user typed)
         self._amounts: list[tuple[str, str, float]] = []
         self._labels: dict[int, str] = {}  # idx -> visible name, from the latest observe()
         self.last_target: str | None = None  # name of the control the last action used
@@ -357,7 +358,9 @@ class Session:
             if kind == "click":
                 await tap(page.locator(f'[data-bc-idx="{int(action["target"])}"]'), action)
             elif kind == "fill":
-                await page.locator(f'[data-bc-idx="{int(action["target"])}"]').fill(str(action["text"]), timeout=5000)
+                field = page.locator(f'[data-bc-idx="{int(action["target"])}"]')
+                await field.fill(str(action["text"]), timeout=5000)
+                await self._remember_typed(field, self.last_target, str(action["text"]))
             elif kind in ("click_role", "fill_role"):
                 if not action.get("name"):
                     return "error: a screen reader cannot use a control without a name"
@@ -378,7 +381,9 @@ class Session:
             elif kind == "click_css":  # scripted tests only
                 await tap(page.locator(action["selector"]).first, action)
             elif kind == "fill_css":  # scripted tests only
-                await page.locator(action["selector"]).first.fill(str(action["text"]), timeout=5000)
+                field = page.locator(action["selector"]).first
+                await field.fill(str(action["text"]), timeout=5000)
+                await self._remember_typed(field, action["selector"], str(action["text"]))
             elif kind == "goto":  # open another path of the same site (deep links in complaints, guards)
                 await page.goto(self.base_url.rstrip("/") + "/" + str(action.get("path", "")).lstrip("/"))
             elif kind in ("scroll", "swipe"):
@@ -394,6 +399,8 @@ class Session:
             self._blocked(action, kind, str(e))
             return f"error: {str(e).splitlines()[0][:200]}"
         await self.settle()
+        if kind not in ("fill", "fill_role", "fill_css", "type"):
+            await self._check_typed(self.last_target or action.get("selector") or action.get("key") or "a control")
         if before is not None and await self._fingerprint() == before and self._requests == requests_before:
             name = self.last_target or action.get("selector") or action.get("key") or "a control"
             self.add("no_response", f"tapped '{name}' but nothing happened: no change on screen, no request sent")
@@ -409,6 +416,30 @@ class Session:
             self.add("tap_blocked", f"tapping '{name}' hit {blocker.group(1)[:120]} instead")
         elif "not visible" in error or "not enabled" in error or "not stable" in error or "Timeout" in error:
             self.add("tap_blocked", f"'{name}' could not be tapped: it never became visible, enabled and still")
+
+    async def _remember_typed(self, field, name: str | None, text: str) -> None:
+        if text.strip():
+            try:
+                self._typed.append((await field.element_handle(timeout=2000), name or "a field", text))
+            except Exception:  # the field went away at once; nothing to watch
+                pass
+
+    async def _check_typed(self, tapped: str) -> None:
+        """What the user typed must survive tapping something else ("I typed the amount, tapped Cleared, it's gone")."""
+        still = []
+        for handle, name, text in self._typed:
+            try:
+                if not await handle.evaluate("e => e.isConnected"):
+                    continue  # the form was closed or replaced on purpose (saved, navigated): not this bug
+                value = (await handle.input_value()).strip()
+            except Exception:
+                continue
+            if value in ("", "0", "0.00", "0,00") and text.strip() not in ("0", "0.00"):
+                self.add("typed_value_lost", f"'{name}' held '{text[:40]}' the user typed; after tapping '{tapped}' it "
+                                             f"shows '{value or '(empty)'}'")
+                continue
+            still.append((handle, name, text))
+        self._typed = still
 
     async def _fingerprint(self) -> str | None:
         try:

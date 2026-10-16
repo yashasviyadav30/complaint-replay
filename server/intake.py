@@ -28,7 +28,7 @@ PII_PATTERNS = (
 SEVERITY = {
     "duplicate_request": 5, "amount_mismatch": 5, "redirect_loop": 4,
     "request_failed": 3, "http_error": 3, "offscreen_control": 3, "covered_control": 3, "stuck_loading": 3,
-    "not_keyboard_reachable": 3, "no_response": 3, "tap_blocked": 3, "language_mismatch": 2, "rtl_missing": 2, "a11y_violation": 2, "unclear_name": 2,
+    "not_keyboard_reachable": 3, "no_response": 3, "tap_blocked": 3, "typed_value_lost": 4, "language_mismatch": 2, "rtl_missing": 2, "a11y_violation": 2, "unclear_name": 2,
     "clipped_text": 2, "page_overflow": 2, "focus_invisible": 2, "broken_image": 1, "slow_page": 1,
     "slow_request": 1, "layout_shift": 1, "console_error": 1,
 }

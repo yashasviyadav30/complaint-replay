@@ -1,0 +1,5 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
+<body><label>Amount <input id="amount" inputmode="decimal"></label>
+<label><input type="checkbox" id="cleared" onchange="document.getElementById('amount').value = this.dataset.buggy ? '' : document.getElementById('amount').value"> Cleared</label>
+<label><input type="checkbox" id="buggy-cleared" data-buggy="1" onchange="document.getElementById('amount').value = '0.00'"> Cleared (buggy)</label>
+</body></html>
