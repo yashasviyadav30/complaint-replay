@@ -159,7 +159,8 @@ def build_prompt(ctx: dict) -> tuple[str, str]:
         f"Accessibility tree (what the screen reader announces):\n{obs['aria']}"
         if cond.screen_reader
         else "Controls you can see:\n" + "\n".join(
-            f"[{e['idx']}] {e['tag']} '{e['label']}'" + (f" value='{e['value']}'" if e["value"] else "")
+            f"[{e['idx']}] {e['tag']} '{e['label']}'" + (f" value='{e['value']}'" if e["value"] else "") +
+            (" (new)" if e.get("new") else "")
             for e in obs["elements"]
         ) + f"\n\nVisible text:\n{obs['text']}"
     )

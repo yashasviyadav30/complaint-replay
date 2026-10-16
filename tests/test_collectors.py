@@ -159,3 +159,14 @@ def test_waiting_on_a_loaded_page_says_nothing_is_loading(site) -> None:
             return await s.act({"type": "wait", "ms": 100})
 
     assert "nothing on this screen is loading" in asyncio.run(body())
+
+
+def test_controls_that_just_appeared_are_marked_new(site) -> None:
+    async def body() -> list[str]:
+        async with browser.Session(f"{site}/popover.html", PHONE) as s:
+            obs = await s.observe()
+            await s.page.evaluate("document.body.insertAdjacentHTML('beforeend', '<button>Post transaction</button>')")
+            obs = await s.observe()
+            return [e["label"] for e in obs["elements"] if e["new"]]
+
+    assert asyncio.run(body()) == ["Post transaction"]

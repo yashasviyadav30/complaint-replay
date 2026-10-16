@@ -326,6 +326,9 @@ class Session:
 
     async def observe(self) -> dict:
         obs = await self.page.evaluate(OBSERVE_JS)
+        before = set(self._labels.values())
+        for e in obs["elements"]:  # a menu that just opened stands out (cloud case 9064 missed one at the list's end)
+            e["new"] = bool(before) and e["label"] not in before
         self._labels = {e["idx"]: e["label"] for e in obs["elements"]}
         self._layout(obs)
         self._language(obs)
@@ -467,6 +470,10 @@ class Session:
                 return f"error: unknown action type {kind!r}"
         except Exception as e:  # report to the model; a failed click is information, not a crash
             await self._blocked(action, kind, str(e), opened)
+            covered = INTERCEPTS.search(str(e))
+            if covered:
+                return (f"error: the tap hit {covered.group(1)[:120]} instead: something is on top of it "
+                        "(a menu or dialog may have opened; look for (new) controls)")
             return f"error: {str(e).splitlines()[0][:200]}"
         await self.settle()
         if kind == "wait" and self._inflight == 0 and not await self.page.evaluate(BUSY_JS):
