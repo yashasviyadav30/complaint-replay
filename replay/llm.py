@@ -140,9 +140,34 @@ Unrelated errors do not count, and neither do errors the replay caused itself by
 never described (for example typing a wrong code). If nothing matches, reply {"evidence": [], "summary": ""}."""
 
 
+LOAD_KINDS = {"slow_page", "slow_request", "layout_shift"}
+SLOWNESS_SYSTEM = """A user complained about a website. Is the complaint about speed: something slow, loading forever,
+timing out, or the page jumping while it loads? Any language.
+Reply with ONE JSON object and nothing else: {"about_speed": true} or {"about_speed": false}"""
+
+
+async def about_speed(chat: Chat, complaint: str) -> bool:
+    try:
+        return parse_json(await chat([{"role": "system", "content": SLOWNESS_SYSTEM},
+                                      {"role": "user", "content": complaint}])).get("about_speed") is True
+    except ValueError:
+        return True  # unreadable: keep the evidence and let the judge decide, as before
+
+
 def llm_matcher(chat: Chat) -> Matcher:
+    speed: dict[str, bool] = {}  # asked once per complaint
+
     async def matcher(complaint: str, evidence: list) -> dict:
-        lines = "\n".join(f"{e.id} [{e.kind}] {e.detail}" for e in evidence)
+        # Load-speed evidence proves only complaints about speed. A prompt rule alone did not hold: the judge cited
+        # "page appeared after 28 s" for a date picker that never opens (cloud case 9071, runs 6 and 7).
+        if any(e.kind in LOAD_KINDS for e in evidence):
+            if complaint not in speed:
+                speed[complaint] = await about_speed(chat, complaint)
+            if not speed[complaint]:
+                evidence = [e for e in evidence if e.kind not in LOAD_KINDS]
+        if not evidence:
+            return {"evidence": []}
+        lines ="\n".join(f"{e.id} [{e.kind}] {e.detail}" for e in evidence)
         reply = await chat([{"role": "system", "content": MATCH_SYSTEM},
                             {"role": "user", "content": f"Complaint: {complaint}\n\nEvidence:\n{lines}"}])
         try:

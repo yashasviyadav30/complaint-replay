@@ -92,3 +92,22 @@ def test_twin_sees_a_few_items_per_kind_of_evidence() -> None:
     items.append(Evidence("E99", "typed_value_lost", "'Amount' held '100'", 3))
     brief = evidence_brief(items)
     assert brief.count("slow_request") == 4 and "(+22 more slow_request)" in brief and "E99" in brief
+
+
+def test_load_speed_evidence_is_dropped_unless_the_complaint_is_about_speed() -> None:
+    import asyncio
+
+    from replay.llm import llm_matcher
+
+    seen = []
+
+    async def fake_chat(messages: list[dict]) -> str:
+        system = messages[0]["content"]
+        if "about speed" in system or "about_speed" in system:
+            return '{"about_speed": false}'
+        seen.append(messages[1]["content"])
+        return '{"evidence": ["E1"], "summary": "s"}'
+
+    slow = [Evidence("E1", "slow_page", "main content appeared after 28.6 s", 1)]
+    result = asyncio.run(llm_matcher(fake_chat)("The calendar never opens", slow))
+    assert result == {"evidence": []} and not seen  # the judge never even sees it
