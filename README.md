@@ -61,7 +61,7 @@ crp devices pixel                                              # 207 device prof
 - **Support desks**: forward tickets from Zendesk, Intercom or an email bridge to the project's inbox address with its secret.
 - **Sentry**: point an issue-alert webhook at the project's Sentry address; new errors arrive as silent signals.
 - **Team chat**: a Slack-compatible webhook (Slack, Mattermost, Discord) hears when a bug is proven, fixed, or needs a person.
-- **Coding agents**: when the automatic fix fails or doesn't hold, the proven bug becomes a GitHub issue with the evidence, the steps and the guard test as its acceptance check, ready for GitHub Copilot's coding agent or a teammate.
+- **Coding agents**: when the automatic fix fails or doesn't hold, the proven bug becomes a GitHub issue with the evidence, the steps and the guard test as its acceptance check, ready for GitHub Copilot's coding agent or a teammate. It can also go to Linear or Jira (set `LINEAR_API_KEY` or the `JIRA_*` values in the repo; built to their documented APIs, not yet tried against live accounts).
 - **Your own model**: set `REPLAY_BASE_URL` and `REPLAY_API_KEY` to use any OpenAI-compatible server (vLLM, NVIDIA NIM, Ollama) instead of Token Factory.
 
 Each project also has a kind of product. Government, health and education projects get accessibility checks for every user, strict masking of any long number, and no screenshots; payments projects get strict masking.

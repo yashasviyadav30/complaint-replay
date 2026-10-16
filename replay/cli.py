@@ -131,9 +131,13 @@ async def cmd_replay(args: argparse.Namespace) -> int:
     elif args.pr and case["stage"] in ("fix_failed", "fix_unproven") and case.get("guard"):
         from replay.pr import open_issue
 
+        from replay.pr import issue_body, title
+        from replay.trackers import file_everywhere
+
         case["issue"] = open_issue(repo, case)  # the bug is proven; hand the fix to a person or a coding agent
+        case["tracker_links"] = file_everywhere(title(case).replace("fix:", "bug:", 1), issue_body(case))
         save(case)
-        print(f"Issue for a person or coding agent: {case['issue']}")
+        print(f"Issue for a person or coding agent: {case['issue']}", *case["tracker_links"])
     if args.issue:
         from replay.pr import comment_on_issue
 

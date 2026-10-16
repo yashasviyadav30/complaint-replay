@@ -32,6 +32,13 @@ jobs:
       pull-requests: write   # open the pull request
       issues: write          # reply on the issue, or open one when the fix needs a person
     runs-on: ubuntu-latest
+    env:                     # optional: also file bugs that need a person in Linear or Jira
+      LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+      LINEAR_TEAM_ID: ${{ vars.LINEAR_TEAM_ID }}
+      JIRA_URL: ${{ vars.JIRA_URL }}
+      JIRA_EMAIL: ${{ vars.JIRA_EMAIL }}
+      JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+      JIRA_PROJECT: ${{ vars.JIRA_PROJECT }}
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
