@@ -150,3 +150,12 @@ def test_a_made_up_control_number_gets_a_clear_error_fast(site) -> None:
             return await s.act({"type": "click", "target": 999})
 
     assert asyncio.run(body()).startswith("error: there is no control [999]")
+
+
+def test_waiting_on_a_loaded_page_says_nothing_is_loading(site) -> None:
+    async def body() -> str:
+        async with browser.Session(f"{site}/popover.html", PHONE) as s:
+            await s.observe()
+            return await s.act({"type": "wait", "ms": 100})
+
+    assert "nothing on this screen is loading" in asyncio.run(body())

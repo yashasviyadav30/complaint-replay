@@ -469,6 +469,10 @@ class Session:
             await self._blocked(action, kind, str(e), opened)
             return f"error: {str(e).splitlines()[0][:200]}"
         await self.settle()
+        if kind == "wait" and self._inflight == 0 and not await self.page.evaluate(BUSY_JS):
+            # Cloud case 9107: slow-page evidence ("appeared after 24.8 s") made the twin wait 25 times on a
+            # page that had finished loading. Say so plainly.
+            return "ok, and nothing on this screen is loading any more (no spinner, network quiet): act on what you see"
         if kind not in ("fill", "fill_role", "fill_css", "type"):
             await self._check_typed(self.last_target or action.get("selector") or action.get("key") or "a control")
         if before is not None and await self._fingerprint() == before and self._requests == requests_before:
