@@ -54,7 +54,14 @@ Phase 1 tasks 1.0-1.7 (except 1.8) and most of 1.9/1.10 are built and tested (`u
   bare numbers (now names); cold Vite page hung after reload (twin refreshes once); a tap's own popover
   counted as "tap blocked"; made-up control numbers (clear error now); fixer ran out of tokens while reasoning
   (32k, says so); slow-page evidence read as "still loading" (wait result says when nothing loads).
-- Run 5 (38911600083) has all of these. Read each case with `gh run download <run> -n case-<pr>`.
+- Run 5 (38911600083): 0/8. Its report showed the real cause of much wandering: with no REPLAY_MODEL (CI and every
+  customer's Action) the twin ran on `nemotron-3-nano-omni-30b-a3b-reasoning`. Default is now Nemotron 3 Super.
+  Also fixed from run 5: disabled controls are never proof (Actual disables fields while the amount is edited:
+  the 9071 and 8926 "reproductions" were that); new controls marked (new); covered taps explained; patches match
+  despite changed indentation; keyboard twin sees the screen and can hold Tab; evidence brief per kind.
+- Known hard cases: 9107 needs a domain check (running balance maths); 9038 needs a non-current month on screen;
+  9071's native date picker is invisible to a headless browser.
+- Run 6 (38928497833): first run on Super with every fix. Read cases with `gh run download <run> -n case-<pr>`.
 - Memory: the laptop ran out once (Chrome + Docker + two Actual dev servers). Docker Desktop is stopped; don't
   run heavy jobs during a pass. Restart a killed pass only when the user says so.
 
