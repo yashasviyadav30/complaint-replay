@@ -153,6 +153,7 @@ class Session:
         self._labels: dict[int, str] = {}  # idx -> visible name, from the latest observe()
         self.last_target: str | None = None  # name of the control the last action used
         self.last_idx: int | None = None  # and its position among the page's controls
+        self._opened: str | None = None  # control whose last tap changed the screen (it may have opened a menu)
         self._payments: list[tuple[float, str, str]] = []  # (time, path, body) of payment-like POSTs
         self._started: dict[object, float] = {}  # request -> start time
         self._navigations: deque[tuple[float, str]] = deque(maxlen=20)
@@ -414,6 +415,7 @@ class Session:
         if self.condition.keyboard_only and kind in ("click", "fill", "click_role", "fill_role"):
             return "error: this user has no mouse; use press (Tab, Enter, Space) and type"
         taps = kind in ("click", "click_role", "click_css") or (kind == "press" and action.get("key") in ("Enter", "Space"))
+        opened, self._opened = self._opened, None
         before = await self._fingerprint() if taps else None
         requests_before = self._requests
         try:
@@ -461,7 +463,7 @@ class Session:
             else:
                 return f"error: unknown action type {kind!r}"
         except Exception as e:  # report to the model; a failed click is information, not a crash
-            await self._blocked(action, kind, str(e))
+            await self._blocked(action, kind, str(e), opened)
             return f"error: {str(e).splitlines()[0][:200]}"
         await self.settle()
         if kind not in ("fill", "fill_role", "fill_css", "type"):
@@ -469,6 +471,8 @@ class Session:
         if before is not None and await self._fingerprint() == before and self._requests == requests_before:
             name = self.last_target or action.get("selector") or action.get("key") or "a control"
             self.add("no_response", f"tapped '{name}' but nothing happened: no change on screen, no request sent")
+        elif taps:
+            self._opened = self.last_target or action.get("name") or action.get("selector")
         return "ok"
 
     async def _element(self) -> str:
@@ -481,7 +485,7 @@ class Session:
         except Exception:
             return ""
 
-    async def _blocked(self, action: dict, kind: str, error: str) -> None:
+    async def _blocked(self, action: dict, kind: str, error: str, opened: str | None = None) -> None:
         """A tap the user could not make is evidence too: Playwright says what got in the way."""
         if kind not in ("click", "click_role", "click_css", "fill", "fill_role"):
             return
@@ -489,6 +493,8 @@ class Session:
         if not name:
             return  # a blocked tap on an unknown control proves nothing about any complaint; the twin still sees the error
         blocker = INTERCEPTS.search(error)
+        if blocker and name == opened:
+            return  # the last tap on this control opened something that now covers it: a menu working as made
         if blocker:
             self.add("tap_blocked", f"tapping '{name}'{await self._element()} hit {blocker.group(1)[:120]} instead")
         elif "not visible" in error or "not enabled" in error or "not stable" in error or "Timeout" in error:

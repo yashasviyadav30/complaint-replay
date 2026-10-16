@@ -135,3 +135,9 @@ def test_twin_reloads_a_page_that_never_finishes_loading(site, monkeypatch) -> N
             return await s.page.inner_text("body")
 
     assert "Try the demo" in asyncio.run(body())
+
+
+def test_a_menu_covering_the_control_that_opened_it_is_not_a_blocked_tap(site) -> None:
+    # Cloud case 9071: the second tap on a month picker hit its own open popover and was cited as the bug.
+    taps = [{"type": "click_css", "selector": "#month"}] * 2
+    assert not [k for k in kinds(f"{site}/popover.html", PHONE, taps) if k.startswith("tap_blocked")]
