@@ -116,6 +116,9 @@ Reply with ONE JSON object and nothing else: {"evidence": ["E1", ...], "summary"
 List only ids whose detail clearly shows the problem the user complained about.
 Real apps have several bugs at once: if an item shows a different problem than the one described (another
 control, another page, another kind of failure), leave it out even if it is a real bug.
+An item that only stopped the replay from reaching the screen or control the user talks about is NOT proof of
+their problem: if the user complains about a switch, a date picker or a field, the item must be about that
+switch, picker or field. When in doubt, cite nothing.
 Unrelated errors do not count, and neither do errors the replay caused itself by doing something the user
 never described (for example typing a wrong code). If nothing matches, reply {"evidence": [], "summary": ""}."""
 
