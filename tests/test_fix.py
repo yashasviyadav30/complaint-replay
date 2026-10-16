@@ -87,3 +87,27 @@ def test_the_app_under_test_gets_no_secrets(monkeypatch) -> None:
     monkeypatch.setenv("NODE_ENV", "development")
     env = app_env()
     assert "NEBIUS_API_KEY" not in env and "GH_TOKEN" not in env and env["NODE_ENV"] == "development"
+
+
+def test_picker_finds_a_shared_component_from_the_element_kind(tmp_path) -> None:
+    from replay import sources
+
+    for i in range(30):
+        (tmp_path / f"filler{i}.tsx").write_text(f"export const f{i} = 'filler';\n" * 50, encoding="utf-8")
+    (tmp_path / "mobile").mkdir()
+    (tmp_path / "mobile" / "forms" ).mkdir()
+    (tmp_path / "mobile" / "forms" / "Fields.tsx").write_text("export function InputField() {}\n" + "// x\n" * 50,
+                                                              encoding="utf-8")
+    (tmp_path / "mobile" / "Edit.tsx").write_text(
+        "import { InputField } from './forms/Fields';\n<InputField type=\"date\" />\n", encoding="utf-8")
+    hints = ["'2026-10-16' (<input type=\"date\" name=\"date\">) could not be tapped"]
+    picked = sources.pick(tmp_path, hints, budget=2000)
+    assert "mobile/Edit.tsx" in picked and "mobile/forms/Fields.tsx" in picked
+
+
+def test_picker_follows_alias_imports(tmp_path) -> None:
+    from replay.sources import local_imports
+
+    texts = {"src/a/Edit.tsx": "import { X } from '#components/mobile/Forms';\nimport React from 'react';",
+             "src/components/mobile/Forms.tsx": "", "src/other/Forms.tsx": ""}
+    assert local_imports("src/a/Edit.tsx", texts) == ["src/components/mobile/Forms.tsx"]

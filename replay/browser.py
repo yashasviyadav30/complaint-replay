@@ -43,6 +43,15 @@ try {
     .observe({ type: 'layout-shift', buffered: true });
 } catch (e) {}
 """
+# What kind of element a control is, in the words its source code uses (<input type="date" ...>): the fixer
+# searches the code for these, since a visible label like '2026-10-16' appears in no source file.
+ELEMENT_JS = """
+(el) => {
+  const attrs = ['type', 'name', 'id', 'role', 'data-testid'].filter(a => el.getAttribute(a))
+    .map(a => `${a}="${el.getAttribute(a).slice(0, 40)}"`);
+  return `<${el.tagName.toLowerCase()}${attrs.length ? ' ' + attrs.join(' ') : ''}>`;
+}
+"""
 # The option a keyboard user sees highlighted in a dropdown, and the field it belongs to (for wrong_option_chosen).
 HIGHLIGHTED_JS = """
 () => {
@@ -443,7 +452,7 @@ class Session:
             else:
                 return f"error: unknown action type {kind!r}"
         except Exception as e:  # report to the model; a failed click is information, not a crash
-            self._blocked(action, kind, str(e))
+            await self._blocked(action, kind, str(e))
             return f"error: {str(e).splitlines()[0][:200]}"
         await self.settle()
         if kind not in ("fill", "fill_role", "fill_css", "type"):
@@ -453,7 +462,17 @@ class Session:
             self.add("no_response", f"tapped '{name}' but nothing happened: no change on screen, no request sent")
         return "ok"
 
-    def _blocked(self, action: dict, kind: str, error: str) -> None:
+    async def _element(self) -> str:
+        """' (<input type="date">)' for the control last acted on, or '' when it cannot be read."""
+        if self.last_idx is None:
+            return ""
+        try:
+            el = self.page.locator(f'[data-bc-idx="{self.last_idx}"]').first
+            return f" ({await el.evaluate(ELEMENT_JS, timeout=2000)})"
+        except Exception:
+            return ""
+
+    async def _blocked(self, action: dict, kind: str, error: str) -> None:
         """A tap the user could not make is evidence too: Playwright says what got in the way."""
         if kind not in ("click", "click_role", "click_css", "fill", "fill_role"):
             return
@@ -462,9 +481,10 @@ class Session:
             return  # a blocked tap on an unknown control proves nothing about any complaint; the twin still sees the error
         blocker = INTERCEPTS.search(error)
         if blocker:
-            self.add("tap_blocked", f"tapping '{name}' hit {blocker.group(1)[:120]} instead")
+            self.add("tap_blocked", f"tapping '{name}'{await self._element()} hit {blocker.group(1)[:120]} instead")
         elif "not visible" in error or "not enabled" in error or "not stable" in error or "Timeout" in error:
-            self.add("tap_blocked", f"'{name}' could not be tapped: it never became visible, enabled and still")
+            self.add("tap_blocked",
+                     f"'{name}'{await self._element()} could not be tapped: it never became visible, enabled and still")
 
     async def _check_choice(self, highlighted: dict) -> None:
         """Enter on a highlighted option must pick that option (ARIA combobox pattern)."""

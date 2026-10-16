@@ -18,12 +18,16 @@ SKIP_PARTS = {"node_modules", ".git", "dist", "build", ".next", ".nuxt", ".svelt
               "__pycache__", ".venv", "venv", ".complaint-replay", "out", "target", ".turbo", ".cache"}
 SKIP_NAMES = {"package-lock.json", "yarn.lock", "pnpm-lock.yaml", "composer.lock", "Gemfile.lock", "poetry.lock",
               "complaint-replay.toml"}
-MAX_FILE_CHARS = 60_000   # bigger files are bundles, fixtures or generated
-BUDGET_CHARS = 120_000    # about 30k tokens of source per fix request
+MAX_FILE_CHARS = 100_000  # bigger files are bundles, fixtures or generated (real components reach 65k: Actual)
+BUDGET_CHARS = 200_000    # about 50k tokens of source per fix request
 MIN_CLUE = 3
 QUOTED = re.compile(r"['\"‘“]([^'\"’”]{3,80})['\"’”]")
 PATH = re.compile(r"/[\w\-./]{2,}")
 SELECTOR = re.compile(r"[#.]([A-Za-z][\w-]{2,})")
+ATTRIBUTE = re.compile(r'\b[\w-]+="[^"]{2,40}"')  # type="date": how source code writes the element
+IMPORT = re.compile(r"""(?:from|import|require\()\s*['"]([^'"]+/[^'"]+)['"]""")  # paths only, not 'react'
+IMPORT_SUFFIXES = ("", ".ts", ".tsx", ".js", ".jsx", ".mjs", ".vue", ".svelte", "/index.ts", "/index.tsx", "/index.js")
+FOLLOW_TOP = 3  # imports of the best matches only: a shared component often holds the bug (an input used everywhere)
 
 
 def list_sources(root: Path, allowed: tuple[str, ...] = ()) -> list[str]:
@@ -53,6 +57,7 @@ def clues(texts: list[str]) -> list[str]:
         found.update(QUOTED.findall(text))
         found.update(p.strip("/.") for p in PATH.findall(text))
         found.update(SELECTOR.findall(text))
+        found.update(ATTRIBUTE.findall(text))
     return sorted(c for c in found if len(c.strip()) >= MIN_CLUE)
 
 
@@ -76,13 +81,38 @@ def pick(root: Path, hints: list[str], allowed: tuple[str, ...] = (), budget: in
     def score(rel: str) -> float:
         return sum(math.log((n + 1) / (df[c] + 1)) * (1 + (c in rel.lower())) for c in terms if c in lowered[rel])
 
+    ranked = [r for r in sorted(lowered, key=score, reverse=True) if score(r) > 0]
+    # The best matches first, then the local files they import, then the other matches.
+    order = ranked[:FOLLOW_TOP] + [i for r in ranked[:FOLLOW_TOP] for i in local_imports(r, texts)] + ranked[FOLLOW_TOP:]
     chosen, used = [], 0
-    for rel in sorted(lowered, key=score, reverse=True):
-        if score(rel) <= 0 or used + len(texts[rel]) > budget:
+    for rel in dict.fromkeys(order):
+        if used + len(texts[rel]) > budget:
             continue
         chosen.append(rel)
         used += len(texts[rel])
     return sorted(chosen)
+
+
+def local_imports(rel: str, texts: dict[str, str]) -> list[str]:
+    """Repo files that `rel` imports: relative (./Button) or through an alias (#components/x, @/x, ~/x).
+
+    An alias is matched by the end of the path, and only when exactly one repo file fits.
+    """
+    found = []
+    for spec in IMPORT.findall(texts[rel]):
+        if spec.startswith("."):
+            parts = []
+            for part in (Path(rel).parent / spec).as_posix().split("/"):  # resolve ../ without the disk
+                if part == "..":
+                    parts = parts[:-1]
+                elif part not in (".", ""):
+                    parts.append(part)
+            found += [f for s in IMPORT_SUFFIXES if (f := "/".join(parts) + s) in texts][:1]
+        else:
+            tail = "/" + spec.lstrip("#@~/")
+            fits = [f for f in texts if any(f.endswith(tail + s) for s in IMPORT_SUFFIXES)]
+            found += fits if len(fits) == 1 else []
+    return found
 
 
 def read(root: Path, rels: list[str]) -> str:
