@@ -450,7 +450,9 @@ class Session:
         """A tap the user could not make is evidence too: Playwright says what got in the way."""
         if kind not in ("click", "click_role", "click_css", "fill", "fill_role"):
             return
-        name = self.last_target or action.get("name") or action.get("selector") or "a control"
+        name = self.last_target or action.get("name") or action.get("selector")
+        if not name:
+            return  # a blocked tap on an unknown control proves nothing about any complaint; the twin still sees the error
         blocker = INTERCEPTS.search(error)
         if blocker:
             self.add("tap_blocked", f"tapping '{name}' hit {blocker.group(1)[:120]} instead")
