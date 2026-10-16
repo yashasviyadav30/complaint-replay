@@ -82,6 +82,10 @@ FOCUS_JS = r"""() => { const a = document.activeElement;
 DIALOG_OPEN_JS = """() => [...document.querySelectorAll('[role=dialog], [role=alertdialog], [aria-modal=true], dialog[open]')]
   .some((e) => e.getBoundingClientRect().width > 0)"""
 MAX_KEY_REPEAT = 15
+# The text of the dialog on top, so the twin knows WHAT opened (a scheduled-payment menu is not the editor).
+DIALOG_TEXT_JS = r"""() => { const d = [...document.querySelectorAll('[role=dialog], [role=alertdialog], [aria-modal=true], dialog[open]')]
+  .filter((e) => e.getBoundingClientRect().width > 0).pop();
+  return d ? d.innerText.trim().replace(/\s+/g, ' ').slice(0, 160) : ''; }"""
 READY_TEXT_TIMEOUT_S = 180
 BUSY_JS = """() => [...document.querySelectorAll('[aria-busy=true], [role=progressbar], [class*=spinner], [class*=loading]')]
   .some((e) => e.getBoundingClientRect().width > 0)"""
@@ -433,6 +437,7 @@ class Session:
         taps = kind in ("click", "click_role", "click_css") or (kind == "press" and action.get("key") in ("Enter", "Space"))
         opened, self._opened = self._opened, None
         before = await self._fingerprint() if taps else None
+        dialog_before = await self._dialog_text() if taps else ""
         requests_before = self._requests
         tabs_before = len(self._new_tabs)
         try:
@@ -520,7 +525,18 @@ class Session:
             self.add("no_response", f"tapped '{name}' but nothing happened: no change on screen, no request sent")
         elif taps:
             self._opened = self.last_target or action.get("name") or action.get("selector")
+            dialog = await self._dialog_text()
+            if dialog and dialog != dialog_before:
+                # Cloud case 9064 (run 7): told only "a dialog is open", the twin reopened a scheduled payment's
+                # menu nine times looking for a transaction's edit screen.
+                return f"ok, a dialog opened: '{dialog}'"
         return "ok"
+
+    async def _dialog_text(self) -> str:
+        try:
+            return await self.page.evaluate(DIALOG_TEXT_JS)
+        except Exception:
+            return ""
 
     async def _dialog_open(self) -> bool:
         try:

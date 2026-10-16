@@ -233,3 +233,15 @@ def test_a_link_that_opens_a_new_tab_is_not_a_dead_button(site) -> None:
 
     result, seen = asyncio.run(body())
     assert result.startswith("ok, it opened a new tab") and "no_response" not in seen
+
+
+def test_the_twin_hears_what_a_new_dialog_says(site) -> None:
+    async def body() -> str:
+        async with browser.Session(f"{site}/popover.html", PHONE) as s:
+            await s.page.set_content(
+                "<button onclick=\"document.body.insertAdjacentHTML('beforeend', "
+                "'<div role=dialog>Upcoming Utilities <button>Post transaction</button></div>')\">Upcoming</button>")
+            obs = await s.observe()
+            return await s.act({"type": "click", "target": obs["elements"][0]["idx"]})
+
+    assert asyncio.run(body()) == "ok, a dialog opened: 'Upcoming Utilities Post transaction'"
