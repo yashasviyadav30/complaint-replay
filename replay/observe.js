@@ -15,6 +15,14 @@
       .map((s) => (s || '').trim()).filter(Boolean);
     return [...new Set(parts)].join(' ').replace(/\s+/g, ' ').slice(0, 60);
   };
+  // A control with no name of its own (a bare toggle) is described by the text beside it, so it can be found.
+  const nearText = (el) => {
+    for (let a = el.parentElement, i = 0; a && i < 3; a = a.parentElement, i++) {
+      const t = (a.innerText || '').trim().replace(/\s+/g, ' ');
+      if (t) return t.slice(0, 40);
+    }
+    return '';
+  };
   const ours = (el) => el.closest(OURS) !== null;
   // Where a control sits, in words a person would use: helps tell two similar bugs apart.
   const PLACES = { nav: 'the navigation', header: 'the top bar', footer: 'the footer', aside: 'a side panel',
@@ -44,7 +52,8 @@
     const r = el.getBoundingClientRect();
     if (r.left >= vw || r.right <= 0) { offscreen.push({ label: name(el), left: Math.round(r.left), vw, where: where(el) }); continue; }
     el.setAttribute('data-bc-idx', i);
-    elements.push({ idx: i++, tag: el.tagName.toLowerCase(), role: el.getAttribute('role') || '', label: name(el),
+    elements.push({ idx: i++, tag: el.tagName.toLowerCase(), role: el.getAttribute('role') || '',
+      label: name(el) || (nearText(el) ? `(no name) near '${nearText(el)}'` : ''),
       value: (el.type === 'password' ? '' : el.value) || '', disabled: !!el.disabled });
     // A name with no letters ("1", "+", "x") tells a screen-reader user nothing about what the control does.
     if (!['input', 'select', 'textarea'].includes(el.tagName.toLowerCase()) && !/\p{L}/u.test(name(el))) {
@@ -54,10 +63,12 @@
     if ((!modal || modal.contains(el)) && r.top >= 0 && r.bottom <= vh && r.left >= 0 && r.right <= vw) {
       const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
       // Something from the control's own parent on top is usually by design (drag handles, overlaid labels).
+      // Fixed page chrome (top bar, bottom tabs) over a scrolled list is how apps are built, not a bug.
+      const chrome = top && top.closest('nav, header, footer, [role=navigation], [role=banner], [role=tablist], [role=toolbar]');
       const row = el.parentElement;
       const sameParent = row && row !== document.body && row.contains(top)
         && row.getBoundingClientRect().height < 3 * r.height + 40;  // a row, not the whole page
-      if (top && top !== el && !el.contains(top) && !top.contains(el) && !ours(top) && !sameParent) {
+      if (top && top !== el && !el.contains(top) && !top.contains(el) && !ours(top) && !sameParent && !chrome) {
         const cls = typeof top.className === 'string' && top.className ? '.' + top.className.split(' ')[0] : '';
         covered.push({ label: name(el), by: (top.id ? '#' + top.id : top.tagName.toLowerCase()) + cls, where: where(el) });
       }

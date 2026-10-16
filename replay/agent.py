@@ -10,6 +10,7 @@ from replay.conditions import Condition
 
 VERDICTS = ("reproduced", "ux_confusion", "not_reproduced")
 REPEAT_LIMIT = 3
+STUCK_LIMIT = 6  # the same action this many times: the twin is lost, stop instead of burning tokens
 Policy = Callable[[dict], Awaitable[dict]]
 
 
@@ -70,6 +71,11 @@ async def _drive(session: Session, complaint: str, condition: Condition, policy:
             last_result += " (nothing visible changed)"
         recent = {json.dumps({k: v for k, v in s["action"].items() if k != "why"}, sort_keys=True)
                   for s in steps[-REPEAT_LIMIT:]}
+        last_few = {json.dumps({k: v for k, v in s["action"].items() if k != "why"}, sort_keys=True)
+                    for s in steps[-STUCK_LIMIT:]}
+        if len(steps) >= STUCK_LIMIT and len(last_few) == 1:
+            stop = {"verdict": "not_reproduced", "summary": f"Stuck: the same action {STUCK_LIMIT} times in a row."}
+            return judge(stop, session.evidence, steps)
         if len(steps) >= REPEAT_LIMIT and len(recent) == 1:
             last_result += f" (you did the same action {REPEAT_LIMIT} times in a row; try something else)"
         prev_view = view

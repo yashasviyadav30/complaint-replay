@@ -46,6 +46,7 @@ CLEAN = [
     ("rtl_ok.html", CONDITIONS["arabic"], []),
     ("spanish_ok.html", profile(locale="es-ES"), []),
     ("modal_open.html", PHONE, []),  # an open dialog is meant to cover the page
+    ("chrome.html", PHONE, []),  # a fixed top bar over the list is page chrome, not a covered control
     ("clean.html", PHONE, [{"type": "click_css", "selector": "button"}]),  # the button changes its text
     ("dead_button.html", PHONE, [{"type": "click_css", "selector": "#toggle"}]),  # a toggle that toggles
 ]
@@ -95,3 +96,14 @@ def test_a_teams_own_check_becomes_evidence(site) -> None:
             return [f"{e.kind}: {e.detail}" for e in s.evidence]
 
     assert asyncio.run(run()) == ["check:invoice_total: total shows 160 but the lines add up to 150"]
+
+
+
+def test_a_control_without_a_name_is_described_by_the_text_beside_it(site) -> None:
+    from replay.browser import Session
+
+    async def labels() -> list[str]:
+        async with Session(f"{site}/chrome.html", PHONE) as s:
+            return [e["label"] for e in (await s.observe())["elements"]]
+
+    assert "(no name) near 'Reconciled'" in asyncio.run(labels())

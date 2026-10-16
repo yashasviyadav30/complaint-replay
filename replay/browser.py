@@ -382,6 +382,9 @@ class Session:
             elif kind == "goto":  # open another path of the same site (deep links in complaints, guards)
                 await page.goto(self.base_url.rstrip("/") + "/" + str(action.get("path", "")).lstrip("/"))
             elif kind in ("scroll", "swipe"):
+                # From the middle of the screen: at (0, 0) the wheel hits the top bar and inner panels never move.
+                size = page.viewport_size or {"width": 800, "height": 600}
+                await page.mouse.move(size["width"] / 2, size["height"] / 2)
                 await page.mouse.wheel(0, -600 if action.get("direction") == "up" else 600)
             elif kind == "wait":
                 await asyncio.sleep(min(int(action.get("ms", 1000)), 10_000) / 1000)
