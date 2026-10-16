@@ -39,6 +39,12 @@ class Project:
     hints: str = ""
     auth: str = ""
     edit: tuple[str, ...] = ()
+    checks: tuple[str, ...] = ()  # your own evidence: JS files, each `() => [problem, ...]`, run on every page
+
+    @property
+    def check_scripts(self) -> dict[str, str]:
+        """{name: JavaScript} for the project's own checks; a missing file is a config error, said loudly."""
+        return {Path(c).stem: (self.root / c).read_text(encoding="utf-8") for c in self.checks}
 
     @property
     def auth_file(self) -> Path | None:
@@ -51,8 +57,9 @@ def load_project(root: Path) -> Project:
     path = root / CONFIG
     app = tomllib.loads(path.read_text(encoding="utf-8")).get("app", {}) if path.exists() else {}
     known = {k: v for k, v in app.items() if k in Project.__dataclass_fields__ and k != "root"}
-    if "edit" in known:
-        known["edit"] = tuple(known["edit"])
+    for key in ("edit", "checks"):
+        if key in known:
+            known[key] = tuple(known[key])
     return Project(root, **known)
 
 

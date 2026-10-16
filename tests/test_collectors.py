@@ -78,3 +78,20 @@ def test_clean_page_is_silent(site, page, cond, script) -> None:
     found = kinds(f"{site}/{page}", cond, script)
     noisy = [f for f in found if not f.startswith("a11y_violation")]  # axe has opinions even about tiny pages
     assert not noisy, noisy
+
+
+def test_a_teams_own_check_becomes_evidence(site) -> None:
+    from replay.browser import Session
+
+    total_check = """() => {
+      const sum = [...document.querySelectorAll('.line')].reduce((s, l) => s + Number(l.dataset.amount), 0);
+      const shown = Number(document.querySelector('#total').textContent);
+      return sum === shown ? [] : [`total shows ${shown} but the lines add up to ${sum}`];
+    }"""
+
+    async def run() -> list[str]:
+        async with Session(f"{site}/invoice.html", PHONE, checks={"invoice_total": total_check}) as s:
+            await s.observe()
+            return [f"{e.kind}: {e.detail}" for e in s.evidence]
+
+    assert asyncio.run(run()) == ["check:invoice_total: total shows 160 but the lines add up to 150"]

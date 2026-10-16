@@ -102,10 +102,12 @@ class Evidence:
 class Session:
     """Async context manager: one browser page under one condition."""
 
-    def __init__(self, base_url: str, condition: Condition, storage_state: Path | None = None):
+    def __init__(self, base_url: str, condition: Condition, storage_state: Path | None = None,
+                 checks: dict[str, str] | None = None):
         self.base_url = base_url
         self.condition = condition
         self.storage_state = storage_state
+        self.checks = checks or {}  # the project's own evidence checks: {name: JS returning a list of problems}
         self.evidence: list[Evidence] = []
         self.step = 0
         self._seen: set[tuple[str, str]] = set()
@@ -264,6 +266,7 @@ class Session:
         self._layout(obs)
         self._language(obs)
         self._loading(obs)
+        await self._own_checks()
         if self.condition.keyboard_only:
             if obs["focus"] and not obs["focus"]["outline"]:
                 self.add("focus_invisible", f"keyboard focus is on '{obs['focus']['label']}' but nothing shows where")
@@ -278,6 +281,16 @@ class Session:
             for v in await self._axe():
                 self.add("a11y_violation", f"{v['id']}: {v['help']} ({', '.join(v['targets'])})")
         return obs
+
+    async def _own_checks(self) -> None:
+        """A team's own rules ("invoice total = sum of lines"), run like the built-in collectors."""
+        for name, js in self.checks.items():
+            try:
+                problems = await self.page.evaluate(js)
+            except Exception as e:  # a broken check must say so, not hide a bug
+                problems = [f"the check itself failed: {str(e).splitlines()[0][:150]}"]
+            for p in problems or []:
+                self.add(f"check:{name}", str(p.get("detail", p) if isinstance(p, dict) else p)[:300])
 
     def _layout(self, obs: dict) -> None:
         for o in obs["offscreen"]:

@@ -43,13 +43,13 @@ Matcher = Callable[[str, list[Evidence]], Awaitable[dict]]
 
 async def replay(base_url: str, complaint: str, condition: Condition, policy: Policy,
                  matcher: Matcher | None = None, screenshot: Path | None = None, hints: str = "",
-                 storage_state: Path | None = None) -> ReplayResult:
+                 storage_state: Path | None = None, checks: dict[str, str] | None = None) -> ReplayResult:
     """Replay a complaint. If `screenshot` is given, save what the user sees at the moment of the verdict.
 
     `hints` are facts about the app the twin may need (test accounts, test data), from the project config.
     `storage_state` is a saved login, so the twin starts signed in.
     """
-    async with Session(base_url, condition, storage_state) as session:
+    async with Session(base_url, condition, storage_state, checks) as session:
         result = await _drive(session, complaint, condition, policy, matcher, hints)
         if screenshot:
             screenshot.parent.mkdir(parents=True, exist_ok=True)
