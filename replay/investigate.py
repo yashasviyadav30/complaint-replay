@@ -129,6 +129,7 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
     sources = await research([e for e in before.evidence if e.id in before.cited])
     rejected = None
     patch = None
+    errors = []  # every attempt's reason, not only the last: the first one often says more
     for _ in range(FIX_ATTEMPTS):  # a rejected edit, or an unreadable reply, gets one retry with the reason
         try:
             tried = tuple(str(e.get("file", "")) for e in patch.edits) if patch else ()
@@ -138,8 +139,10 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
             break
         except ValueError as e:  # includes a reply that was not valid JSON (seen on a big real repo)
             rejected = str(e)[:300]
+            errors.append(rejected)
     else:
-        case["fix"] = {"model": fix_model, "explanation": patch.explanation if patch else "", "error": rejected}
+        case["fix"] = {"model": fix_model, "explanation": patch.explanation if patch else "", "error": rejected,
+                       "errors": errors}
         stage("fix_failed")
         return case
     case["fix"] = {"model": fix_model, "explanation": patch.explanation, "diff": diff, "edits": list(patch.edits),

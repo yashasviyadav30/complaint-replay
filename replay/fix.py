@@ -25,6 +25,11 @@ Rules:
 - Fix the cause, not the symptom: do not hide error messages or delete checks."""
 
 
+# Reasoning is on for the fixer, and on a big repo it used all of 12k tokens before writing a patch (Actual,
+# case 8926). The NVIDIA endpoint accepts 32k.
+FIX_MAX_TOKENS = 32000
+
+
 @dataclass(frozen=True)
 class Patch:
     explanation: str
@@ -80,10 +85,13 @@ async def propose_fix(client: AsyncOpenAI, model: str, complaint: str, condition
     )
     await throttle()
     resp = await patiently(lambda: client.chat.completions.create(
-        model=model, temperature=0.1, max_tokens=12000,
+        model=model, temperature=0.1, max_tokens=FIX_MAX_TOKENS,
         messages=[{"role": "system", "content": FIX_SYSTEM}, {"role": "user", "content": user}],
     ))
-    data = parse_json(resp.choices[0].message.content or "")
+    choice = resp.choices[0]
+    if not choice.message.content and choice.finish_reason == "length":
+        raise ValueError(f"the reply ran out of tokens ({FIX_MAX_TOKENS}) while reasoning, before writing the patch")
+    data = parse_json(choice.message.content or "")
     return Patch(str(data.get("explanation", "")), tuple(data.get("edits", [])))
 
 
