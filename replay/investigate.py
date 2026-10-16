@@ -130,8 +130,9 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
     patch = None
     for _ in range(FIX_ATTEMPTS):  # a rejected edit, or an unreadable reply, gets one retry with the reason
         try:
+            tried = tuple(str(e.get("file", "")) for e in patch.edits) if patch else ()
             patch = await propose_fix(client, fix_model, complaint, cond, before, branch, sources, rejected,
-                                      project.edit)
+                                      project.edit, tried)
             diff = apply_patch(patch, branch, project.edit)
             break
         except ValueError as e:  # includes a reply that was not valid JSON (seen on a big real repo)

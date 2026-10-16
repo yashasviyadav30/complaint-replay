@@ -60,9 +60,12 @@ def background(sources: list[dict]) -> str:
 
 async def propose_fix(client: AsyncOpenAI, model: str, complaint: str, condition: Condition,
                       result: ReplayResult, root: Path, sources: list[dict] | None = None,
-                      rejected: str | None = None, allowed: tuple[str, ...] = ()) -> Patch:
+                      rejected: str | None = None, allowed: tuple[str, ...] = (),
+                      also: tuple[str, ...] = ()) -> Patch:
     cited = [e for e in result.evidence if e.id in result.cited] or list(result.evidence)
     files = src.pick(root, fix_clues(result), allowed)
+    # On a retry, the files the last attempt tried to edit are shown in full: it may have guessed their text.
+    files += [f for f in also if f not in files and (root / f).is_file() and root.resolve() in (root / f).resolve().parents]
     if not files:
         raise ValueError("no source files to fix: check `edit` in complaint-replay.toml")
     user = (
