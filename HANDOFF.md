@@ -36,6 +36,18 @@ Phase 1 tasks 1.0-1.7 (except 1.8) and most of 1.9/1.10 are built and tested (`u
   fixed AND same file as the real fix. Do not run heavy jobs (tests, docker builds) while it runs: Actual's dev
   server then misses its start timeout (`CRP_START_TIMEOUT=300`).
 
+## Real-bug benchmark status (Actual Budget)
+
+- Pass 1: 0/8 solved (kept in `benchmarks/real-bugs-pass1.md`). Misses were mostly navigation (app still loading,
+  wandering, Tab/scroll loops) and missing evidence types.
+- Engine lessons added since: wait-until-ready, visited-pages memory, stuck detection (not for keyboard), nameless
+  controls labelled by nearby text, chrome bars not "covering", scroll from screen centre, new evidence
+  (no_response, tap_blocked, typed_value_lost, wrong_option_chosen), judge rule + per-item skeptic check against
+  "obstacle on the way" proofs, fix retries see the full files the first attempt tried to edit, tolerant JSON.
+- Pass 3 running (started before the skeptic and retry fixes). Next: pass 4 with everything, then README numbers.
+- Memory: the laptop ran out once (Chrome + Docker + two Actual dev servers). Docker Desktop is stopped; don't
+  run heavy jobs during a pass. Restart a killed pass only when the user says so.
+
 ## Proven end to end (all real, all reproducible)
 
 Demo repo (private): `yashasviyadav30/crp-demo-shopping-cart`, an unchanged copy of an MIT app with real a11y bugs.
