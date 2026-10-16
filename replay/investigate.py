@@ -127,15 +127,17 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
     fix_model = await pick_fix_model(client)
     sources = await research([e for e in before.evidence if e.id in before.cited])
     rejected = None
-    for _ in range(FIX_ATTEMPTS):  # a rejected (ambiguous or unsafe) edit gets one retry with the reason
-        patch = await propose_fix(client, fix_model, complaint, cond, before, branch, sources, rejected, project.edit)
+    patch = None
+    for _ in range(FIX_ATTEMPTS):  # a rejected edit, or an unreadable reply, gets one retry with the reason
         try:
+            patch = await propose_fix(client, fix_model, complaint, cond, before, branch, sources, rejected,
+                                      project.edit)
             diff = apply_patch(patch, branch, project.edit)
             break
-        except ValueError as e:
-            rejected = str(e)
+        except ValueError as e:  # includes a reply that was not valid JSON (seen on a big real repo)
+            rejected = str(e)[:300]
     else:
-        case["fix"] = {"model": fix_model, "explanation": patch.explanation, "error": rejected}
+        case["fix"] = {"model": fix_model, "explanation": patch.explanation if patch else "", "error": rejected}
         stage("fix_failed")
         return case
     case["fix"] = {"model": fix_model, "explanation": patch.explanation, "diff": diff, "edits": list(patch.edits),

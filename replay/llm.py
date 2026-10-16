@@ -42,7 +42,8 @@ def parse_json(text: str) -> dict:
     start = text.find("{")
     if start == -1:
         raise ValueError(f"no JSON object in model reply: {text[:200]!r}")
-    obj, _ = json.JSONDecoder().raw_decode(text[start:])  # first object only; models sometimes add a second
+    # strict=False: models often put raw line breaks inside strings (code in a "find" text); accept them.
+    obj, _ = json.JSONDecoder(strict=False).raw_decode(text[start:])  # first object only; models may add a second
     return obj
 
 

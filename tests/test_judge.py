@@ -47,3 +47,10 @@ def test_policy_accepts_bare_action_and_never_lets_garbage_decide() -> None:
 def test_parse_json_takes_first_object_when_model_sends_two() -> None:
     reply = '{"action": {"type": "click", "target": 1}} {"action": {"type": "wait"}}'
     assert parse_json(reply)["action"] == {"type": "click", "target": 1}
+
+
+def test_model_reply_with_raw_line_breaks_in_a_string_still_parses() -> None:
+    from replay.llm import parse_json
+
+    reply = '{"explanation": "x", "edits": [{"file": "a.js", "find": "if (a) {\n  b()\n}", "replace": "c"}]}'
+    assert parse_json(reply)["edits"][0]["find"].startswith("if (a)")
