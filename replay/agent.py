@@ -61,11 +61,14 @@ async def replay(base_url: str, complaint: str, condition: Condition, policy: Po
 async def _drive(session: Session, complaint: str, condition: Condition, policy: Policy,
                  matcher: Matcher | None, hints: str = "") -> ReplayResult:
     steps: list[dict] = []
+    visited: list[str] = []  # page paths in the order seen, so the twin can tell it is going in circles
     last_result = "(page just opened)"
     judged = 0
     prev_view = None
     for step in range(condition.max_steps):
         obs = await session.observe()
+        if not visited or visited[-1] != obs["url"]:
+            visited.append(obs["url"])
         view = page_signature(obs)
         if steps and view == prev_view:
             last_result += " (nothing visible changed)"
@@ -73,7 +76,8 @@ async def _drive(session: Session, complaint: str, condition: Condition, policy:
                   for s in steps[-REPEAT_LIMIT:]}
         last_few = {json.dumps({k: v for k, v in s["action"].items() if k != "why"}, sort_keys=True)
                     for s in steps[-STUCK_LIMIT:]}
-        if len(steps) >= STUCK_LIMIT and len(last_few) == 1:
+        moving = bool(steps) and steps[-1]["action"].get("type") == "press"  # Tab, Tab, Tab is how keyboards move
+        if len(steps) >= STUCK_LIMIT and len(last_few) == 1 and not moving:
             stop = {"verdict": "not_reproduced", "summary": f"Stuck: the same action {STUCK_LIMIT} times in a row."}
             return judge(stop, session.evidence, steps)
         if len(steps) >= REPEAT_LIMIT and len(recent) == 1:
@@ -86,7 +90,7 @@ async def _drive(session: Session, complaint: str, condition: Condition, policy:
                 return judge({"verdict": "reproduced", **match}, session.evidence, steps)
         action = await policy({
             "complaint": complaint, "condition": condition, "obs": obs, "step": step,
-            "evidence": list(session.evidence), "steps": steps, "last_result": last_result, "hints": hints,
+            "evidence": list(session.evidence), "steps": steps, "last_result": last_result, "hints": hints, "visited": visited,
         })
         if action.get("type") == "verdict":
             return judge(action, session.evidence, steps)
@@ -166,7 +170,8 @@ def build_prompt(ctx: dict) -> tuple[str, str]:
     history = "\n".join(json.dumps(s["action"]) + " -> " + s["result"] for s in ctx["steps"][-6:]) or "(none)"
     user = (
         f"Complaint: {ctx['complaint']}\nUser: {cond.persona}\n{about}"
-        f"Step {ctx['step'] + 1} of {cond.max_steps}. Last action result: {ctx['last_result']}\n\n"
+        f"Step {ctx['step'] + 1} of {cond.max_steps}. Last action result: {ctx['last_result']}\n"
+        f"Pages visited so far, in order: {' > '.join(ctx.get('visited', [])[-10:]) or '(this is the first)'}\n\n"
         f"Recent actions:\n{history}\n\n{page}\n\nEvidence collected by the browser:\n{evidence}"
     )
     return SYSTEM_PROMPT.replace("{ACTIONS}", actions), user

@@ -64,6 +64,9 @@ CHOSEN_JS = """
   return ('value' in f && f.value !== undefined) ? String(f.value) : (f.innerText || '');
 }
 """
+READY_TIMEOUT_S = 20
+BUSY_JS = """() => [...document.querySelectorAll('[aria-busy=true], [role=progressbar], [class*=spinner], [class*=loading]')]
+  .some((e) => e.getBoundingClientRect().width > 0)"""
 # Playwright's click error names what took the tap: "- <div class=...> intercepts pointer events".
 INTERCEPTS = re.compile(r"(<[^>]{1,200}>)[^\n]*intercepts pointer events")
 # Everything a tap could change that a user (or assistive tech) would notice. Same before and after = dead control.
@@ -169,8 +172,21 @@ class Session:
             cdp = await context.new_cdp_session(self.page)
             await cdp.send("Emulation.setCPUThrottlingRate", {"rate": self.condition.cpu_slowdown})
         await self.page.goto(self.base_url, wait_until="load", timeout=60_000)
+        await self._wait_until_ready()
         self._loaded = True
         return self
+
+    async def _wait_until_ready(self) -> None:
+        """Big apps keep loading after the load event (bundles, workers, a splash screen). A user waits for that,
+        so the twin does too: network quiet and no spinner on screen, up to READY_TIMEOUT_S."""
+        try:
+            await self.page.wait_for_load_state("networkidle", timeout=READY_TIMEOUT_S * 1000)
+        except Exception:  # some apps poll forever; carry on after the timeout
+            pass
+        for _ in range(READY_TIMEOUT_S * 2):
+            if not await self.page.evaluate(BUSY_JS):
+                return
+            await asyncio.sleep(0.5)
 
     async def __aexit__(self, *exc) -> None:
         # Release in-flight route handlers first: a handler still inside its latency sleep when the browser
