@@ -160,7 +160,7 @@ def build_prompt(ctx: dict) -> tuple[str, str]:
         if cond.screen_reader
         else "Controls you can see:\n" + "\n".join(
             f"[{e['idx']}] {e['tag']} '{e['label']}'" + (f" value='{e['value']}'" if e["value"] else "") +
-            (" (new)" if e.get("new") else "")
+            (" (new)" if e.get("new") else "") + (" (disabled)" if e.get("disabled") else "")
             for e in obs["elements"]
         ) + f"\n\nVisible text:\n{obs['text']}"
     )

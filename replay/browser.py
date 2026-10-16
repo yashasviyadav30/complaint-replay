@@ -471,6 +471,10 @@ class Session:
         except Exception as e:  # report to the model; a failed click is information, not a crash
             await self._blocked(action, kind, str(e), opened)
             covered = INTERCEPTS.search(str(e))
+            if "element is not enabled" in str(e):
+                # Cloud cases 8926 and 9071 "proved" bugs by tapping fields the app had disabled on purpose.
+                return ("error: that control is disabled right now (greyed out), so a user can't tap it either; "
+                        "finish or close what is open first")
             if covered:
                 return (f"error: the tap hit {covered.group(1)[:120]} instead: something is on top of it "
                         "(a menu or dialog may have opened; look for (new) controls)")
@@ -511,6 +515,8 @@ class Session:
             return  # the last tap on this control opened something that now covers it: a menu working as made
         if blocker:
             self.add("tap_blocked", f"tapping '{name}'{await self._element()} hit {blocker.group(1)[:120]} instead")
+        elif "element is not enabled" in error:
+            return  # disabled on purpose (Actual disables fields while another is edited): a user can't tap it either
         elif "not visible" in error or "not enabled" in error or "not stable" in error or "Timeout" in error:
             self.add("tap_blocked",
                      f"'{name}'{await self._element()} could not be tapped: it never became visible, enabled and still")

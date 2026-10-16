@@ -170,3 +170,14 @@ def test_controls_that_just_appeared_are_marked_new(site) -> None:
             return [e["label"] for e in obs["elements"] if e["new"]]
 
     assert asyncio.run(body()) == ["Post transaction"]
+
+
+def test_a_disabled_control_is_not_evidence_and_the_twin_hears_why(site, monkeypatch) -> None:
+    async def body() -> tuple[str, list]:
+        async with browser.Session(f"{site}/disabled.html", PHONE) as s:
+            obs = await s.observe()
+            idx = next(e["idx"] for e in obs["elements"] if e["label"].startswith("Who did you pay"))
+            return await s.act({"type": "click", "target": idx}), [e.kind for e in s.evidence]
+
+    result, kinds_seen = asyncio.run(body())
+    assert result.startswith("error: that control is disabled") and "tap_blocked" not in kinds_seen
