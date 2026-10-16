@@ -112,6 +112,15 @@ async () => (await axe.run(document, { runOnly: { type: 'tag', values: ['wcag2a'
 NUMBER = re.compile(r"\d+(?:\.\d+)?")
 
 
+DEV_WARNING = re.compile(r"%s|^Warning:|^Using kebab-case|^Each child in a list|^React does not recognize", re.I)
+
+
+def is_real_error(text: str) -> bool:
+    """A console error a user could feel, not a framework's development-mode warning. The judge cited React's
+    "In HTML, %s cannot be a descendant of <%s>" as proof that a date picker never opens (cloud case 9071)."""
+    return not DEV_WARNING.search(text)
+
+
 def evidence_key(kind: str, detail: str) -> str:
     """The same problem seen again, even if pixel sizes or timings differ: numbers are blanked out.
 
@@ -261,7 +270,7 @@ class Session:
         page.on("requestfailed", self._on_failed)
         page.on("response", self._on_response)
         page.on("framenavigated", self._on_navigated)
-        page.on("console", lambda m: m.type == "error" and self.add("console_error", m.text[:200]))
+        page.on("console", lambda m: m.type == "error" and is_real_error(m.text) and self.add("console_error", m.text[:200]))
         page.on("pageerror", lambda e: self.add("console_error", str(e)[:200]))
 
     def _on_request(self, request) -> None:

@@ -260,3 +260,9 @@ def test_a_switch_drawn_as_a_label_for_a_hidden_checkbox_is_a_control(site) -> N
 
     switch, checked = asyncio.run(body())
     assert switch[0]["value"] == "off" and "Cleared" in switch[0]["label"] and checked
+
+
+def test_framework_dev_warnings_are_not_console_errors() -> None:
+    assert not browser.is_real_error("In HTML, %s cannot be a descendant of <%s>.")
+    assert not browser.is_real_error("Using kebab-case for css properties in objects is not supported.")
+    assert browser.is_real_error("TypeError: Cannot read properties of undefined (reading 'date')")
