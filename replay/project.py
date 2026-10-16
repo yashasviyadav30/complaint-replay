@@ -27,7 +27,7 @@ from pathlib import Path
 
 CONFIG = "complaint-replay.toml"
 SECRET_WORDS = ("KEY", "TOKEN", "SECRET", "PASSWORD", "CREDENTIAL")
-START_TIMEOUT_S = 120  # a cold `npm run dev` can take a while
+START_TIMEOUT_S = int(os.getenv("CRP_START_TIMEOUT", "120"))  # a cold `npm run dev` can take a while
 
 
 @dataclass(frozen=True)
