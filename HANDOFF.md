@@ -93,8 +93,14 @@ read it whole) is `~/.claude/projects/C--Users-yasha-Downloads-Nebius-x-NVIDIA-G
   try). 9107: 11 taps behind an open menu (fixed: refusal lists the menu's controls; sighted twins have Escape).
   9064: honest miss. Fixer rule added for shared helpers (8733).
 
+- Run 14 final: solved 0/8, fixed in any file 0/8. 8733 hit the 80 min cap with an empty error and its progress
+  lost (fixed in bench_real.py: progress kept, "timed out after N min (last stage: ...)", cap 95 min; job limit is
+  120). 8570 Tab-wandered 50 steps on the budget page; 8765 ticked budget-page boxes, never opened an account
+  (navigation, not the new state note); 9038 walked the tour, highlight only off-screen in a non-current month.
+
 **In flight**
-1. Run 14: 8733, 8570, 8765, 9038 still to land. Then run 15 on 8c2bf01 (all fixes above).
+1. Run 15 (39061678952, on 76fadc0, every fix from the Oct 17 night). Read each case; publish the table if it
+   improves, keep run 11's numbers otherwise (README says run 11: 0/8 strict, 1/8 any file).
 2. Demo dashboard (gh-pages) has no films/transcripts yet: record fresh demo-shop cases (one screen-reader), then
    `scripts/deploy_demo.sh` (it pushes gh-pages: ask the user first, it is public).
 
