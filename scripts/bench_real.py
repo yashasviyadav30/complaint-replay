@@ -130,7 +130,10 @@ def write_report(repo: Path | None) -> None:
         "a file the real fix edited. A \"fixed\" with a different file is counted as a miss: the guard may have "
         "proven the wrong thing.", "",
         "| Upstream fix | Complaint | User | Result | Proof (evidence kinds) | Same file as real fix | Solved | Time |",
-        "|---|---|---|---|---|---|---|---|", *rows, ""]), encoding="utf-8")
+        "|---|---|---|---|---|---|---|---|", *rows, "",
+        "## What each case needs (our reading of the misses, not a measurement)", "",
+        *[f"- [#{c['pr']}](https://github.com/actualbudget/actual/pull/{c['pr']}): {c['note']}"
+          for c in json.loads(CASES.read_text(encoding="utf-8"))["cases"] if c.get("note")], ""]), encoding="utf-8")
     print(REPORT.read_text(encoding="utf-8"))
 
 
