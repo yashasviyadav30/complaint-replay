@@ -19,6 +19,24 @@ read it whole) is `~/.claude/projects/C--Users-yasha-Downloads-Nebius-x-NVIDIA-G
 - The GateGuard hook asks for facts before each first edit of a file and before some Bash calls: state them, retry.
 - Heredoc/python string edits turn `\n` inside strings into real newlines: use the Edit tool for those.
 
+**How the work runs (the user asked the next session to work exactly like this, without waiting for them)**
+- Never sit idle and never ask "should I continue?". While something slow runs, do the next useful thing.
+- Cloud benchmark loop: start a run, watch it with the Monitor tool, read each case as it lands, fix what it
+  teaches (with a test), commit after a green suite, start the next run. Re-arm the monitor when it expires.
+  ```bash
+  gh workflow run real-bugs.yml --repo yashasviyadav30/complaint-replay      # then get the id:
+  gh run list --repo yashasviyadav30/complaint-replay --workflow real-bugs.yml --limit 1 --json databaseId
+  # Monitor command (one event per finished case; ends when the run completes):
+  prev=""; while true; do s=$(gh run view <ID> --repo yashasviyadav30/complaint-replay --json jobs,status --jq '.status as $st | (.jobs[] | select(.status=="completed") | "\(.name): \(.conclusion)"), "run: \($st)"' 2>/dev/null | sort); if [ -n "$s" ]; then diff <(echo "$prev") <(echo "$s") | grep '^>' | sed 's/^> //'; prev=$s; fi; echo "$s" | grep -q "run: completed" && break; sleep 120; done
+  gh run download <ID> --repo yashasviyadav30/complaint-replay -n case-<pr> -D <scratch dir>
+  uv run python scripts/show_case.py <scratch dir>/real-bugs/pr<pr>.json
+  ```
+- Long test suites (`uv run pytest -q`, 6-40 min on this laptop) go in a background shell; one suite at a time.
+  A test that fails only in the full run but passes alone (`pytest --lf`) has been timing flakiness under load.
+- Before building anything: quick ranked brainstorm (WOW, ₹0, days left, real user value), then build the best.
+- Check every claim before writing it (git log for counts, a real run for behaviour, docs/web for facts).
+- Tell the user, in short plain English, what changed and why after each meaningful step; they read along.
+
 **State right now**
 - Code: all committed and pushed to `main` (last: the replay film, f387fcb). 161 tests.
 - Real-bug benchmark (Actual Budget, 8 bugs, GitHub Actions `real-bugs.yml`): published in README +
