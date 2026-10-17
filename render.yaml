@@ -7,8 +7,6 @@ services:
     plan: free
     healthCheckPath: /api/v1/me
     envVars:
-      - key: PUBLIC_URL          # this service's https address, e.g. https://complaint-replay.onrender.com
-        sync: false
       - key: SECRET_KEY          # signs logins and callback tokens
         generateValue: true
       - key: ADMIN_LOGIN         # your GitHub username: only you may create the GitHub App

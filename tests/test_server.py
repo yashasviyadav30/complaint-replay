@@ -275,3 +275,20 @@ def test_public_sector_twin_runs_accessibility_checks_for_everyone() -> None:
 
     cond = condition_from(parser().parse_args(["replay", "x"]), {"env": ENV, "pack": {"audit": True}})
     assert cond.audit and not cond.screen_reader
+
+
+def test_a_complaint_is_kept_and_answered_even_before_public_url_is_set(client, monkeypatch) -> None:
+    # Found smoke-testing the Render image: without PUBLIC_URL the widget got a 500 and no status token.
+    monkeypatch.delenv("PUBLIC_URL", raising=False)
+    project = client.post("/api/v1/projects", json={"name": "Shop", "repo": "acme/shop"}).json()
+    monkeypatch.setattr(srv, "from_this_machine", lambda request: False)  # a hosted server, reached from outside
+    r = client.post("/api/v1/reports", json={"project": project["key"], "kind": "spoken", "text": "Pay missing", "env": ENV})
+    assert r.status_code == 201 and r.json()["token"]
+    case = srv.store.get("case", r.json()["id"])
+    assert "PUBLIC_URL" in case["error"]
+
+
+def test_on_render_the_public_address_needs_no_setting(monkeypatch) -> None:
+    monkeypatch.delenv("PUBLIC_URL", raising=False)
+    monkeypatch.setenv("RENDER_EXTERNAL_URL", "https://crp.onrender.com/")
+    assert srv.public_url(None) == "https://crp.onrender.com"

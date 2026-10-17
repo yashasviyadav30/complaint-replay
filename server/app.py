@@ -168,7 +168,7 @@ def save_case(case: dict) -> dict:
     if case.get("stage") in notify.WORTH_SAYING and (not stored or stored.get("stage") != case["stage"]):
         project = store.get("project", case.get("project", "")) or {}
         if project.get("notify_url"):
-            text = notify.message(case, project, os.getenv("PUBLIC_URL", ""))
+            text = notify.message(case, project, os.getenv("PUBLIC_URL") or os.getenv("RENDER_EXTERNAL_URL", ""))
             threading.Thread(target=notify.send, args=(project["notify_url"], text), daemon=True).start()
     return saved
 
@@ -228,6 +228,10 @@ async def start_case(project: dict, case: dict, env: dict, base_url: str) -> Non
         return
     if not project.get("repo"):
         return  # collected only: the team replays by hand with `crp replay`
+    if not base_url:
+        save_case({**case, "error": "Set PUBLIC_URL to this server's public https address, so GitHub Actions can "
+                                    "report back; then press Replay Again."})
+        return
     payload = {"case_id": case["id"], "kind": case["kind"], "complaint": case["complaint"], "said": case["said"],
                "env": env, "reports": case.get("reports", 1), "token": case_token(case["id"]),
                "pack": {k: v for k, v in pack(project).items() if k != "strict_pii"},
@@ -327,8 +331,9 @@ def from_this_machine(request: Request) -> bool:
 
 def public_url(request: Request) -> str:
     """Where GitHub Actions should send progress. Never taken from a Host header sent by a stranger."""
-    if os.getenv("PUBLIC_URL"):
-        return os.environ["PUBLIC_URL"].rstrip("/")
+    # Render sets RENDER_EXTERNAL_URL to the service's own https address: on Render there is nothing to fill in.
+    if os.getenv("PUBLIC_URL") or os.getenv("RENDER_EXTERNAL_URL"):
+        return (os.getenv("PUBLIC_URL") or os.environ["RENDER_EXTERNAL_URL"]).rstrip("/")
     if from_this_machine(request):
         return str(request.base_url).rstrip("/")
     raise HTTPException(500, "set PUBLIC_URL to this server's public address")
@@ -406,7 +411,11 @@ async def accept(project: dict, report: ReportIn, request: Request, source: str)
             save_case({**case, "error": f"Daily replay limit ({MAX_DAILY_REPLAYS}) reached; replay it by hand."})
         elif case.get("triage", {}).get("replay", True):
             save_case(case)
-            await start_case(project, case, record["env"], public_url(request))
+            try:
+                base = public_url(request)
+            except HTTPException:  # the complaint is kept and answered; the dashboard says what to set
+                base = ""
+            await start_case(project, case, record["env"], base)
         else:  # spam or a clear feature wish: keep it for the team, don't spend a replay on it
             save_case({**case, "stage": "not_a_bug"})
     return {"id": record["id"], "token": record["status_token"], "grouped_into": duplicate}

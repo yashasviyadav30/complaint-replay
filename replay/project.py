@@ -11,6 +11,7 @@
 No config file at all means: a static site served from the repo root.
 """
 
+import contextlib
 import os
 import signal
 import socket
@@ -91,6 +92,30 @@ def _kill_tree(proc: subprocess.Popen) -> None:
         proc.kill()
 
 
+def _port_owners(port: int) -> set[int]:
+    """Processes still listening on `port`."""
+    try:
+        if os.name == "nt":
+            out = subprocess.run(["netstat", "-ano", "-p", "TCP"], capture_output=True, text=True).stdout
+            rows = [line.split() for line in out.splitlines()]
+            return {int(r[4]) for r in rows if len(r) == 5 and r[1].endswith(f":{port}") and r[3] == "LISTENING"}
+        out = subprocess.run(["lsof", "-t", f"-iTCP:{port}", "-sTCP:LISTEN"], capture_output=True, text=True).stdout
+        return {int(pid) for pid in out.split()}
+    except (OSError, ValueError):  # no netstat/lsof: the tree kill above is all we can do
+        return set()
+
+
+def _free_port(port: int) -> None:
+    """We started the app on this port, so whatever still listens there is ours: a shell that exited first leaves
+    its server running (a leftover kept workspace/badshop locked and failed 8 tests, Oct 17)."""
+    for pid in _port_owners(port) - {os.getpid()}:
+        if os.name == "nt":
+            subprocess.run(["taskkill", "/T", "/F", "/PID", str(pid)], capture_output=True)
+        else:
+            with contextlib.suppress(OSError):
+                os.kill(pid, signal.SIGTERM)
+
+
 def _wait_ready(url: str, proc: subprocess.Popen | None, timeout: float) -> None:
     deadline = time.monotonic() + timeout
     while True:
@@ -128,5 +153,6 @@ def running_app(root: Path, port: int | None = None) -> Iterator[str]:
         yield url
     finally:
         _kill_tree(proc)
+        _free_port(port)
         if log is not subprocess.DEVNULL:
             log.close()

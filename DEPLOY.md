@@ -6,8 +6,9 @@ small free instance is enough.
 ## Render (free)
 
 1. On render.com: New > Blueprint > this repo. It reads `render.yaml` and builds `Dockerfile.server`.
-2. Fill `PUBLIC_URL` (the service's https address), `ADMIN_LOGIN` (your GitHub username), `NEBIUS_API_KEY`, and
-   `DATABASE_URL` from a free Postgres (Neon or Supabase). The image already includes the Postgres driver.
+2. Fill `ADMIN_LOGIN` (your GitHub username), `NEBIUS_API_KEY`, and `DATABASE_URL` from a free Postgres (Neon or
+   Supabase). The image already includes the Postgres driver. The service's address comes from Render itself
+   (`RENDER_EXTERNAL_URL`); elsewhere, set `PUBLIC_URL` to the https address.
 3. Open `PUBLIC_URL/setup/github-app`: GitHub creates the App from a manifest in one click. On a host that
    restarts from scratch, copy the saved values into `GITHUB_APP_ID`, `GITHUB_APP_SLUG`, `GITHUB_APP_PRIVATE_KEY`,
    `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET`, then redeploy.

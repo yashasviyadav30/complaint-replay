@@ -41,7 +41,7 @@ docker compose up          # API, dashboard, widget and the built-in demo shop o
 ```
 
 Hosting it for a team: see [DEPLOY.md](DEPLOY.md) (a free Render blueprint and a slim image with no browser inside).
-SQLite by default; set `DATABASE_URL=postgresql://...` for Postgres. Set `PUBLIC_URL` to the address GitHub Actions can reach. GitHub login and per-repo installs need a GitHub App: open `/setup/github-app` and GitHub creates one from a manifest in one click (or set `GITHUB_APP_*` and `GITHUB_CLIENT_*`).
+SQLite by default; set `DATABASE_URL=postgresql://...` for Postgres. Set `PUBLIC_URL` to the address GitHub Actions can reach (on Render it is set for you). GitHub login and per-repo installs need a GitHub App: open `/setup/github-app` and GitHub creates one from a manifest in one click (or set `GITHUB_APP_*` and `GITHUB_CLIENT_*`).
 
 ### Or use the command line
 

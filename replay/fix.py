@@ -26,7 +26,9 @@ Rules:
 - Fix the cause, not the symptom: do not hide error messages or delete checks.
 - Change the app's own code. Never edit tests, mocks or test setup: they judge the fix.
 - If the evidence is about how one control behaves (a picker that does not open, a typed value that is lost, a wrong
-  option chosen) and a shared component draws that control, fix the shared component, not the one screen using it."""
+  option chosen) and a shared component draws that control, fix the shared component, not the one screen using it.
+- Likewise, when a shared helper loses or mangles a value (a typed amount gone after another field changes), fix
+  the helper, not by skipping it in one caller: every caller needs the fix."""
 
 
 # Reasoning is on for the fixer, and on a big repo it used all of 12k tokens before writing a patch (Actual,
