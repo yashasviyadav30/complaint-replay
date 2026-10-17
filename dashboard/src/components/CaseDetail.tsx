@@ -84,7 +84,7 @@ function Heard({ lines }: { lines: string[] }) {
           {speaking ? "Stop" : "Listen"}
         </button>
       )}
-      <ol translate="no" className="grid max-h-64 gap-1 overflow-y-auto rounded-lg border border-line bg-surface-2 p-3 font-mono text-[12px] text-ink">
+      <ol translate="no" tabIndex={0} aria-label="Screen reader transcript" className="grid max-h-64 gap-1 overflow-y-auto rounded-lg border border-line bg-surface-2 p-3 font-mono text-[12px] text-ink">
         {lines.map((l, i) => <li key={i}>{l}</li>)}
       </ol>
     </>
