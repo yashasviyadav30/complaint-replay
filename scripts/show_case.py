@@ -10,6 +10,8 @@ import sys
 case = json.load(open(sys.argv[1], encoding="utf-8"))
 replay, fix = case.get("replay", {}), case.get("fix", {})
 print("stage", case.get("stage"), "| steps", len(replay.get("steps", [])), "|", (replay.get("summary") or "")[:220])
+if case.get("error"):
+    print("  error", case["error"])
 for e in replay.get("evidence", []):
     if e["id"] in replay.get("cited", []):
         print("  cited", e["kind"], e["detail"][:170])

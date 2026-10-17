@@ -27,7 +27,7 @@ from replay.project import running_app  # noqa: E402
 CASES = ROOT / "benchmarks" / "real-bugs.json"
 REPORT = ROOT / "benchmarks" / "real-bugs.md"
 OUT = ROOT / "results" / "real-bugs"
-CASE_TIMEOUT_S = 80 * 60  # two fix rounds on a free, slow endpoint: case 8733 ran out at 45 min (run 10)
+CASE_TIMEOUT_S = 95 * 60  # two fix rounds on a free, slow endpoint: 8733 ran out at 45 min (run 10), at 80 (run 14)
 NOT_SOURCE = ("test", "e2e", "stories", "upcoming-release-notes", "__snapshots__")
 
 
@@ -94,12 +94,18 @@ async def main() -> None:
     for spec in specs:
         files = fix_files(repo, spec["commit"])
         started = time.monotonic()
+        saved = OUT / f"pr{spec['pr']}.json"  # run_case saves its progress here as it goes
+        saved.unlink(missing_ok=True)
         print(f"pr{spec['pr']}: re-creating the bug in {', '.join(files)}", flush=True)
         try:
             unfix(repo, spec["commit"], files)
             case = await run_case(repo, spec, client, chat)
-        except Exception as e:  # a crash is a result too: it goes in the table
-            case = {"stage": "error", "error": str(e)[:300], "condition": {"label": spec["user"].get("device", "desktop")}}
+        except Exception as e:  # a crash is a result too: it goes in the table, with how far the case got
+            # Run 14: 8733 hit the time limit with an empty error ("" is str(TimeoutError())) and its progress lost.
+            last = json.loads(saved.read_text(encoding="utf-8")) if saved.exists() else {}
+            reason = f"timed out after {CASE_TIMEOUT_S // 60} min" if isinstance(e, TimeoutError) else (str(e) or repr(e))
+            case = {**last, "stage": "error", "error": f"{reason} (last stage: {last.get('stage', 'heard')})"[:300],
+                    "condition": last.get("condition") or {"label": spec["user"].get("device", "desktop")}}
             print(f"  pr{spec['pr']}: error {e!r}", flush=True)
         finally:
             restore(repo, files)
