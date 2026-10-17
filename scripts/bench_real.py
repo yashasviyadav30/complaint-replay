@@ -129,6 +129,11 @@ def write_report(repo: Path | None) -> None:
         f"**Solved {sum('**yes**' in r for r in rows)} of {len(rows)}.** Solved means fixed and guarded AND our fix edited "
         "a file the real fix edited. A \"fixed\" with a different file is counted as a miss: the guard may have "
         "proven the wrong thing.", "",
+        # A second, looser number, defined before it is read: the guard (the user's own steps, replayed by code)
+        # passes on our fix and fails on the bug, whatever file the fix is in. The diff is in each case's result.
+        f"**Fixed and guarded in any file: {sum('| guarded |' in r for r in rows)} of {len(rows)}.** The user's steps, "
+        "replayed by code, show the bug on the old code and not on ours; our fix may differ from the upstream one, "
+        "so read its diff before trusting it.", "",
         "| Upstream fix | Complaint | User | Result | Proof (evidence kinds) | Same file as real fix | Solved | Time |",
         "|---|---|---|---|---|---|---|---|", *rows, "",
         "## What each case needs (our reading of the misses, not a measurement)", "",
