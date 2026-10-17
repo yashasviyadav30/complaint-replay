@@ -5,6 +5,9 @@ Read this first in a new session. The plan is `plan.md` (phases, gates, cut list
 
 ## START HERE (written Oct 17 evening, end of the long session c15f4155)
 
+If a detail is missing here, the full transcript of that session (≈209 MB, JSON lines; search it with grep, never
+read it whole) is `~/.claude/projects/C--Users-yasha-Downloads-Nebius-x-NVIDIA-Global-AI-Hackathon/c15f4155-4d0f-4d91-a968-a421246165b9.jsonl`.
+
 **How to work with this user** (also in memory files, which load automatically):
 - Reply in English only (user writes Hinglish). IELTS rule: if *their own* sentence has a real grammar error, one line
   "✏️ Corrected: ..." then `---`, then the answer. Plain English everywhere (see `~/.claude/CLAUDE.md`).
