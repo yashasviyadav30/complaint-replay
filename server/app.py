@@ -57,7 +57,7 @@ MAX_BODY_BYTES = 64_000  # a widget report is a few kB; anything far bigger is n
 CASE_TOKEN_S = 24 * 3600
 MAX_DAILY_REPLAYS = int(os.getenv("MAX_DAILY_REPLAYS", "50"))  # per project: model calls and CI minutes cost money
 LOOPBACK = {"127.0.0.1", "::1", "localhost", "testclient"}
-SHOT_NAME = re.compile(r"[\w.-]{1,120}\.(png|jpe?g)")
+SHOT_NAME = re.compile(r"[\w.-]{1,120}\.(png|jpe?g|gif)")  # gif: the replay films
 TIMEZONES = available_timezones()
 # What the person who complained is told, by stage. The widget shows these in the user's language.
 PUBLIC_STATUS = {
@@ -269,7 +269,7 @@ def sweep_once() -> None:
             for doc in store.all(kind, project=project["id"]):
                 if doc.get("created_at", now()) < cutoff:
                     store.delete(kind, doc["id"])
-                    for shot in (doc.get("shots") or {}).values():
+                    for shot in [*(doc.get("shots") or {}).values(), *(doc.get("films") or {}).values()]:
                         (SHOTS_DIR / Path(str(shot)).name).unlink(missing_ok=True)  # never a path from outside
 
 
@@ -463,7 +463,14 @@ def report_status(report_id: str, token: str) -> dict:
     if not record or not secrets.compare_digest(record.get("status_token", "").encode(), token.encode()):
         raise HTTPException(404, "no such report")
     case = store.get("case", record["case"]) or {}
-    return {"status": PUBLIC_STATUS.get(case.get("stage", "heard"), "received"), "reports": case.get("reports", 1)}
+    status = PUBLIC_STATUS.get(case.get("stage", "heard"), "received")
+    out = {"status": status, "reports": case.get("reports", 1)}
+    # Once fixed, the reporter may watch their problem as the twin replayed it, then gone. Only films this server
+    # holds: the ones on a pull request branch may sit in a private repo.
+    films = {k: f"/shots/{v}" for k, v in (case.get("films") or {}).items() if (SHOTS_DIR / v).is_file()}
+    if status == "fixed" and films:
+        out["films"] = films
+    return out
 
 
 @app.get("/widget.js")
@@ -486,13 +493,15 @@ async def case_progress(case_id: str, request: Request) -> dict:
     update = json.loads(raw)
     if not isinstance(update, dict):
         raise HTTPException(422, "progress must be a JSON object")
-    for key in ("stage", "condition", "replay", "fix", "proof", "guard", "shots", "pr", "issue", "error"):
+    for key in ("stage", "condition", "replay", "fix", "proof", "guard", "shots", "films", "pr", "issue", "error"):
         if key in update:
             case[key] = update[key]
     # Anything shown as a link or used as a file name must be what it claims to be.
-    if not isinstance(case.get("shots"), dict) or not all(isinstance(v, str) and SHOT_NAME.fullmatch(v)
-                                                         for v in case["shots"].values()):
-        case.pop("shots", None)
+    for pics in ("shots", "films"):
+        named = case.get(pics) if isinstance(case.get(pics), dict) else {}
+        case[pics] = {k: v for k, v in named.items() if isinstance(v, str) and SHOT_NAME.fullmatch(v)}
+        if not case[pics]:
+            case.pop(pics)
     for link in ("pr", "issue"):
         if case.get(link) and not str(case[link]).startswith("https://github.com/"):
             case.pop(link)

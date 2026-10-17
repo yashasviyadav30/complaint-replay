@@ -160,3 +160,57 @@ def test_the_twin_is_refused_a_sixth_tap_on_the_same_control(tmp_path) -> None:
     with running_app(tmp_path) as url:
         asyncio.run(replay(url, "x", CONDITIONS["fast_desktop"], policy))
     assert any(r.startswith("error: not tapped. You already opened 'Upcoming' 5 times") for r in results)
+
+
+def test_a_number_from_a_closed_menu_is_named_and_does_not_cost_a_step(tmp_path) -> None:
+    import asyncio
+
+    from replay.agent import replay
+    from replay.conditions import CONDITIONS
+    from replay.project import running_app
+
+    # Cloud case 9107 (run 13): the twin tapped [32] from a closed menu five times, each a wasted step.
+    (tmp_path / "index.html").write_text(
+        "<button onclick=\"m.hidden=false\">Menu</button>"
+        "<div id=m hidden><button onclick=\"m.hidden=true\">Show reconciled</button></div>", encoding="utf-8")
+    results = []
+
+    async def policy(ctx: dict) -> dict:
+        results.append(ctx["last_result"])
+        return [{"type": "click", "target": 0}, {"type": "click", "target": 1},
+                {"type": "click", "target": 1}][len(results) - 1] if len(results) < 4 else {"type": "verdict"}
+
+    with running_app(tmp_path) as url:
+        result = asyncio.run(replay(url, "x", CONDITIONS["fast_desktop"], policy))
+    assert "'Show reconciled'" in results[3] and "Menu" in results[3]
+    assert len(result.steps) == 2
+
+
+def test_a_screen_reader_replay_keeps_what_the_user_heard(tmp_path) -> None:
+    import asyncio
+
+    from replay.agent import replay, spoken
+    from replay.conditions import CONDITIONS
+    from replay.project import running_app
+
+    (tmp_path / "index.html").write_text('<h2>Cart</h2><button>1</button><img src="x.png"><a href="/">Home</a>'
+                                         '<ul><li>Apples $3</li></ul><label>Qty <input value=2></label>', encoding="utf-8")
+
+    async def policy(ctx: dict) -> dict:
+        return {"type": "verdict", "verdict": "not_reproduced"}
+
+    with running_app(tmp_path) as url:
+        heard = asyncio.run(replay(url, "x", CONDITIONS["screen_reader"], policy)).heard
+    assert list(heard) == ["Cart, heading level 2", "1, button", "image", "Home, link", "Apples $3", "Qty", "Qty, edit, 2"]
+    assert spoken('- checkbox "Gift" [checked]\n- button "Pay" [disabled]') == ["Gift, check box, checked",
+                                                                              "Pay, button, unavailable"]
+    assert asyncio.run(_sighted(tmp_path, policy)) == ()
+
+
+async def _sighted(root, policy) -> list:
+    from replay.agent import replay
+    from replay.conditions import CONDITIONS
+    from replay.project import running_app
+
+    with running_app(root) as url:
+        return (await replay(url, "x", CONDITIONS["fast_desktop"], policy)).heard

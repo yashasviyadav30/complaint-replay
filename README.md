@@ -12,7 +12,7 @@ Complaint Replay turns the complaint into a pull request:
 4. **Fixes** it: NVIDIA Nemotron reads the evidence and the relevant source files and writes the smallest fix.
 5. **Proves the fix**: the exact steps that triggered the bug run again on the fixed code, by code, no model.
 6. **Guards** it: those steps become a test that passes on the fix and fails on the old code, and runs in your CI on every pull request.
-7. **Closes the loop**: a pull request with the evidence, before/after screenshots and the guard; the person who complained sees "fixed" in the widget.
+7. **Closes the loop**: a pull request with the evidence, the guard and two short films (captioned GIFs of the user's steps: the bug, then the same steps on the fix); the person who complained sees "fixed" in the widget, with a link to watch it working.
 
 It runs inside **your own GitHub Actions**, so your source code never leaves your CI. Open source, Apache 2.0.
 
@@ -53,6 +53,7 @@ crp replay "الدفع لا يعمل" --user arabic --fix --pr               # r
 crp guard                                                      # run every guard test (what CI runs)
 crp auth --url https://staging.example.com                     # save a test login the twin reuses
 crp devices pixel                                              # 207 device profiles
+crp mcp                                                        # the same, as tools for coding agents (below)
 ```
 
 ## Works with the tools you already use
@@ -61,7 +62,7 @@ crp devices pixel                                              # 207 device prof
 - **Support desks**: forward tickets from Zendesk, Intercom or an email bridge to the project's inbox address with its secret.
 - **Sentry**: point an issue-alert webhook at the project's Sentry address; new errors arrive as silent signals.
 - **Team chat**: a Slack-compatible webhook (Slack, Mattermost, Discord) hears when a bug is proven, fixed, or needs a person.
-- **Coding agents**: when the automatic fix fails or doesn't hold, the proven bug becomes a GitHub issue with the evidence, the steps and the guard test as its acceptance check, ready for GitHub Copilot's coding agent or a teammate. It can also go to Linear or Jira (set `LINEAR_API_KEY` or the `JIRA_*` values in the repo; built to their documented APIs, not yet tried against live accounts).
+- **Coding agents**: when the automatic fix fails or doesn't hold, the proven bug becomes a GitHub issue with the evidence, the steps and the guard test as its acceptance check, ready for GitHub Copilot's coding agent or a teammate. Agents can also drive Complaint Replay directly over MCP: `claude mcp add complaint-replay -- crp mcp` (Claude Code; Cursor and others take the same command) gives them `replay_complaint`, `run_guards` and `find_devices`, so an agent can reproduce the bug as the user, change the code, and rerun the guard until it passes. Install with `uv tool install "complaint-replay[mcp] @ git+https://github.com/yashasviyadav30/complaint-replay"`. It can also go to Linear or Jira (set `LINEAR_API_KEY` or the `JIRA_*` values in the repo; built to their documented APIs, not yet tried against live accounts).
 - **Your own model**: set `REPLAY_BASE_URL` and `REPLAY_API_KEY` to use any OpenAI-compatible server (vLLM, NVIDIA NIM, Ollama) instead of Token Factory.
 
 Each project also has a kind of product. Government, health and education projects get accessibility checks for every user, strict masking of any long number, and no screenshots; payments projects get strict masking.

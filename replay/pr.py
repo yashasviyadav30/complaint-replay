@@ -64,6 +64,8 @@ def body(case: dict, image_url: str = "") -> str:
         "",
         "### Proof (collected by the browser, not written by a model)",
         *[f"- `{e['kind']}` {quoted(e['detail'])}" for e in cited],
+        *(["", "<details><summary>What a screen reader announces on that screen</summary>", "",
+           *[f"- {quoted(h)}" for h in rep["heard"][:40]], "", "</details>"] if rep.get("heard") else []),
         "",
         "### Steps that triggered it",
         *[f"{i + 1}. {s['action'].get('type')} " + (f"`{s['target']}`" if s.get("target") else "")

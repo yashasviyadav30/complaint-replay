@@ -1,4 +1,4 @@
-import { ArrowClockwise, GitPullRequest, X } from "@phosphor-icons/react";
+import { ArrowClockwise, GitPullRequest, SpeakerHigh, Stop, X } from "@phosphor-icons/react";
 import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { DEMO, replayCase, safeUrl, shotUrl } from "../api";
@@ -44,15 +44,50 @@ function Steps({ replay }: { replay: Replay }) {
   );
 }
 
-function Shot({ src, caption, base }: { src: string; caption: string; base?: string }) {
+/** A film (captioned GIF of the user's steps) when there is one; the still for reduced motion or as the fallback. */
+function Shot({ src, film, caption, base }: { src?: string; film?: string; caption: string; base?: string }) {
+  const main = shotUrl((film ?? src)!, base);
   return (
     <figure className="min-w-0">
-      <a href={shotUrl(src, base)} target="_blank" rel="noreferrer">
-        <img src={shotUrl(src, base)} alt={caption} loading="lazy" width={640} height={400}
-          className="max-h-96 w-full rounded-lg border border-line bg-surface-2 object-contain object-top" />
+      <a href={main} target="_blank" rel="noreferrer">
+        <picture>
+          {film && src && <source media="(prefers-reduced-motion: reduce)" srcSet={shotUrl(src, base)} />}
+          <img src={main} alt={caption} loading="lazy" width={640} height={400}
+            className="max-h-96 w-full rounded-lg border border-line bg-surface-2 object-contain object-top" />
+        </picture>
       </a>
-      <figcaption className="mt-1.5 text-xs text-muted">{caption}</figcaption>
+      <figcaption className="mt-1.5 text-xs text-muted">{caption}{film && " · replayed step by step"}</figcaption>
     </figure>
+  );
+}
+
+/** The screen as a blind user meets it, read aloud by the browser's own voice: hearing "1, button" lands harder. */
+function Heard({ lines }: { lines: string[] }) {
+  const [speaking, setSpeaking] = useState(false);
+  const canSpeak = typeof window !== "undefined" && "speechSynthesis" in window;
+  useEffect(() => () => { if (canSpeak) window.speechSynthesis.cancel(); }, [canSpeak]);
+  const toggle = () => {
+    window.speechSynthesis.cancel();
+    if (speaking) return setSpeaking(false);
+    const say = new SpeechSynthesisUtterance(lines.join(". "));
+    say.rate = 1.15; // screen-reader users listen fast; this is still slower than most
+    say.onend = say.onerror = () => setSpeaking(false);
+    window.speechSynthesis.speak(say);
+    setSpeaking(true);
+  };
+  return (
+    <>
+      {canSpeak && (
+        <button type="button" onClick={toggle}
+          className="mb-3 inline-flex items-center gap-2 rounded-lg border border-line px-4 py-2 text-sm text-ink hover:bg-surface-2">
+          {speaking ? <Stop size={16} aria-hidden="true" /> : <SpeakerHigh size={16} aria-hidden="true" />}
+          {speaking ? "Stop" : "Listen"}
+        </button>
+      )}
+      <ol translate="no" className="grid max-h-64 gap-1 overflow-y-auto rounded-lg border border-line bg-surface-2 p-3 font-mono text-[12px] text-ink">
+        {lines.map((l, i) => <li key={i}>{l}</li>)}
+      </ol>
+    </>
   );
 }
 
@@ -143,12 +178,20 @@ export function CaseDetail({ c, onClose }: { c: Case; onClose: () => void }) {
             </Section>
           )}
 
-          {c.shots?.before && (
+          {(c.shots?.before || c.films?.before) && (
             <Section title="What the user saw">
               <div className="grid gap-3 sm:grid-cols-2">
-                <Shot src={c.shots.before} base={c.shot_base} caption="When the bug was proven" />
-                {c.shots.after && c.stage !== "fix_unproven" && <Shot src={c.shots.after} base={c.shot_base} caption="Same user, on the fixed code" />}
+                <Shot src={c.shots?.before} film={c.films?.before} base={c.shot_base} caption="When the bug was proven" />
+                {(c.shots?.after || c.films?.after) && c.stage !== "fix_unproven" && (
+                  <Shot src={c.shots?.after} film={c.films?.after} base={c.shot_base} caption="Same user, on the fixed code" />
+                )}
               </div>
+            </Section>
+          )}
+
+          {c.replay?.heard && c.replay.heard.length > 0 && (
+            <Section title="What a screen reader user hears">
+              <Heard lines={c.replay.heard} />
             </Section>
           )}
 

@@ -102,6 +102,22 @@ def test_action_progress_needs_the_case_token(client) -> None:
     assert status["status"] == "fixed"
 
 
+def test_the_reporter_sees_the_film_of_their_problem_once_it_is_fixed(client, tmp_path, monkeypatch) -> None:
+    monkeypatch.setattr(srv, "SHOTS_DIR", tmp_path)
+    r = client.post("/api/v1/reports", json={"project": "demo", "kind": "spoken", "text": "Pay missing", "env": ENV})
+    case_id, token = r.json()["id"], r.json()["token"]
+    (tmp_path / "c-before.gif").write_bytes(b"GIF89a")  # "after" was never made: no link to a missing file
+    films = {"before": "c-before.gif", "after": "c-after.gif", "evil": "../../db.sqlite"}
+    client.post(f"/api/v1/cases/{case_id}/progress", json={"stage": "fixing", "films": films},
+                headers={"Authorization": f"Bearer {srv.case_token(case_id)}"})
+    assert "evil" not in client.get(f"/api/v1/cases/{case_id}").json().get("films", {})
+    assert "films" not in client.get(f"/api/v1/reports/{case_id}", params={"token": token}).json()
+    client.post(f"/api/v1/cases/{case_id}/progress", json={"stage": "guarded"},
+                headers={"Authorization": f"Bearer {srv.case_token(case_id)}"})
+    status = client.get(f"/api/v1/reports/{case_id}", params={"token": token}).json()
+    assert status["films"] == {"before": "/shots/c-before.gif"}
+
+
 def test_a_running_investigation_does_not_wipe_merged_reports(client) -> None:
     in_memory = {"id": "c1", "project": "demo", "stage": "reproducing"}  # the investigation's own copy
     srv.save_case(dict(in_memory))

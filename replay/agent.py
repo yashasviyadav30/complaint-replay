@@ -1,8 +1,9 @@
 """The replay loop: observe -> policy picks one action -> act, until a verdict."""
 
 import json
+import re
 from collections.abc import Awaitable, Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 from replay.film import describe, write_gif
@@ -27,6 +28,42 @@ class ReplayResult:
     cited: tuple[str, ...]
     evidence: tuple[Evidence, ...]
     steps: tuple[dict, ...]
+    heard: tuple[str, ...] = ()  # screen-reader users: what the last screen announces, in screen-reader words
+
+
+# Roughly how screen readers name roles and states; structure with no words of its own is not spoken.
+ROLE_WORDS = {"img": "image", "textbox": "edit", "combobox": "combo box", "checkbox": "check box",
+              "radio": "radio button", "searchbox": "search edit", "spinbutton": "spin button"}
+STATE_WORDS = {"disabled": "unavailable", "checked": "checked", "expanded": "expanded", "pressed": "pressed",
+               "selected": "selected", "required": "required"}
+SILENT = {"list", "group", "generic", "none", "presentation", "rowgroup", "table", "row", "main", "navigation",
+          "banner", "contentinfo", "region", "form", "article", "section"}
+ARIA_LINE = re.compile(r'^(?P<role>[a-z]+)(?: "(?P<name>(?:[^"\\]|\\.)*)")?(?P<attrs>(?: \[[^\]]+\])*)'
+                       r'(?::\s*(?P<val>.*))?$')
+
+
+def spoken(aria: str, limit: int = 80) -> list[str]:
+    """A Playwright aria snapshot as a screen reader would read it out: '1, button', 'image', 'Cart, heading level 2'."""
+    said = []
+    for raw in aria.splitlines():
+        m = ARIA_LINE.match(raw.strip().removeprefix("- "))
+        if not m:
+            continue
+        role, name, val = m["role"], m["name"] or "", (m["val"] or "").strip().strip('"')
+        words = []
+        for attr in re.findall(r"\[([^\]]+)\]", m["attrs"] or ""):
+            key, _, level = attr.partition("=")
+            words.append(f"level {level}" if key == "level" else STATE_WORDS.get(key, ""))
+        if role in ("text", "paragraph", "listitem", "cell", "gridcell", "option") and not name:
+            if val:
+                said.append(val)
+            continue
+        if role in SILENT and not name:
+            continue
+        role_said = " ".join([ROLE_WORDS.get(role, role)] + [w for w in words if w.startswith("level")])
+        said.append(", ".join(x for x in [name, role_said, *[w for w in words if w and not w.startswith("level")],
+                                          val] if x))
+    return said[:limit]
 
 
 def judge(action: dict, evidence: list[Evidence], steps: list[dict]) -> ReplayResult:
@@ -65,6 +102,11 @@ async def replay(base_url: str, complaint: str, condition: Condition, policy: Po
             await snap(session, frames, f"Found: {found[0]}" if found else f"Not reproduced. {result.summary[:140]}",
                        "alert" if found else "")
             write_gif(frames, film)
+        if condition.screen_reader:
+            try:
+                result = replace(result, heard=tuple(spoken(await session.page.locator("body").aria_snapshot())))
+            except Exception:  # a transcript is a nice-to-have, like a film frame
+                pass
         return result
 
 
@@ -95,9 +137,11 @@ async def _drive(session: Session, complaint: str, condition: Condition, policy:
     last_result = "(page just opened)"
     judged = 0
     prev_view = None
+    seen: dict[int, str] = {}  # control number -> its name when last on screen
     # Keyboard users need many more presses than a tap to reach the same control (cloud case 8570 ran out of steps).
     for step in range(condition.max_steps * (2 if condition.keyboard_only else 1)):
         obs = await session.observe()
+        seen.update({e["idx"]: e["label"] for e in obs.get("elements", [])})
         if not visited or visited[-1] != obs["url"]:
             visited.append(obs["url"])
         view = page_signature(obs)
@@ -134,7 +178,13 @@ async def _drive(session: Session, complaint: str, condition: Condition, policy:
                            "summary": str(action.get("summary", "")) + " [The judge found no evidence of this problem.]"})
             return judge(action, session.evidence, steps)
         label = next((e["label"] for e in obs.get("elements", []) if e["idx"] == action.get("target")), None)
-        taps = sum(1 for s in steps if s.get("target") == label and s["action"].get("type") == "click") if label else 0
+        if action.get("type") in ("click", "fill") and label is None and action.get("target") in seen:
+            # Cloud case 9107 (run 13): five taps on [32] from a menu that had closed, each a wasted step.
+            here = [f"[{e['idx']}] {e['label']}" for e in obs.get("elements", [])][:12]
+            last_result = (f"error: not tapped. [{action['target']}] was '{seen[action['target']]}' on an earlier screen; "
+                           f"it is not on this one (a menu or dialog closed). Controls here now: {', '.join(here)}")
+            continue
+        taps =sum(1 for s in steps if s.get("target") == label and s["action"].get("type") == "click") if label else 0
         if action.get("type") == "click" and taps >= BLOCK_LIMIT:
             # Notes alone did not stop it: cloud case 9064 (run 9) reopened one scheduled payment eleven times.
             last_result = (f"error: not tapped. You already opened '{label}' {taps} times and it is not what you need; "

@@ -24,6 +24,9 @@ crp = "replay.cli:main"
 postgres = [
     "psycopg[binary]>=3.2",
 ]
+mcp = [
+    "mcp>=2.3",
+]
 
 [build-system]
 requires = ["hatchling>=1.27"]
@@ -37,5 +40,6 @@ pythonpath = ["."]
 
 [dependency-groups]
 dev = [
+    "mcp>=2.3",  # tests/test_mcp.py
     "pytest>=9.1.1",
 ]

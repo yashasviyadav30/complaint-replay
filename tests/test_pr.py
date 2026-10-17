@@ -82,3 +82,10 @@ def test_pr_body_plays_the_before_and_after_films() -> None:
             "films": {"before": "c-before.gif", "after": "c-after.gif"}}
     text = body(case, image_url="https://github.com/o/r/blob/b/.complaint-replay/shots")
     assert "c-before.gif?raw=true" in text and "c-after.gif?raw=true" in text and "c-before.png" not in text
+
+
+def test_pr_body_quotes_what_the_screen_reader_announced() -> None:
+    case = {**CASE, "replay": {**CASE["replay"], "heard": ["1, button", "<script>, link"]}}
+    text = body(case)
+    assert "What a screen reader announces" in text and "- 1, button" in text and "&lt;script>, link" in text
+    assert "screen reader" not in body(CASE)

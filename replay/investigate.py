@@ -35,7 +35,7 @@ def as_dict(r: ReplayResult) -> dict:
     return {
         "verdict": r.verdict, "summary": r.summary, "cited": list(r.cited),
         "evidence": [{"id": e.id, "kind": e.kind, "detail": e.detail, "step": e.step} for e in r.evidence],
-        "steps": list(r.steps),
+        "steps": list(r.steps), **({"heard": list(r.heard)} if r.heard else {}),
     }
 
 
@@ -122,6 +122,8 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
     stage("reproducing")
     before = await replay(live_url, complaint, cond, policy, matcher, shot("before"), film=film("before"), **target)
     case["replay"] = as_dict(before)
+    if not shots:  # projects that keep no screenshots keep no transcript of the screen either
+        case["replay"].pop("heard", None)
     if before.verdict != "reproduced":
         stage(before.verdict)
         return case
@@ -154,11 +156,12 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
                 errors.append(rejected)
         else:
             case["fix"] = {"model": fix_model, "explanation": patch.explanation if patch else "", "error": rejected,
-                           "errors": errors, "edits": list(patch.edits) if patch else []}  # what it tried
+                           "errors": errors, "edits": list(patch.edits) if patch else [],
+                           "shown": list(patch.shown) if patch else []}  # what it tried
             stage("fix_failed")
             return case
         case["fix"] = {"model": fix_model, "explanation": patch.explanation, "diff": diff, "edits": list(patch.edits),
-                       "sources": [{"title": s["title"], "url": s["url"]} for s in sources]}
+                       "shown": list(patch.shown), "sources": [{"title": s["title"], "url": s["url"]} for s in sources]}
 
         # Proof and guard are one thing: the exact steps that triggered the bug, replayed by code, no model.
         # A fresh model-driven proof replay once "proved" a fix by never reaching the broken screen at all.

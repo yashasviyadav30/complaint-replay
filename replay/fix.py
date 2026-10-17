@@ -24,7 +24,9 @@ Rules:
 - Make the smallest change that fixes the root cause for this user. Do not touch unrelated code.
 - "find" must be copied exactly from the file and appear exactly once in it.
 - Fix the cause, not the symptom: do not hide error messages or delete checks.
-- Change the app's own code. Never edit tests, mocks or test setup: they judge the fix."""
+- Change the app's own code. Never edit tests, mocks or test setup: they judge the fix.
+- If the evidence is about how one control behaves (a picker that does not open, a typed value that is lost, a wrong
+  option chosen) and a shared component draws that control, fix the shared component, not the one screen using it."""
 
 
 # Reasoning is on for the fixer, and on a big repo it used all of 12k tokens before writing a patch (Actual,
@@ -36,6 +38,7 @@ FIX_MAX_TOKENS = 32000
 class Patch:
     explanation: str
     edits: tuple[dict, ...]
+    shown: tuple[str, ...] = ()  # the source files the model saw, so a miss can say whether the right one was there
 
 
 def fix_clues(result: ReplayResult) -> list[str]:
@@ -94,7 +97,7 @@ async def propose_fix(client: AsyncOpenAI, model: str, complaint: str, condition
     if not choice.message.content and choice.finish_reason == "length":
         raise ValueError(f"the reply ran out of tokens ({FIX_MAX_TOKENS}) while reasoning, before writing the patch")
     data = parse_json(choice.message.content or "")
-    return Patch(str(data.get("explanation", "")), tuple(data.get("edits", [])))
+    return Patch(str(data.get("explanation", "")), tuple(data.get("edits", [])), tuple(files))
 
 
 # Files a fix may never change, whatever the model says: they control what runs in CI and with which secrets.

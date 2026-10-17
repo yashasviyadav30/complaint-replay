@@ -14,6 +14,8 @@ export interface Replay {
   cited: string[];
   evidence: Evidence[];
   steps: Step[];
+  /** Screen-reader users: what the last screen announces, in screen-reader words. */
+  heard?: string[];
 }
 
 /** The fix proven by replaying the exact steps on the fixed code (older cases hold a full Replay instead). */
@@ -36,6 +38,7 @@ export interface Case {
   fix?: { model: string; explanation: string; diff?: string; error?: string; sources?: { title: string; url: string }[] };
   proof?: Proof | Replay;
   shots?: { before?: string; after?: string };
+  films?: { before?: string; after?: string };
   shot_base?: string;
   guard?: { file: string; steps: number; passes_on_fix: boolean; catches_bug: boolean };
   pr?: string;

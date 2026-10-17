@@ -19,39 +19,39 @@
   // UI text. Machine-assisted translations: native speakers, please send corrections.
   const T = {
     en: ["Report a problem", "What went wrong?", "Tell us in your own words…", "Send", "Thanks, we're on it", "Close",
-         "Your last report", { received: "Received", checking: "We're trying it the way you did", found: "We found the problem", fixing: "A fix is being made", fixed: "Fixed. It will reach you with the next update", not_reproduced: "We couldn't make it happen yet. The team will look" }],
+         "Your last report", { received: "Received", checking: "We're trying it the way you did", found: "We found the problem", fixing: "A fix is being made", fixed: "Fixed. It will reach you with the next update", not_reproduced: "We couldn't make it happen yet. The team will look", watch: "Watch it working now" }],
     hi: ["समस्या बताएँ", "क्या गड़बड़ हुई?", "अपने शब्दों में बताइए", "भेजें", "धन्यवाद, हम देख रहे हैं", "बंद करें",
-         "आपकी पिछली शिकायत", { received: "मिल गई", checking: "हम इसे आपकी तरह आज़मा रहे हैं", found: "हमें समस्या मिल गई", fixing: "इसे ठीक किया जा रहा है", fixed: "ठीक हो गया। अगले अपडेट में आप तक पहुँचेगा", not_reproduced: "अभी तक दोहरा नहीं पाए। टीम देखेगी" }],
+         "आपकी पिछली शिकायत", { received: "मिल गई", checking: "हम इसे आपकी तरह आज़मा रहे हैं", found: "हमें समस्या मिल गई", fixing: "इसे ठीक किया जा रहा है", fixed: "ठीक हो गया। अगले अपडेट में आप तक पहुँचेगा", not_reproduced: "अभी तक दोहरा नहीं पाए। टीम देखेगी", watch: "अब इसे ठीक चलते हुए देखें" }],
     ar: ["الإبلاغ عن مشكلة", "ما الذي حدث؟", "أخبرنا بكلماتك", "إرسال", "شكرًا، نحن نعمل على ذلك", "إغلاق",
-         "بلاغك الأخير", { received: "تم الاستلام", checking: "نجرّبها كما فعلت", found: "وجدنا المشكلة", fixing: "يجري إصلاحها", fixed: "تم الإصلاح. سيصلك مع التحديث القادم", not_reproduced: "لم نتمكن من تكرارها بعد. سيتابع الفريق" }],
+         "بلاغك الأخير", { received: "تم الاستلام", checking: "نجرّبها كما فعلت", found: "وجدنا المشكلة", fixing: "يجري إصلاحها", fixed: "تم الإصلاح. سيصلك مع التحديث القادم", not_reproduced: "لم نتمكن من تكرارها بعد. سيتابع الفريق", watch: "شاهده وهو يعمل الآن" }],
     ur: ["مسئلہ بتائیں", "کیا خرابی ہوئی؟", "اپنے الفاظ میں بتائیں", "بھیجیں", "شکریہ، ہم دیکھ رہے ہیں", "بند کریں",
-         "آپ کی پچھلی شکایت", { received: "موصول ہو گئی", checking: "ہم اسے آپ کی طرح آزما رہے ہیں", found: "ہمیں مسئلہ مل گیا", fixing: "اسے ٹھیک کیا جا رہا ہے", fixed: "ٹھیک ہو گیا۔ اگلی اپڈیٹ میں آپ تک پہنچے گا", not_reproduced: "ابھی دہرا نہیں سکے۔ ٹیم دیکھے گی" }],
+         "آپ کی پچھلی شکایت", { received: "موصول ہو گئی", checking: "ہم اسے آپ کی طرح آزما رہے ہیں", found: "ہمیں مسئلہ مل گیا", fixing: "اسے ٹھیک کیا جا رہا ہے", fixed: "ٹھیک ہو گیا۔ اگلی اپڈیٹ میں آپ تک پہنچے گا", not_reproduced: "ابھی دہرا نہیں سکے۔ ٹیم دیکھے گی", watch: "اب اسے ٹھیک چلتا دیکھیں" }],
     bn: ["সমস্যা জানান", "কী সমস্যা হয়েছে?", "নিজের ভাষায় লিখুন", "পাঠান", "ধন্যবাদ, আমরা দেখছি", "বন্ধ করুন",
-         "আপনার শেষ অভিযোগ", { received: "পেয়েছি", checking: "আপনার মতো করে চেষ্টা করছি", found: "সমস্যাটি পেয়েছি", fixing: "ঠিক করা হচ্ছে", fixed: "ঠিক হয়েছে। পরের আপডেটে পাবেন", not_reproduced: "এখনও ঘটাতে পারিনি। টিম দেখবে" }],
+         "আপনার শেষ অভিযোগ", { received: "পেয়েছি", checking: "আপনার মতো করে চেষ্টা করছি", found: "সমস্যাটি পেয়েছি", fixing: "ঠিক করা হচ্ছে", fixed: "ঠিক হয়েছে। পরের আপডেটে পাবেন", not_reproduced: "এখনও ঘটাতে পারিনি। টিম দেখবে", watch: "এখন এটি ঠিকভাবে চলতে দেখুন" }],
     ta: ["சிக்கலைத் தெரிவிக்க", "என்ன தவறு நடந்தது?", "உங்கள் சொற்களில் சொல்லுங்கள்", "அனுப்பு", "நன்றி, கவனிக்கிறோம்", "மூடு",
-         "உங்கள் கடைசி புகார்", { received: "பெறப்பட்டது", checking: "நீங்கள் செய்தது போல் முயல்கிறோம்", found: "சிக்கலைக் கண்டோம்", fixing: "சரிசெய்யப்படுகிறது", fixed: "சரிசெய்யப்பட்டது. அடுத்த புதுப்பிப்பில் வரும்", not_reproduced: "இன்னும் மீண்டும் நிகழ்த்த முடியவில்லை. குழு பார்க்கும்" }],
+         "உங்கள் கடைசி புகார்", { received: "பெறப்பட்டது", checking: "நீங்கள் செய்தது போல் முயல்கிறோம்", found: "சிக்கலைக் கண்டோம்", fixing: "சரிசெய்யப்படுகிறது", fixed: "சரிசெய்யப்பட்டது. அடுத்த புதுப்பிப்பில் வரும்", not_reproduced: "இன்னும் மீண்டும் நிகழ்த்த முடியவில்லை. குழு பார்க்கும்", watch: "இப்போது சரியாக வேலை செய்வதைப் பாருங்கள்" }],
     es: ["Informar de un problema", "¿Qué salió mal?", "Cuéntanoslo con tus palabras", "Enviar", "Gracias, ya lo estamos viendo", "Cerrar",
-         "Tu último aviso", { received: "Recibido", checking: "Lo estamos probando como tú", found: "Encontramos el problema", fixing: "Se está preparando el arreglo", fixed: "Arreglado. Te llegará con la próxima actualización", not_reproduced: "Aún no logramos repetirlo. El equipo lo revisará" }],
+         "Tu último aviso", { received: "Recibido", checking: "Lo estamos probando como tú", found: "Encontramos el problema", fixing: "Se está preparando el arreglo", fixed: "Arreglado. Te llegará con la próxima actualización", not_reproduced: "Aún no logramos repetirlo. El equipo lo revisará", watch: "Míralo funcionar ahora" }],
     pt: ["Relatar um problema", "O que deu errado?", "Conte com suas palavras", "Enviar", "Obrigado, já estamos vendo", "Fechar",
-         "Seu último relato", { received: "Recebido", checking: "Estamos testando do seu jeito", found: "Encontramos o problema", fixing: "A correção está sendo feita", fixed: "Corrigido. Chega na próxima atualização", not_reproduced: "Ainda não conseguimos repetir. A equipe vai olhar" }],
+         "Seu último relato", { received: "Recebido", checking: "Estamos testando do seu jeito", found: "Encontramos o problema", fixing: "A correção está sendo feita", fixed: "Corrigido. Chega na próxima atualização", not_reproduced: "Ainda não conseguimos repetir. A equipe vai olhar", watch: "Veja funcionando agora" }],
     fr: ["Signaler un problème", "Qu'est-ce qui n'a pas marché ?", "Dites-le avec vos mots", "Envoyer", "Merci, on s'en occupe", "Fermer",
-         "Votre dernier signalement", { received: "Reçu", checking: "Nous essayons comme vous", found: "Nous avons trouvé le problème", fixing: "Un correctif est en cours", fixed: "Corrigé. Il arrivera avec la prochaine mise à jour", not_reproduced: "Pas encore reproduit. L'équipe va regarder" }],
+         "Votre dernier signalement", { received: "Reçu", checking: "Nous essayons comme vous", found: "Nous avons trouvé le problème", fixing: "Un correctif est en cours", fixed: "Corrigé. Il arrivera avec la prochaine mise à jour", not_reproduced: "Pas encore reproduit. L'équipe va regarder", watch: "Voyez-le fonctionner maintenant" }],
     de: ["Problem melden", "Was ist schiefgelaufen?", "Erzähl es in deinen Worten", "Senden", "Danke, wir kümmern uns", "Schließen",
-         "Deine letzte Meldung", { received: "Erhalten", checking: "Wir probieren es so wie du", found: "Wir haben das Problem gefunden", fixing: "Eine Korrektur entsteht", fixed: "Behoben. Kommt mit dem nächsten Update", not_reproduced: "Noch nicht nachgestellt. Das Team schaut es sich an" }],
+         "Deine letzte Meldung", { received: "Erhalten", checking: "Wir probieren es so wie du", found: "Wir haben das Problem gefunden", fixing: "Eine Korrektur entsteht", fixed: "Behoben. Kommt mit dem nächsten Update", not_reproduced: "Noch nicht nachgestellt. Das Team schaut es sich an", watch: "Sieh es dir jetzt funktionierend an" }],
     id: ["Laporkan masalah", "Apa yang salah?", "Ceritakan dengan kata-kata Anda", "Kirim", "Terima kasih, sedang kami tangani", "Tutup",
-         "Laporan terakhir Anda", { received: "Diterima", checking: "Kami mencobanya seperti Anda", found: "Kami menemukan masalahnya", fixing: "Perbaikan sedang dibuat", fixed: "Sudah diperbaiki. Hadir di pembaruan berikutnya", not_reproduced: "Belum bisa kami ulangi. Tim akan memeriksa" }],
+         "Laporan terakhir Anda", { received: "Diterima", checking: "Kami mencobanya seperti Anda", found: "Kami menemukan masalahnya", fixing: "Perbaikan sedang dibuat", fixed: "Sudah diperbaiki. Hadir di pembaruan berikutnya", not_reproduced: "Belum bisa kami ulangi. Tim akan memeriksa", watch: "Lihat sekarang sudah berfungsi" }],
     sw: ["Ripoti tatizo", "Nini kimeharibika?", "Tuambie kwa maneno yako", "Tuma", "Asante, tunalishughulikia", "Funga",
-         "Ripoti yako ya mwisho", { received: "Imepokelewa", checking: "Tunajaribu kama ulivyofanya", found: "Tumepata tatizo", fixing: "Linarekebishwa", fixed: "Limerekebishwa. Litakufikia kwenye sasisho lijalo", not_reproduced: "Bado hatujaweza kulirudia. Timu itaangalia" }],
+         "Ripoti yako ya mwisho", { received: "Imepokelewa", checking: "Tunajaribu kama ulivyofanya", found: "Tumepata tatizo", fixing: "Linarekebishwa", fixed: "Limerekebishwa. Litakufikia kwenye sasisho lijalo", not_reproduced: "Bado hatujaweza kulirudia. Timu itaangalia", watch: "Tazama likifanya kazi sasa" }],
     tr: ["Sorun bildir", "Ne ters gitti?", "Kendi sözlerinle anlat", "Gönder", "Teşekkürler, ilgileniyoruz", "Kapat",
-         "Son bildirimin", { received: "Alındı", checking: "Senin gibi deniyoruz", found: "Sorunu bulduk", fixing: "Düzeltme hazırlanıyor", fixed: "Düzeltildi. Sonraki güncellemeyle gelecek", not_reproduced: "Henüz tekrarlayamadık. Ekip bakacak" }],
+         "Son bildirimin", { received: "Alındı", checking: "Senin gibi deniyoruz", found: "Sorunu bulduk", fixing: "Düzeltme hazırlanıyor", fixed: "Düzeltildi. Sonraki güncellemeyle gelecek", not_reproduced: "Henüz tekrarlayamadık. Ekip bakacak", watch: "Şimdi çalıştığını izle" }],
     vi: ["Báo lỗi", "Đã có chuyện gì?", "Hãy kể bằng lời của bạn", "Gửi", "Cảm ơn, chúng tôi đang xử lý", "Đóng",
-         "Báo cáo gần nhất", { received: "Đã nhận", checking: "Chúng tôi đang thử như bạn đã làm", found: "Đã tìm ra lỗi", fixing: "Đang sửa", fixed: "Đã sửa. Sẽ có trong bản cập nhật tới", not_reproduced: "Chưa tái hiện được. Nhóm sẽ xem xét" }],
+         "Báo cáo gần nhất", { received: "Đã nhận", checking: "Chúng tôi đang thử như bạn đã làm", found: "Đã tìm ra lỗi", fixing: "Đang sửa", fixed: "Đã sửa. Sẽ có trong bản cập nhật tới", not_reproduced: "Chưa tái hiện được. Nhóm sẽ xem xét", watch: "Xem nó hoạt động ngay bây giờ" }],
     ru: ["Сообщить о проблеме", "Что пошло не так?", "Расскажите своими словами", "Отправить", "Спасибо, уже разбираемся", "Закрыть",
-         "Ваше последнее сообщение", { received: "Получено", checking: "Пробуем так же, как вы", found: "Мы нашли проблему", fixing: "Готовим исправление", fixed: "Исправлено. Придёт со следующим обновлением", not_reproduced: "Пока не удалось повторить. Команда посмотрит" }],
+         "Ваше последнее сообщение", { received: "Получено", checking: "Пробуем так же, как вы", found: "Мы нашли проблему", fixing: "Готовим исправление", fixed: "Исправлено. Придёт со следующим обновлением", not_reproduced: "Пока не удалось повторить. Команда посмотрит", watch: "Посмотрите, как это работает теперь" }],
     ja: ["問題を報告", "何が起きましたか？", "あなたの言葉で教えてください", "送信", "ありがとうございます。対応中です", "閉じる",
-         "前回の報告", { received: "受け付けました", checking: "あなたと同じ操作で確認中", found: "問題が見つかりました", fixing: "修正を作成中", fixed: "修正済み。次の更新で届きます", not_reproduced: "まだ再現できていません。チームが確認します" }],
+         "前回の報告", { received: "受け付けました", checking: "あなたと同じ操作で確認中", found: "問題が見つかりました", fixing: "修正を作成中", fixed: "修正済み。次の更新で届きます", not_reproduced: "まだ再現できていません。チームが確認します", watch: "直った様子を見る" }],
     zh: ["报告问题", "出了什么问题？", "用你自己的话告诉我们", "发送", "谢谢，我们正在处理", "关闭",
-         "你上次的报告", { received: "已收到", checking: "正在按你的操作重现", found: "我们找到了问题", fixing: "正在修复", fixed: "已修复，将随下次更新发布", not_reproduced: "暂时无法重现，团队会继续查看" }],
+         "你上次的报告", { received: "已收到", checking: "正在按你的操作重现", found: "我们找到了问题", fixing: "正在修复", fixed: "已修复，将随下次更新发布", not_reproduced: "暂时无法重现，团队会继续查看", watch: "查看修复后的效果" }],
   };
   const RTL = new Set(["ar", "ur", "fa", "he"]);
   const lang = (navigator.language || "en").toLowerCase().split("-")[0];
@@ -159,6 +159,7 @@
       #cr-widget .row{display:flex;gap:8px;margin-top:10px} #cr-widget .row button{flex:1}
       #cr-widget .ghost{background:#eee;color:#1d1b18}
       #cr-widget .status{margin:0 0 10px;padding:8px 10px;background:#f3f0ea;border-radius:8px;font-size:13px}
+      #cr-widget .status a{color:inherit;font-weight:600;text-decoration:underline}
       #cr-widget[data-open] form{display:block} #cr-widget[data-open] > button{display:none}
       @media (prefers-color-scheme: dark){#cr-widget form{background:#211f1c;color:#f4f1ec}#cr-widget textarea{background:#2b2925;color:#f4f1ec;border-color:#555}#cr-widget .ghost{background:#38352f;color:#f4f1ec}#cr-widget .status{background:#2b2925}}
       @media (prefers-reduced-motion: no-preference){#cr-widget form{animation:cr-in .16s ease-out}@keyframes cr-in{from{opacity:0;transform:translateY(6px)}}}
@@ -190,6 +191,13 @@
       const data = await res.json();
       status.textContent = `${LAST}: ${STATUS[data.status] || STATUS.received}`;
       status.hidden = false;
+      if (data.films && data.films.after) { // the twin's replay on the fixed app: their problem, gone
+        const watch = document.createElement("a");
+        watch.href = new URL(data.films.after, script.src).href;
+        watch.target = "_blank"; watch.rel = "noopener";
+        watch.textContent = STATUS.watch || T.en[7].watch;
+        status.append(" ", watch);
+      }
     } catch (e) { /* offline: no status, no harm */ }
   };
   const hide = () => { delete ui.dataset.open; open.setAttribute("aria-expanded", "false"); open.focus(); };

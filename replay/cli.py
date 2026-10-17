@@ -7,6 +7,7 @@
     crp auth --url https://staging.example.com      log in once by hand; the twin reuses the session
     crp devices pixel                               list device profiles
     crp init                                        add complaint-replay.toml and the GitHub workflow
+    crp mcp                                         serve replays and guards to coding agents (MCP, stdio)
 
 Run inside the app's repo. Model keys come from the environment or a .env file:
 NEBIUS_API_KEY (Nebius Token Factory) or NVIDIA_API_KEY (build.nvidia.com).
@@ -118,11 +119,11 @@ async def cmd_replay(args: argparse.Namespace) -> int:
             keep_shots = (payload or {}).get("pack", {}).get("screenshots", True)
             case = await investigate(case, cond, url, repo, client, chat, save, out / "shots" if keep_shots else None)
         else:
-            shot = f"{case['id']}-before.png"
+            shot, film = f"{case['id']}-before.png", f"{case['id']}-before.gif"
             result = await replay(url, complaint, cond, llm_policy(chat), llm_matcher(chat), out / "shots" / shot,
                                   hints=project.hints, storage_state=project.auth_file, checks=project.check_scripts,
-                                  ready_text=project.ready_text)
-            case.update(replay=as_dict(result), stage=result.verdict, shots={"before": shot})
+                                  ready_text=project.ready_text, film=out / "shots" / film)
+            case.update(replay=as_dict(result), stage=result.verdict, shots={"before": shot}, films={"before": film})
             save(case)
     show(case)
     if args.pr and case["stage"] == "guarded":
@@ -317,6 +318,8 @@ def parser() -> argparse.ArgumentParser:
     sub.add_parser("setup", help="install the browser the twin uses")
     i = sub.add_parser("init", help="add the config file and GitHub workflow to a repo")
     i.add_argument("--repo", default=".")
+    m = sub.add_parser("mcp", help="serve replays and guards to coding agents over MCP (stdio)")
+    m.add_argument("--repo", default=".")
     return p
 
 
@@ -327,6 +330,10 @@ def main(argv: list[str] | None = None) -> None:
     handlers = {"replay": cmd_replay, "guard": cmd_guard, "auth": cmd_auth}
     if args.cmd in handlers:
         sys.exit(asyncio.run(handlers[args.cmd](args)))
+    if args.cmd == "mcp":
+        from replay.mcp_server import serve  # optional: pip install "complaint-replay[mcp]"
+
+        return serve(args.repo)
     sys.exit({"devices": cmd_devices, "init": cmd_init, "setup": cmd_setup}[args.cmd](args))
 
 

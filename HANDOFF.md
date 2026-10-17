@@ -54,14 +54,27 @@ read it whole) is `~/.claude/projects/C--Users-yasha-Downloads-Nebius-x-NVIDIA-G
   When `NEBIUS_API_KEY` is in `.env`: one test call, then set a hard token cap; benchmarks stay on the NVIDIA key.
   Model and embedding names are looked up in the provider's own catalog, so the switch needs no code change.
 
-**In flight when the session ended**
-1. Replay film (WOW idea #1): `replay/film.py` makes a captioned GIF, one frame per step, the control about to be
-   used boxed in yellow, last frame red ("Found: ...") or green ("the problem is gone"). Wired into
-   `agent.replay(film=...)`, `guard.run_guard(film=..., ending=...)`, `investigate` (`case["films"]` before/after)
-   and the PR body (films play inline on GitHub; stills are the fallback). Committed (f387fcb), suite green.
-   NEXT: show films in the dashboard case view (server must serve `.gif` from the shots dir) and on the
-   reporter's status page ("here is your problem, as you saw it; it's fixed"), then use them in the demo video.
-2. Benchmark run 13: read each case, fix what misses teach, rerun.
+**Done in the Oct 17 night session (session 700d7840)**
+- Films finished: dashboard case view plays them (`<picture>`: still for reduced motion), server accepts `films` in
+  progress updates (per-entry name check, `.gif` allowed), sweeps them, and the reporter's status returns
+  `films.after` once fixed (only files on this server: a PR branch may be private); widget shows "Watch it
+  working now" in all 17 languages. `crp replay` without `--fix` now records a film too.
+- WOW #2 done the ₹0 way: screen-reader replays keep `replay.heard` (the last screen's aria snapshot in
+  screen-reader words, `agent.spoken()`); PR body has it in a <details>; dashboard "What a screen reader user
+  hears" with a Listen button (browser `speechSynthesis`, no files, no dependency). Dropped when a project keeps no
+  screenshots.
+- WOW #3 done: `crp mcp` (`replay/mcp_server.py`, extra `complaint-replay[mcp]`, mcp 2.3 `MCPServer`): tools
+  `replay_complaint`, `run_guards`, `find_devices`; CLI output captured, never on the protocol's stdout;
+  test spawns the real server over stdio. README documents `claude mcp add complaint-replay -- crp mcp`.
+- From run 13: a control number from a closed menu is refused by name without spending a step (9107 burned 5);
+  fixer rule "fix the shared component that draws the control" (9071's real fix is `MobileForms.tsx`
+  `showPicker()`, ours patched the screen; 8733 same pattern); cases record `fix.shown` and `show_case.py` says
+  whether the real fix file was shown. 8926's real fix is a new feature across 6 files: stays an honest miss.
+
+**In flight**
+1. Benchmark run 13 (39040748961): 8733, 8765, 8570, 9038 were still to land. Then run 14 with tonight's fixes.
+2. Demo dashboard (gh-pages) has no films/transcripts yet: record fresh demo-shop cases (one screen-reader), then
+   `scripts/deploy_demo.sh` (it pushes gh-pages: ask the user first, it is public).
 
 **WOW / user-centric list (ranked, Oct 17)**: (1) replay film, building; (2) "hear what a blind user hears":
 screen-reader audio of the page for screen-reader bugs; (3) MCP server so coding agents (Claude Code, Cursor,
@@ -188,7 +201,7 @@ the server with `PUBLIC_URL=<tunnel url>` and `GITHUB_TOKEN=$(gh auth token)`, p
 
 ## Next, in order
 
-1. Finish the replay film (commit after green; dashboard + reporter status page), then WOW ideas #2 and #3.
+1. WOW ideas #1-#3 done. Next WOW: #4 "Who does this PR hurt?" (guards/replays under the real users' mix).
 2. Real-bug benchmark: keep reading runs and fixing what misses teach; republish README + table + write-up numbers.
 3. Deploy-ready: check `Dockerfile.server` + `render.yaml` + `DEPLOY.md` still work; the user only signs up.
 4. When the Token Factory key exists: one test call, token cap, one small proof run on Token Factory; README note.
