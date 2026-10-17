@@ -54,6 +54,8 @@ CLEAN = [
                             {"type": "click_css", "selector": "#cleared"}]),  # the working toggle keeps the amount
     ("clean.html", PHONE, [{"type": "click_css", "selector": "button"}]),  # the button changes its text
     ("dead_button.html", PHONE, [{"type": "click_css", "selector": "#toggle"}]),  # a toggle that toggles
+    # Tapping a text box puts the cursor in it: that is its response (cloud case 8926, run 15, "proved" a bug so).
+    ("dead_button.html", PHONE, [{"type": "click_css", "selector": "#search"}]),
 ]
 
 

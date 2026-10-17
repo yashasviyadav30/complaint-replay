@@ -592,7 +592,8 @@ class Session:
             # docs link was cited as proof). The twin stays on the app.
             await asyncio.sleep(0.5)
             return f"ok, it opened a new tab outside this app ({self._new_tabs[-1][:100] or 'a link'}); you are still on the app"
-        if before is not None and await self._fingerprint() == before and self._requests == requests_before:
+        if (before is not None and await self._fingerprint() == before and self._requests == requests_before
+                and not await self._typing_into()):  # the cursor in a text box is the tap's response (8926, run 15)
             name = self.last_target or action.get("selector") or action.get("key") or "a control"
             self.add("no_response", f"tapped '{name}' but nothing happened: no change on screen, no request sent")
         elif taps:
@@ -603,6 +604,12 @@ class Session:
                 # menu nine times looking for a transaction's edit screen.
                 return f"ok, a dialog opened: '{dialog}'"
         return "ok" + self._state_note(state_before, await self._state(tapped))
+
+    async def _typing_into(self) -> bool:
+        try:
+            return await self.page.evaluate(EDITABLE_FOCUS_JS)
+        except Exception:
+            return False
 
     async def _state(self, el) -> dict | None:
         try:
