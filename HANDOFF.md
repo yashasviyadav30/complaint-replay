@@ -62,6 +62,18 @@ Phase 1 tasks 1.0-1.7 (except 1.8) and most of 1.9/1.10 are built and tested (`u
 - Known hard cases: 9107 needs a domain check (running balance maths); 9038 needs a non-current month on screen;
   9071's native date picker is invisible to a headless browser.
 - Run 6 (38928497833): first run on Super with every fix. Read cases with `gh run download <run> -n case-<pr>`.
+- Runs 6-10 (Oct 16-17), all 0/8 but each miss now honest. Fixed from them, each with a test: taps behind an open
+  dialog are not evidence; load-speed evidence only proves speed complaints (one model question per case); React
+  dev warnings are not console errors; the twin's own "reproduced" claim goes through the judge; fixer may not edit
+  tests/mocks/guards; second fix round with the proof's evidence when the guard rejects a patch; new tabs are a
+  response; key presses report the new focus; same-named controls get their row; label-drawn switches and
+  `tabindex=0` divs are controls; a tap on a disabled control still lands (ends the edit in progress); refuse a
+  sixth tap on one control; 80 min per case.
+- 8733 reproduces for real every run (amount lost after tapping Cleared); the fixer sees table/utils.ts but keeps
+  patching its caller. Actual hints (public, `benchmarks/actual-complaint-replay.toml`) now explain scheduled rows,
+  the '✓' sort header and which transactions show a Reconciled switch.
+- Lesson for me: never run two pytest suites at once here (shared `workspace/badshop`), and commit only after a
+  green run.
 - Memory: the laptop ran out once (Chrome + Docker + two Actual dev servers). Docker Desktop is stopped; don't
   run heavy jobs during a pass. Restart a killed pass only when the user says so.
 

@@ -41,7 +41,10 @@
   document.querySelectorAll('[data-bc-idx]').forEach((el) => el.removeAttribute('data-bc-idx'));
 
   const CONTROLS = 'button, a[href], input:not([type=hidden]), select, textarea, summary, [role=button], [role=link], '
-    + '[role=tab], [role=menuitem], [role=checkbox], [role=radio], [role=switch], [role=option], [role=combobox]';
+    + '[role=tab], [role=menuitem], [role=checkbox], [role=radio], [role=switch], [role=option], [role=combobox], '
+    // A div made focusable is a control too: Actual's row select box is <div tabindex=0> with no role, so the
+    // twin never saw it and kept tapping the '✓' sort header instead (cloud case 8765).
+    + '[tabindex="0"]:not(body):not(html)';
   // An open dialog is meant to cover the page: then only controls inside it are checked for being covered.
   const modal = [...document.querySelectorAll('dialog[open], [aria-modal=true], [role=dialog], .modal.show, .offcanvas.show')]
     .find((d) => !ours(d) && visible(d));

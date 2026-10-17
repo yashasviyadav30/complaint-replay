@@ -296,3 +296,15 @@ def test_a_tap_on_a_disabled_field_still_ends_the_edit_in_progress(site) -> None
 
     first, text = asyncio.run(body())
     assert first.startswith("error: that control was disabled") and text == "open"
+
+
+def test_a_focusable_div_is_a_control(site) -> None:
+    async def body() -> list[str]:
+        async with browser.Session(f"{site}/popover.html", PHONE) as s:
+            await s.page.set_content("<table><tr><td><div tabindex=0 style='width:12px;height:12px'></div></td>"
+                                     "<td>Kroger 3.92</td></tr><tr><td><div tabindex=0 style='width:12px;height:12px'>"
+                                     "</div></td><td>Publix 4.41</td></tr></table>")
+            return [e["label"] for e in (await s.observe())["elements"]]
+
+    labels = asyncio.run(body())
+    assert len(labels) == 2 and "Kroger" in labels[0] and "Publix" in labels[1]
