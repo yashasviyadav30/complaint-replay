@@ -110,7 +110,14 @@ PICKER_JS = r"""(el) => {
 DIALOG_TEXT_JS = r"""() => { const d = [...document.querySelectorAll('[role=dialog], [role=alertdialog], [aria-modal=true], dialog[open]')]
   .filter((e) => e.getBoundingClientRect().width > 0).pop();
   return d ? d.innerText.trim().replace(/\s+/g, ' ').slice(0, 160) : ''; }"""
+# The control numbers inside the dialog on top: what the twin can tap while it is open.
+DIALOG_CONTROLS_JS = r"""() => { const d = [...document.querySelectorAll('[role=dialog], [role=alertdialog], [aria-modal=true], dialog[open]')]
+  .filter((e) => e.getBoundingClientRect().width > 0).pop();
+  return d ? [...d.querySelectorAll('[data-bc-idx]')].map((e) => +e.dataset.bcIdx) : []; }"""
 READY_TEXT_TIMEOUT_S = 180
+# A tap on a disabled control that still landed (and ended an edit): an error for the twin, a real step for a guard.
+TAP_LANDED = ("error: that control was disabled (greyed out) when tapped; the tap still landed and ended what was "
+              "being edited, so try it again now")
 # A tapped control's own state: checked/selected/pressed, else how many marks (tick icons) it holds. Actual's row
 # box shows "selected" only as a checkmark SVG (cloud case 8765).
 STATE_JS = r"""(el) => {
@@ -548,13 +555,18 @@ class Session:
                 # loses focus), which is what enables the control. Playwright never touches the screen for a disabled
                 # control, so the twin stayed stuck forever (cloud case 9071, run 10).
                 if kind == "click" and self.last_idx is not None and await self._tap_where(self.last_idx):
-                    return ("error: that control was disabled (greyed out) when tapped; the tap still landed and "
-                            "ended what was being edited, so try it again now")
+                    return TAP_LANDED
                 return ("error: that control is disabled right now (greyed out), so a user can't tap it either; "
                         "finish or close what is open first")
             if covered and await self._dialog_open():
-                return ("error: a dialog or menu is open on top of the page; use its controls (marked (new)) "
-                        "or close it first")
+                # Cloud case 9107 (run 14): eleven taps behind a menu that had opened before, so nothing in it was
+                # "(new)". Name its controls.
+                try:
+                    inside = [f"[{i}] {self._labels[i]}" for i in await page.evaluate(DIALOG_CONTROLS_JS) if i in self._labels]
+                except Exception:
+                    inside = []
+                return ("error: a dialog or menu is open on top of the page; tap one of its own controls"
+                        + (f" ({', '.join(inside[:12])})" if inside else "") + ", or press Escape to close it")
             if covered:
                 return (f"error: the tap hit {covered.group(1)[:120]} instead: something is on top of it "
                         "(a menu or dialog may have opened; look for (new) controls)")

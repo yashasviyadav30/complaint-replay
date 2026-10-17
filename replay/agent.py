@@ -140,6 +140,7 @@ async def _drive(session: Session, complaint: str, condition: Condition, policy:
     judged = 0
     prev_view = None
     seen: dict[int, str] = {}  # control number -> its name when last on screen
+    refused = 0  # the twin's own "reproduced" claims the judge turned down
     # Keyboard users need many more presses than a tap to reach the same control (cloud case 8570 ran out of steps).
     budget = condition.max_steps * (2 if condition.keyboard_only else 1)
     for step in range(budget):
@@ -176,6 +177,12 @@ async def _drive(session: Session, complaint: str, condition: Condition, policy:
                 # The twin's own claim goes through the same checks as the judge's (speed filter, skeptic question):
                 # it cited "page loaded slowly" for a payee bug, skipping them (cloud case 8926, run 8).
                 match = await matcher(complaint, list(session.evidence))
+                if not match.get("evidence") and refused < CLAIM_RETRIES:
+                    # Cloud case 8926 (run 14): a refused claim ended the replay after 3 of 25 steps.
+                    refused += 1
+                    last_result = ("not accepted: the browser recorded no evidence of this problem yet. Keep going "
+                                   "the way the user did, to the screen where it happens")
+                    continue
                 action = ({"verdict": "reproduced", **match} if match.get("evidence") else
                           {"verdict": "not_reproduced",
                            "summary": str(action.get("summary", "")) + " [The judge found no evidence of this problem.]"})
@@ -245,7 +252,8 @@ Rules:
   Finish or close that first (press Enter, tap a neutral spot, or Escape), then try the control again."""
 
 SIGHTED_ACTIONS = """{"type": "click", "target": <idx>}   (add "times": 2 to tap twice quickly, like an impatient user)
-{"type": "fill", "target": <idx>, "text": "..."}"""
+{"type": "fill", "target": <idx>, "text": "..."}
+{"type": "press", "key": "Escape"}   (closes an open menu or dialog)"""
 SCREEN_READER_ACTIONS = """{"type": "click_role", "role": "button", "name": "<exact accessible name>"}
 {"type": "fill_role", "role": "textbox", "name": "<exact accessible name>", "text": "..."}
 You can only use controls that have a name in the accessibility tree."""
@@ -256,6 +264,7 @@ This user has no mouse. "Focused" shows where the keyboard is now; press Tab to 
 
 
 REVISIT_LIMIT = 3
+CLAIM_RETRIES = 1  # after a refused "reproduced" claim, the twin keeps looking this many times before it stops
 BLOCK_LIMIT = 5  # taps on one control before the twin is refused another
 
 

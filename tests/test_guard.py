@@ -41,3 +41,14 @@ def test_evidence_key_ignores_numbers_but_not_the_control() -> None:
 def test_guard_condition_round_trips() -> None:
     guard = build_guard("c1", "complaint", CONDITIONS["slow_3g_android"], [], set())
     assert Condition(**guard["condition"]) == CONDITIONS["slow_3g_android"]
+
+
+def test_guard_keeps_a_tap_on_a_disabled_control_that_still_landed() -> None:
+    # Cloud case 9071 (run 14): dropping this tap left the guard's only date tap on a disabled field, so the guard
+    # passed on the old code too ("catches the bug: no").
+    from replay.browser import TAP_LANDED
+
+    steps = [{"action": {"type": "click", "target": 3}, "result": TAP_LANDED, "target": "2026-10-17", "idx": 3},
+             {"action": {"type": "click", "target": 3}, "result": "ok", "target": "2026-10-17", "idx": 3}]
+    guard = build_guard("c1", "x", CONDITIONS["fast_desktop"], steps, {"picker_not_opened"})
+    assert [s["do"] for s in guard["steps"]] == ["click", "click"]

@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 from replay.agent import snap
-from replay.browser import Session, evidence_key
+from replay.browser import TAP_LANDED, Session, evidence_key
 from replay.film import describe, write_gif
 from replay.conditions import Condition
 
@@ -22,7 +22,7 @@ def build_guard(case_id: str, complaint: str, cond: Condition, steps: list[dict]
     kept = []
     for s in steps:
         a = s["action"]
-        if s["result"].startswith("error"):
+        if s["result"].startswith("error") and s["result"] != TAP_LANDED:
             continue
         # "idx" is the control's position on the page: the fallback when a fix renames it (an added aria-label).
         position = {"idx": s["idx"]} if s.get("idx") is not None else {}

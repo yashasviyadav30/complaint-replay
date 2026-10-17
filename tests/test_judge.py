@@ -131,7 +131,10 @@ def test_the_twins_own_reproduced_claim_goes_through_the_judge(tmp_path) -> None
 
     (tmp_path / "index.html").write_text("<button>Pay</button><img src=missing.png alt=x>", encoding="utf-8")  # E1
 
+    asked = []
+
     async def policy(ctx: dict) -> dict:
+        asked.append(ctx["last_result"])
         return {"type": "verdict", "verdict": "reproduced", "evidence": ["E1"], "summary": "slow"}
 
     async def strict_judge(complaint: str, evidence: list) -> dict:
@@ -140,6 +143,8 @@ def test_the_twins_own_reproduced_claim_goes_through_the_judge(tmp_path) -> None
     with running_app(tmp_path) as url:
         result = asyncio.run(replay(url, "Pay does nothing", CONDITIONS["fast_desktop"], policy, strict_judge))
     assert result.verdict == "not_reproduced"
+    # Cloud case 8926 (run 14): a refused claim ended the replay after 3 of 25 steps. It now sends the twin back once.
+    assert len(asked) == 2 and asked[1].startswith("not accepted")
 
 
 def test_the_twin_is_refused_a_sixth_tap_on_the_same_control(tmp_path) -> None:
@@ -241,3 +246,26 @@ def test_the_twin_is_told_whether_a_tapped_box_is_now_ticked(tmp_path) -> None:
         asyncio.run(replay(url, "x", CONDITIONS["fast_desktop"], policy))
     assert "nothing visible changed" not in results[1]
     assert "now shows a mark" in results[1] and "mark went away" in results[2] and "now checked" in results[3]
+
+
+def test_a_tap_behind_an_open_menu_is_told_the_menus_own_controls(tmp_path) -> None:
+    import asyncio
+
+    from replay.agent import replay
+    from replay.conditions import CONDITIONS
+    from replay.project import running_app
+
+    # Cloud case 9107 (run 14): eleven taps behind an open menu, each told only "use its controls (marked (new))";
+    # the menu had opened before, so nothing in it was new.
+    (tmp_path / "index.html").write_text(
+        '<button>Close</button><div role="dialog" style="position:fixed;inset:0;background:#fff">'
+        '<button>Hide reconciled transactions</button></div>', encoding="utf-8")
+    results = []
+
+    async def policy(ctx: dict) -> dict:
+        results.append(ctx["last_result"])
+        return {"type": "click", "target": 0} if len(results) == 1 else {"type": "verdict"}
+
+    with running_app(tmp_path) as url:
+        asyncio.run(replay(url, "x", CONDITIONS["fast_desktop"], policy))
+    assert "[1] Hide reconciled transactions" in results[1] and "Escape" in results[1]
