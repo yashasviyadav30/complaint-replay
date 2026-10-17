@@ -80,8 +80,21 @@ read it whole) is `~/.claude/projects/C--Users-yasha-Downloads-Nebius-x-NVIDIA-G
 - Demo cases re-recorded with films (bug 4: Pay off a 360 px screen; bug 10: screen reader + transcript), both
   guarded. Video script updated to use voice, Listen, films and MCP.
 
+- Voice complaints in the widget (WOW #5): "🎤 Speak instead" in 17 languages, browser speech recognition, the
+  user checks the text before sending; README privacy note (Chrome sends audio to Google; we keep none).
+- Deploy check done (Oct 17 night): `Dockerfile.server` builds (978 MB) and serves health, dashboard, widget. Found
+  and fixed: without PUBLIC_URL a complaint got a 500 and no status token (now kept + answered, case says what to
+  set); on Render the address comes from RENDER_EXTERNAL_URL (removed PUBLIC_URL from render.yaml); running_app
+  now stops whatever still listens on the app's port (a leaked server locked workspace/badshop and failed 8 tests).
+  Docker Desktop stopped again afterwards.
+- Run 14 (39051065827, on dc755ea) so far: 9071 "fixed" (guard passes on fix) but the guard did not fail on old
+  code: it had dropped the disabled-but-landed tap (fixed: `TAP_LANDED` steps stay in guards); fixer still patched
+  the screen although `MobileForms.tsx` was shown. 8926: refused claim ended the replay at step 3 (fixed: one more
+  try). 9107: 11 taps behind an open menu (fixed: refusal lists the menu's controls; sighted twins have Escape).
+  9064: honest miss. Fixer rule added for shared helpers (8733).
+
 **In flight**
-1. Benchmark run 14: start it after the commit that holds tonight's fixes; read each case as before.
+1. Run 14: 8733, 8570, 8765, 9038 still to land. Then run 15 on 8c2bf01 (all fixes above).
 2. Demo dashboard (gh-pages) has no films/transcripts yet: record fresh demo-shop cases (one screen-reader), then
    `scripts/deploy_demo.sh` (it pushes gh-pages: ask the user first, it is public).
 
