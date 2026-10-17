@@ -123,3 +123,11 @@ def test_patch_tolerates_changed_indentation_but_not_ambiguity(tmp_path) -> None
     (tmp_path / "Two.tsx").write_text("a  b\na b\n", encoding="utf-8")
     with pytest.raises(ValueError):
         apply_patch(Patch("", ({"file": "Two.tsx", "find": "a   b", "replace": "c"},)), tmp_path)
+
+
+def test_a_missed_find_text_shows_the_closest_real_text(tmp_path) -> None:
+    (tmp_path / "Edit.tsx").write_text("<input\n  style={{\n    appearance: 'none',\n  }}\n/>\n", encoding="utf-8")
+    with pytest.raises(ValueError) as e:
+        apply_patch(Patch("", ({"file": "Edit.tsx", "find": "style={\n    appearance: 'none',\n  }", "replace": "x"},)),
+                    tmp_path)
+    assert "closest text in the file is" in str(e.value) and "style={{" in str(e.value)

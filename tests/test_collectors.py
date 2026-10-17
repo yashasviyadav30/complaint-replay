@@ -316,3 +316,17 @@ def test_a_date_field_whose_picker_opens_or_that_shows_its_icon_is_fine(site) ->
     for field in ("#fixed", "#plain"):
         assert not [k for k in kinds(f"{site}/picker.html", PHONE, [{"type": "click_css", "selector": field}])
                     if k.startswith("picker_not_opened")]
+
+
+def test_typing_words_with_no_field_focused_is_refused_but_shortcuts_go_through(site) -> None:
+    async def body() -> tuple[str, str, str]:
+        async with browser.Session(f"{site}/popover.html", PHONE) as s:
+            await s.page.set_content("<button>Try the demo</button><input id=q>")
+            refused = await s.act({"type": "type", "text": "Try the demo"})
+            shortcut = await s.act({"type": "type", "text": "/"})
+            await s.page.focus("#q")
+            await s.act({"type": "type", "text": "rent"})
+            return refused, shortcut, await s.page.input_value("#q")
+
+    refused, shortcut, typed = asyncio.run(body())
+    assert refused.startswith("error: no text field has focus") and shortcut.startswith("ok") and typed == "rent"

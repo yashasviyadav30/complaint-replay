@@ -82,6 +82,8 @@ FOCUS_JS = r"""() => { const a = document.activeElement;
 DIALOG_OPEN_JS = """() => [...document.querySelectorAll('[role=dialog], [role=alertdialog], [aria-modal=true], dialog[open]')]
   .some((e) => e.getBoundingClientRect().width > 0)"""
 MAX_KEY_REPEAT = 15
+EDITABLE_FOCUS_JS = """() => { const a = document.activeElement;
+  return !!a && (a.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(a.tagName)); }"""
 # The text of the dialog on top, so the twin knows WHAT opened (a scheduled-payment menu is not the editor).
 # A date/time field the user tapped whose picker did not open, and which shows no picker icon either: the user has no
 # way to change the value. ':open' tells a picker that opened from one that did not, even headless (Chromium 133+).
@@ -502,7 +504,13 @@ class Session:
             elif kind == "type" and str(action.get("text", "")).strip() in KEYS:
                 await page.keyboard.press(str(action["text"]).strip())  # "type Tab" means the key (cloud case 8570)
             elif kind == "type":
-                await page.keyboard.type(str(action.get("text", "")), delay=30)
+                text = str(action.get("text", ""))
+                if len(text) > 1 and not await page.evaluate(EDITABLE_FOCUS_JS):
+                    # Cloud case 8570 (run 11): the keyboard twin "typed" a button's name six times with no field
+                    # focused. Single keys still go through: keyboard shortcuts are real.
+                    return ("error: no text field has focus, so typing does nothing; to use a button or link, press "
+                            "Tab until the focus is on it, then Enter")
+                await page.keyboard.type(text, delay=30)
             elif kind == "click_css":  # scripted tests only
                 await tap(page.locator(action["selector"]).first, action)
             elif kind == "fill_css":  # scripted tests only

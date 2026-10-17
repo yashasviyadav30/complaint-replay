@@ -113,6 +113,19 @@ def protected(rel: str) -> bool:
     return any(fnmatch.fnmatch(rel, g) or fnmatch.fnmatch(name, g) for g in PROTECTED)
 
 
+def closest(text: str, find: str) -> str:
+    """The lines of `text` most like `find`, so a retry can copy them exactly. Cloud case 9071 (run 12) quoted
+    `style={` where the code says `style={{`, three times, told only "appears 0 times"."""
+    lines, want = text.splitlines(), find.strip().splitlines()
+    if not want or not lines:
+        return ""
+    n = len(want)
+    target = "\n".join(want)
+    best = max(range(max(1, len(lines) - n + 1)),
+               key=lambda i: difflib.SequenceMatcher(None, "\n".join(lines[i:i + n]), target).ratio())
+    return "\n".join(lines[best:best + n])[:600]
+
+
 def loose_match(text: str, find: str) -> tuple[int, int] | None:
     """Where `find` appears once if spacing and indentation are ignored, else None.
 
@@ -152,7 +165,9 @@ def apply_patch(patch: Patch, root: Path, allowed: tuple[str, ...] = ()) -> str:
             continue
         span = loose_match(current[path], find) if count == 0 and find.strip() else None
         if not span:
-            raise ValueError(f"'find' text must appear exactly once in {edit.get('file')}, but it appears {count} times")
+            near = closest(current[path], find) if count == 0 else ""
+            raise ValueError(f"'find' text must appear exactly once in {edit.get('file')}, but it appears {count} times"
+                             + (f". The closest text in the file is:\n{near}" if near else ""))
         current[path] = current[path][:span[0]] + replace + current[path][span[1]:]
     diff = []
     for path, after in current.items():

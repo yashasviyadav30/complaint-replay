@@ -143,7 +143,7 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
                 diff = apply_patch(patch, branch, project.edit)
                 break
             except ValueError as e:  # includes a reply that was not valid JSON (seen on a big real repo)
-                rejected = str(e)[:300]
+                rejected = str(e)[:1000]  # room for the closest real text
                 errors.append(rejected)
         else:
             case["fix"] = {"model": fix_model, "explanation": patch.explanation if patch else "", "error": rejected,
