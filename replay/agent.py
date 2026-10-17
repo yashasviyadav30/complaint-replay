@@ -5,6 +5,7 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from pathlib import Path
 
+from replay.film import describe, write_gif
 from replay.browser import Evidence, Session
 from replay.conditions import Condition
 
@@ -45,22 +46,50 @@ Matcher = Callable[[str, list[Evidence]], Awaitable[dict]]
 async def replay(base_url: str, complaint: str, condition: Condition, policy: Policy,
                  matcher: Matcher | None = None, screenshot: Path | None = None, hints: str = "",
                  storage_state: Path | None = None, checks: dict[str, str] | None = None,
-                 ready_text: str = "") -> ReplayResult:
+                 ready_text: str = "", film: Path | None = None) -> ReplayResult:
     """Replay a complaint. If `screenshot` is given, save what the user sees at the moment of the verdict.
+    If `film` is given, save the whole replay there as a captioned GIF, ending on what was found.
 
     `hints` are facts about the app the twin may need (test accounts, test data), from the project config.
     `storage_state` is a saved login, so the twin starts signed in.
     """
     async with Session(base_url, condition, storage_state, checks, ready_text) as session:
-        result = await _drive(session, complaint, condition, policy, matcher, hints)
+        frames: list | None = [] if film else None
+        await snap(session, frames, f"The user's screen: {condition.label}")
+        result = await _drive(session, complaint, condition, policy, matcher, hints, frames)
         if screenshot:
             screenshot.parent.mkdir(parents=True, exist_ok=True)
             await session.page.screenshot(path=str(screenshot))
+        if film:
+            found = [e.detail for e in result.evidence if e.id in result.cited]
+            await snap(session, frames, f"Found: {found[0]}" if found else f"Not reproduced. {result.summary[:140]}",
+                       "alert" if found else "")
+            write_gif(frames, film)
         return result
 
 
+async def snap(session: Session, frames: list | None, caption: str, tone: str = "", idx: int | None = None) -> None:
+    """One film frame: the screen as the user sees it, with a caption, and a box around control `idx` if given.
+    No film, no screenshot."""
+    if frames is None:
+        return
+    box = None
+    try:
+        size = session.page.viewport_size
+        rect = await session.page.locator(f'[data-bc-idx="{idx}"]').first.bounding_box(timeout=1000)             if idx is not None and size else None
+        if rect:
+            box = (rect["x"] / size["width"], rect["y"] / size["height"],
+                   rect["width"] / size["width"], rect["height"] / size["height"])
+    except Exception:
+        box = None
+    try:
+        frames.append((await session.page.screenshot(), caption, tone, box))
+    except Exception:  # a frame is a nice-to-have; a page mid-navigation must not break the replay
+        pass
+
+
 async def _drive(session: Session, complaint: str, condition: Condition, policy: Policy,
-                 matcher: Matcher | None, hints: str = "") -> ReplayResult:
+                 matcher: Matcher | None, hints: str = "", frames: list | None = None) -> ReplayResult:
     steps: list[dict] = []
     visited: list[str] = []  # page paths in the order seen, so the twin can tell it is going in circles
     last_result = "(page just opened)"
@@ -111,6 +140,10 @@ async def _drive(session: Session, complaint: str, condition: Condition, policy:
             last_result = (f"error: not tapped. You already opened '{label}' {taps} times and it is not what you need; "
                            "choose a different control")
             continue
+        # The frame is taken just before the step, with the control about to be used boxed: you see what it does.
+        target = action.get("target") if action.get("type") in ("click", "fill") else None
+        await snap(session, frames, f"Step {len(steps) + 1}: {describe(action, label)}",
+                   idx=target if isinstance(target, int) else None)
         last_result = await session.act(action)
         steps.append({"action": action, "result": last_result, "target": session.last_target, "idx": session.last_idx})
         last_result += revisit_note(steps)

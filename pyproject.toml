@@ -9,6 +9,7 @@ dependencies = [
     "fastapi>=0.143.0",
     "fasttext-predict>=0.9.2.4",
     "openai>=3.29.0",
+    "pillow>=11",
     "playwright>=1.63.0",
     "pyjwt[crypto]>=2.10",
     "python-dotenv>=1.2.4",

@@ -75,3 +75,10 @@ def test_init_guesses_how_to_start_the_app(tmp_path) -> None:
     assert guess_start(tmp_path) == "npm run dev -- --port {port}"
     (tmp_path / "yarn.lock").write_text("", encoding="utf-8")
     assert guess_start(tmp_path) == "yarn dev --port {port}"
+
+
+def test_pr_body_plays_the_before_and_after_films() -> None:
+    case = {**CASE, "shots": {"before": "c-before.png", "after": "c-after.png"},
+            "films": {"before": "c-before.gif", "after": "c-after.gif"}}
+    text = body(case, image_url="https://github.com/o/r/blob/b/.complaint-replay/shots")
+    assert "c-before.gif?raw=true" in text and "c-after.gif?raw=true" in text and "c-before.png" not in text

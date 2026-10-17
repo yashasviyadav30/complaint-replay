@@ -61,3 +61,24 @@ def test_bug_leaves_evidence_only_when_present(bug_id: int) -> None:
 def test_otp_bug_works_for_me_on_a_fast_laptop() -> None:
     """The whole point: the developer's machine hides bugs that real users hit."""
     assert "request_failed" not in evidence_kinds(1, buggy=True, condition="fast_desktop")
+
+
+def test_a_replay_can_be_filmed_as_a_captioned_gif(tmp_path) -> None:
+    import asyncio
+
+    from PIL import Image
+
+    from replay.agent import replay, scripted_policy
+    from replay.conditions import profile
+    from replay.project import running_app
+
+    (tmp_path / "site").mkdir()
+    (tmp_path / "site" / "index.html").write_text(
+        "<meta name=viewport content='width=device-width'><div style='width:600px'>"
+        "<button id=pay style='margin-left:420px'>Pay</button></div>", encoding="utf-8")
+    film = tmp_path / "film.gif"
+    with running_app(tmp_path / "site") as url:
+        asyncio.run(replay(url, "Pay is cut off", profile("Galaxy S9+"),
+                           scripted_policy([{"type": "scroll"}, {"type": "wait", "ms": 100}]), film=film))
+    gif = Image.open(film)
+    assert gif.n_frames == 4  # the user's screen, two steps, and the closing frame

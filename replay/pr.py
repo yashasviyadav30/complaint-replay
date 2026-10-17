@@ -74,10 +74,12 @@ def body(case: dict, image_url: str = "") -> str:
     ]
     if fix.get("sources"):
         lines += ["", "Sources: " + ", ".join(f"[{s['title']}]({s['url']})" for s in fix["sources"])]
-    shots = case.get("shots") or {}
+    # The films (captioned GIFs of the user's steps) play inline on GitHub; stills are the fallback.
+    shots = {**(case.get("shots") or {}), **(case.get("films") or {})}
     if image_url and shots:
         cells = [f"![{k}]({image_url}/{shots[k]}?raw=true)" for k in ("before", "after") if k in shots]
-        lines += ["", "| Before | After |", "|---|---|", "| " + " | ".join(cells) + " |"]
+        lines += ["", "| Before: the user's steps on the old code | After: the same steps on this branch |",
+                  "|---|---|", "| " + " | ".join(cells) + " |"]
     lines += [
         "",
         "### Guard test",
@@ -181,7 +183,7 @@ def open_pr(repo: Path, case: dict, shots: Path | None = None, base: str = "", p
         guard = case["guard"]
         (work / guard["file"]).parent.mkdir(parents=True, exist_ok=True)
         (work / guard["file"]).write_text(json.dumps(guard["test"], ensure_ascii=False, indent=2), encoding="utf-8")
-        for name in (case.get("shots") or {}).values():
+        for name in [*(case.get("shots") or {}).values(), *(case.get("films") or {}).values()]:
             if shots and (shots / name).exists():
                 (work / SHOTS).mkdir(parents=True, exist_ok=True)
                 shutil.copy(shots / name, work / SHOTS / name)

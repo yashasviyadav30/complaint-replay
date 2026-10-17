@@ -1,7 +1,57 @@
 # Handoff: where this project stands
 
 Read this first in a new session. The plan is `plan.md` (phases, gates, cut list). Deadline: Oct 30, 2026,
-10:00 am PDT (submit Oct 29). v0 history (Oct 11-15) is in git; this file covers the real product.
+10:00 am PDT = 10:30 pm IST (submit Oct 29). v0 history (Oct 11-15) is in git; this file covers the real product.
+
+## START HERE (written Oct 17 evening, end of the long session c15f4155)
+
+**How to work with this user** (also in memory files, which load automatically):
+- Reply in English only (user writes Hinglish). IELTS rule: if *their own* sentence has a real grammar error, one line
+  "✏️ Corrected: ..." then `---`, then the answer. Plain English everywhere (see `~/.claude/CLAUDE.md`).
+- Keep working without check-ins until the project is complete; stop only for steps only the user can do.
+- Keep brainstorming WOW / user-centric ideas continuously (memory `keep-brainstorming-wow`).
+- Never submit, publish, post or send anything in the user's name without an explicit yes. Budget ₹0.
+  Never type card or bank details; the user adds the card themselves.
+- Run one pytest suite at a time (shared `workspace/badshop`); commit only after a green run.
+- The GateGuard hook asks for facts before each first edit of a file and before some Bash calls: state them, retry.
+- Heredoc/python string edits turn `\n` inside strings into real newlines: use the Edit tool for those.
+
+**State right now**
+- Code: all committed and pushed to `main` except the replay-film feature (see "In flight"). ~165 tests.
+- Real-bug benchmark (Actual Budget, 8 bugs, GitHub Actions `real-bugs.yml`): published in README +
+  `benchmarks/real-bugs.md` from run 11: strict solved 0/8, fixed and guarded in any file 1/8 (8733, diff in
+  `benchmarks/real-bugs-8733-our-fix.diff`). Run 13 (39040748961) was running with all fixes. Read a case:
+  `gh run download <run> --repo yashasviyadav30/complaint-replay -n case-<pr> -D <dir>`.
+  Reproduces reliably: 8733 (typed_value_lost) and 9071 (new evidence `picker_not_opened`). Structurally hard
+  (notes in `benchmarks/real-bugs.json`): 8926 missing feature, 9107 app-specific balance maths, 9064 needs a
+  reconciled transaction (lock icon, no text), 9038 needs a non-current month. 8570 (keyboard) and 8765 (bulk
+  edit) are possible but the twin still doesn't get there.
+- Token Factory: the user registered on Devpost and submitted the $25 credit form (code NEBIUS-DEVPOST-GLOBAL26);
+  another $25 via the Nebius Builders Program. Token Factory's console demands billing details + a card before
+  any API key ("temporary $0 authorization"). RuPay fails because Nebius bills through Stripe (Visa/Mastercard
+  only). The user is solving this (Visa/Mastercard debit with international use on, then off; or Nebius Discord).
+  When `NEBIUS_API_KEY` is in `.env`: one test call, then set a hard token cap; benchmarks stay on the NVIDIA key.
+  Model and embedding names are looked up in the provider's own catalog, so the switch needs no code change.
+
+**In flight when the session ended**
+1. Replay film (WOW idea #1): `replay/film.py` makes a captioned GIF, one frame per step, the control about to be
+   used boxed in yellow, last frame red ("Found: ...") or green ("the problem is gone"). Wired into
+   `agent.replay(film=...)`, `guard.run_guard(film=..., ending=...)`, `investigate` (`case["films"]` before/after)
+   and the PR body (films play inline on GitHub; stills are the fallback). Tests added; the full suite was
+   running. NEXT: commit after green, then show films in the dashboard case view and on the reporter's status
+   page ("here is your problem, as you saw it; it's fixed"), then use them in the demo video.
+2. Benchmark run 13: read each case, fix what misses teach, rerun.
+
+**WOW / user-centric list (ranked, Oct 17)**: (1) replay film, building; (2) "hear what a blind user hears":
+screen-reader audio of the page for screen-reader bugs; (3) MCP server so coding agents (Claude Code, Cursor,
+Copilot) can run replays and guards; (4) "Who does this PR hurt?": pre-merge replay under the real users'
+device/network/language mix from widget data; (5) voice complaints in the widget; (6) bug cost in rupees.
+
+**What "project complete" means here** (user agreed): benchmark as good as it honestly gets; deploy-ready
+(one command, the user only signs up); fresh-machine run of the README (done Oct 17: install from GitHub,
+`crp init`, `crp setup`, first replay all worked); final README/write-up numbers (`submission/writeup.md` has
+`[FILL]` markers). Then: Token Factory key, product name, hosting, Devpost draft (after the name), video
+(script `submission/video-script-v1.md`), submit Oct 29 (user clicks).
 
 ## State after the night of Oct 16-17
 
@@ -117,15 +167,18 @@ the server with `PUBLIC_URL=<tunnel url>` and `GITHUB_TOKEN=$(gh auth token)`, p
 
 ## Next, in order
 
-1. Real-bug benchmark (1.8): read the cloud run's table, fix what the misses teach, rerun, publish the score (misses too).
-2. Hosting (1.10): decide the host (Nebius VM if the card works, else a free tier) and deploy with `PUBLIC_URL`,
-   `SECRET_KEY`, `ADMIN_LOGIN`, then create the GitHub App via `/setup/github-app` (user clicks).
-3. Re-run benchmarks on Nebius Token Factory once `NEBIUS_API_KEY` exists; update README numbers.
-4. Sector packs (1.9): fintech first. Video and write-up (1.11) from Oct 26.
+1. Finish the replay film (commit after green; dashboard + reporter status page), then WOW ideas #2 and #3.
+2. Real-bug benchmark: keep reading runs and fixing what misses teach; republish README + table + write-up numbers.
+3. Deploy-ready: check `Dockerfile.server` + `render.yaml` + `DEPLOY.md` still work; the user only signs up.
+4. When the Token Factory key exists: one test call, token cap, one small proof run on Token Factory; README note.
+5. Video and write-up (1.11) from Oct 26; freeze Oct 28; submit Oct 29 (user clicks).
 
 ## User must do
 
-- Post in the Nebius Discord about the card (Token Factory key); decide by Oct 22, hard stop Oct 25.
-- Pick the product name by Oct 18.
+- Token Factory key: add a Visa/Mastercard (international use on for the $0 check, then off) or ask the Nebius
+  Discord (a ready message was drafted in the Oct 17 chat). Decide by Oct 22, hard stop Oct 25.
+- Pick the product name by Oct 18 (Complaint Replay vs Black Campus/Compass), then create the Devpost draft
+  ("Start project"); Claude prepares the field texts, never submits.
+- Sign up on Render (free) and click the GitHub App creation; Claude does the rest.
 - Decide whether `crp-demo-shopping-cart` becomes public (judges can't open private PR links).
 - Rotate the NVIDIA and Tavily keys after the hackathon (they were pasted in chat earlier).

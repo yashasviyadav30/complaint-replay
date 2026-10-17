@@ -11,7 +11,9 @@ import json
 import sys
 from pathlib import Path
 
+from replay.agent import snap
 from replay.browser import Session, evidence_key
+from replay.film import describe, write_gif
 from replay.conditions import Condition
 
 
@@ -37,10 +39,15 @@ def build_guard(case_id: str, complaint: str, cond: Condition, steps: list[dict]
 
 
 async def run_guard(url: str, guard: dict, storage_state: Path | None = None, screenshot: Path | None = None,
-                    checks: dict[str, str] | None = None, ready_text: str = "") -> dict:
+                    checks: dict[str, str] | None = None, ready_text: str = "", film: Path | None = None,
+                    ending: tuple[str, str] = ("The problem is gone.", "Still there: {}")) -> dict:
+    """Replay the guard's steps by code. With `film`, save them as a captioned GIF; `ending` captions the last
+    frame when the guard passes, and when it fails ({} is the evidence)."""
     cond = Condition(**guard["condition"])
+    frames: list | None = [] if film else None
     async with Session(url, cond, storage_state, checks, ready_text) as session:
-        for step in guard["steps"]:
+        await snap(session, frames, f"The user's screen: {cond.label}")
+        for n, step in enumerate(guard["steps"], 1):
             obs = await session.observe()
             action = {k: v for k, v in step.items() if k not in ("do", "label", "idx")} | {"type": step["do"]}
             on_page = {e["idx"] for e in obs["elements"]}
@@ -56,6 +63,9 @@ async def run_guard(url: str, guard: dict, storage_state: Path | None = None, sc
                 if not found:
                     action = {"type": step["do"].removesuffix("_role"), "target": step["idx"],
                               **({"text": step["text"]} if "text" in step else {})}
+            target = action.get("target") if action["type"] in ("click", "fill") else None
+            await snap(session, frames, f"Step {n}: {describe(action, step.get('label'))}",
+                       idx=target if isinstance(target, int) else None)
             await session.act(action)
         await session.observe()
         if screenshot:
@@ -63,6 +73,10 @@ async def run_guard(url: str, guard: dict, storage_state: Path | None = None, sc
             await session.page.screenshot(path=str(screenshot))
         banned = set(guard["must_not_see"])  # evidence keys; older guards list bare kinds
         hits = [e for e in session.evidence if evidence_key(e.kind, e.detail) in banned or e.kind in banned]
+        if film:
+            await snap(session, frames, ending[1].format(hits[0].detail) if hits else ending[0],
+                       "alert" if hits else "good")
+            write_gif(frames, film)
     return {"passed": not hits, "evidence": [{"kind": e.kind, "detail": e.detail} for e in hits]}
 
 

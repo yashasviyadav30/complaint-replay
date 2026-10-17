@@ -108,12 +108,19 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
         case.setdefault("shots", {})[name] = f"{case['id']}-{name}.png"
         return shots / case["shots"][name]
 
+    def film(name: str) -> Path | None:
+        """A captioned GIF of the replay, for the PR and the reporter: watching the bug beats reading about it."""
+        if not shots:
+            return None
+        case.setdefault("films", {})[name] = f"{case['id']}-{name}.gif"
+        return shots / case["films"][name]
+
     if not (cond.screen_reader or cond.keyboard_only):  # add what the user said about themselves
         cond = with_needs(cond, await stated_needs(chat, case.get("said") or complaint))
         case["condition"] = {"label": cond.label, "persona": cond.persona}
 
     stage("reproducing")
-    before = await replay(live_url, complaint, cond, policy, matcher, shot("before"), **target)
+    before = await replay(live_url, complaint, cond, policy, matcher, shot("before"), film=film("before"), **target)
     case["replay"] = as_dict(before)
     if before.verdict != "reproduced":
         stage(before.verdict)
@@ -161,7 +168,9 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
         guard_file.write_text(json.dumps(guard, ensure_ascii=False, indent=2), encoding="utf-8")
         with running_app(branch) as url:
             on_fix = await run_guard(url, guard, project.auth_file, shot("after"), project.check_scripts,
-                                     project.ready_text)
+                                     project.ready_text, film=film("after"),
+                                     ending=("After the fix: the same steps, and the problem is gone.",
+                                             "Still broken after this fix: {}"))
         if on_fix["passed"]:
             break
         # One more round with what the proof saw. Cloud case 8733 (run 8) named the right function
