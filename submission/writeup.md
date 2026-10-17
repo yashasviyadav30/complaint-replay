@@ -23,12 +23,14 @@ That is not rare. Studies of real bug trackers find 13-24% of bug reports are ne
 
 Complaint Replay turns a user's complaint into a pull request: proof of the bug, the fix, and a test that stops it from coming back.
 
-1. **Hears.** A one-line widget adds "Report a problem" to any site, in 17 languages. With each complaint it records the user's real conditions: screen, device, network, language, timezone, dark mode, reduced motion. It also catches silent frustration (rage clicks, page errors, failed requests), and takes complaints from GitHub issues, support-desk email and Sentry.
+1. **Hears.** A one-line widget adds "Report a problem" to any site, in 17 languages, typed or spoken. With each complaint it records the user's real conditions: screen, device, network, language, timezone, dark mode, reduced motion. It also catches silent frustration (rage clicks, page errors, failed requests), and takes complaints from GitHub issues, support-desk email and Sentry.
 2. **Reproduces.** In the team's own GitHub Actions, an AI twin opens a real browser under those exact conditions and repeats what the user did. If the user says they use a screen reader or only a keyboard, in any language, the twin does too.
-3. **Proves.** Evidence comes only from code watching the browser: failed requests, a button pushed off a phone screen, an English error shown to a Hindi user, a control a screen reader announces only as "1", the same payment sent twice. The model may cite evidence; it cannot invent it.
+3. **Proves.** Evidence comes only from code watching the browser: failed requests, a button pushed off a phone screen, an English error shown to a Hindi user, a control a screen reader announces only as "button", the same payment sent twice. The model may cite evidence; it cannot invent it. For screen-reader bugs, the developer can press Listen and hear the page the way a blind user does.
 4. **Fixes.** NVIDIA Nemotron reads the evidence, web research about it, and the relevant source files, and writes the smallest fix on a new branch.
 5. **Guards.** The steps that triggered the bug run again on the fix, by code, with no model. They become a test that must pass on the fix and fail on the old code, and it runs in CI on every later pull request.
-6. **Closes the loop.** A pull request arrives with the evidence, before/after screenshots and the guard. The person who complained sees "fixed" in the widget.
+6. **Closes the loop.** A pull request arrives with the evidence, the guard, and two short films of the user's steps: the bug, then the same steps on the fix. The person who complained sees "fixed" in the widget, with a link to watch it working.
+
+Coding agents can drive it too: `crp mcp` gives Claude Code, Cursor or Copilot tools to replay a complaint and run the guards, so an agent can work on a proven bug until its guard passes.
 
 The source code never leaves the team's CI. Teams set it up in about ten minutes: one script tag, one workflow file, one GitHub App click.
 
@@ -40,7 +42,8 @@ The source code never leaves the team's CI. Teams set it up in about ten minutes
 - **axe-core** and **fastText language ID** give hard accessibility and language evidence on CPU.
 - **Tavily** searches for the documented cause of the evidence before the fix; the pull request lists the sources the fix relied on.
 - **GitHub Actions** runs every replay in the customer's own CI. A **FastAPI** server handles projects, widget keys, PII masking (including Devanagari digits, PAN and Aadhaar), signed case tokens, retention and a GitHub App made from a manifest in one click. **React, Vite and Tailwind** for the dashboard: setup wizard, an impact-ranked board, case detail with evidence, diff, proof and guard.
-- Self-host with Docker Compose, or bring your own model through any OpenAI-compatible server.
+- An **MCP server** (`crp mcp`) exposes replays and guards to coding agents; the films are captioned GIFs drawn with Pillow; the Listen button uses the browser's own speech engine, so it costs nothing.
+- Self-host with Docker Compose, host on Render's free plan with nothing to fill in but keys, or bring your own model through any OpenAI-compatible server.
 
 ## Results, misses included
 
