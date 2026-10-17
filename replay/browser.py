@@ -83,6 +83,28 @@ DIALOG_OPEN_JS = """() => [...document.querySelectorAll('[role=dialog], [role=al
   .some((e) => e.getBoundingClientRect().width > 0)"""
 MAX_KEY_REPEAT = 15
 # The text of the dialog on top, so the twin knows WHAT opened (a scheduled-payment menu is not the editor).
+# A date/time field the user tapped whose picker did not open, and which shows no picker icon either: the user has no
+# way to change the value. ':open' tells a picker that opened from one that did not, even headless (Chromium 133+).
+# Computed styles can't see a hidden icon, so the page's own rules are read. Actual hid the icon and Chromium only
+# opens the picker from it (cloud case 9071).
+PICKER_JS = r"""(el) => {
+  const types = ['date', 'time', 'month', 'week', 'datetime-local'];
+  if (el.tagName !== 'INPUT' || !types.includes(el.type) || el.disabled || el.readOnly) return '';
+  try { if (el.matches(':open')) return ''; } catch (e) { return ''; }
+  const PSEUDO = '::-webkit-calendar-picker-indicator';
+  for (const sheet of document.styleSheets) {
+    let rules; try { rules = sheet.cssRules; } catch (e) { continue; }
+    for (const r of rules || []) {
+      if (!r.selectorText || !r.selectorText.includes(PSEUDO)) continue;
+      if (!(r.style.display === 'none' || r.style.opacity === '0' || r.style.visibility === 'hidden')) continue;
+      for (const sel of r.selectorText.split(',')) {
+        if (!sel.includes(PSEUDO)) continue;
+        try { if (el.matches(sel.split(PSEUDO).join('').trim() || '*')) return el.type; } catch (e) {}
+      }
+    }
+  }
+  return '';
+}"""
 DIALOG_TEXT_JS = r"""() => { const d = [...document.querySelectorAll('[role=dialog], [role=alertdialog], [aria-modal=true], dialog[open]')]
   .filter((e) => e.getBoundingClientRect().width > 0).pop();
   return d ? d.innerText.trim().replace(/\s+/g, ' ').slice(0, 160) : ''; }"""
@@ -532,6 +554,8 @@ class Session:
             return "ok, and nothing on this screen is loading any more (no spinner, network quiet): act on what you see"
         if kind not in ("fill", "fill_role", "fill_css", "type"):
             await self._check_typed(self.last_target or action.get("selector") or action.get("key") or "a control")
+        if taps:
+            await self._check_picker(action)  # runs even when the tap changed nothing: that is this bug's symptom
         if len(self._new_tabs) > tabs_before:
             # An external link opened a new tab: a response, not a dead button (cloud case 9038's "guided tour"
             # docs link was cited as proof). The twin stays on the app.
@@ -548,6 +572,18 @@ class Session:
                 # menu nine times looking for a transaction's edit screen.
                 return f"ok, a dialog opened: '{dialog}'"
         return "ok"
+
+    async def _check_picker(self, action: dict) -> None:
+        selector = f'[data-bc-idx="{self.last_idx}"]' if self.last_idx is not None else action.get("selector")
+        if not selector:
+            return
+        try:
+            kind = await self.page.locator(selector).first.evaluate(PICKER_JS, timeout=2000)
+        except Exception:
+            return
+        if kind:
+            self.add("picker_not_opened", f"tapping '{self.last_target or selector}' (<input type=\"{kind}\">) did not open its {kind} "
+                                          "picker, and the field shows no picker button: the value can't be changed")
 
     async def _tap_where(self, idx: int) -> bool:
         """Tap the screen where a control is, the way a finger does, whatever the control's state."""

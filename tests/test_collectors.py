@@ -36,6 +36,7 @@ CASES = [
     ("unnamed.html", CONDITIONS["screen_reader"], [], "unclear_name"),
     ("dead_button.html", PHONE, [{"type": "click_css", "selector": "#pick"}], "no_response"),
     ("blocked.html", PHONE, [{"type": "click_css", "selector": "#date"}], "tap_blocked"),
+    ("picker.html", PHONE, [{"type": "click_css", "selector": "#buggy"}], "picker_not_opened"),
     ("no_label.html", replace(PHONE, audit=True), [], "a11y_violation"),  # public-sector pack: everyone audited
     ("amount.html", PHONE, [{"type": "fill_css", "selector": "#amount", "text": "42.50"},
                             {"type": "click_css", "selector": "#buggy-cleared"}], "typed_value_lost"),
@@ -308,3 +309,10 @@ def test_a_focusable_div_is_a_control(site) -> None:
 
     labels = asyncio.run(body())
     assert len(labels) == 2 and "Kroger" in labels[0] and "Publix" in labels[1]
+
+
+def test_a_date_field_whose_picker_opens_or_that_shows_its_icon_is_fine(site) -> None:
+    # The fixed field calls showPicker (Actual's real fix); the plain one keeps its picker icon (normal desktop UI).
+    for field in ("#fixed", "#plain"):
+        assert not [k for k in kinds(f"{site}/picker.html", PHONE, [{"type": "click_css", "selector": field}])
+                    if k.startswith("picker_not_opened")]
