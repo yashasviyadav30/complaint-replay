@@ -18,7 +18,7 @@ env:
 jobs:
   cases:
     runs-on: ubuntu-latest
-    timeout-minutes: 75
+    timeout-minutes: 120
     strategy:
       fail-fast: false
       max-parallel: 1          # one shared free model key: parallel jobs overload it (503). Raise with a Token Factory key.

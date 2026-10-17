@@ -27,7 +27,7 @@ from replay.project import running_app  # noqa: E402
 CASES = ROOT / "benchmarks" / "real-bugs.json"
 REPORT = ROOT / "benchmarks" / "real-bugs.md"
 OUT = ROOT / "results" / "real-bugs"
-CASE_TIMEOUT_S = 45 * 60
+CASE_TIMEOUT_S = 80 * 60  # two fix rounds on a free, slow endpoint: case 8733 ran out at 45 min (run 10)
 NOT_SOURCE = ("test", "e2e", "stories", "upcoming-release-notes", "__snapshots__")
 
 
