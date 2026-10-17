@@ -146,7 +146,9 @@ Rules:
 - "ux_confusion": nothing is technically broken, but this user would get lost. Explain where.
 - "not_reproduced": you repeated every step the user took and finished their task without hitting the problem.
 - The moment the Evidence list has an item that matches the complaint, give the "reproduced" verdict citing it.
-- If you finished the user's whole task and no matching evidence appeared, give "not_reproduced". Do not wander."""
+- If you finished the user's whole task and no matching evidence appeared, give "not_reproduced". Do not wander.
+- A control marked (disabled) is not the bug by itself: apps disable fields while another one is being edited.
+  Finish or close that first (press Enter, tap a neutral spot, or Escape), then try the control again."""
 
 SIGHTED_ACTIONS = """{"type": "click", "target": <idx>}   (add "times": 2 to tap twice quickly, like an impatient user)
 {"type": "fill", "target": <idx>, "text": "..."}"""
