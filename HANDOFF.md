@@ -17,7 +17,7 @@ Read this first in a new session. The plan is `plan.md` (phases, gates, cut list
 - Heredoc/python string edits turn `\n` inside strings into real newlines: use the Edit tool for those.
 
 **State right now**
-- Code: all committed and pushed to `main` except the replay-film feature (see "In flight"). ~165 tests.
+- Code: all committed and pushed to `main` (last: the replay film, f387fcb). 161 tests.
 - Real-bug benchmark (Actual Budget, 8 bugs, GitHub Actions `real-bugs.yml`): published in README +
   `benchmarks/real-bugs.md` from run 11: strict solved 0/8, fixed and guarded in any file 1/8 (8733, diff in
   `benchmarks/real-bugs-8733-our-fix.diff`). Run 13 (39040748961) was running with all fixes. Read a case:
@@ -37,9 +37,9 @@ Read this first in a new session. The plan is `plan.md` (phases, gates, cut list
 1. Replay film (WOW idea #1): `replay/film.py` makes a captioned GIF, one frame per step, the control about to be
    used boxed in yellow, last frame red ("Found: ...") or green ("the problem is gone"). Wired into
    `agent.replay(film=...)`, `guard.run_guard(film=..., ending=...)`, `investigate` (`case["films"]` before/after)
-   and the PR body (films play inline on GitHub; stills are the fallback). Tests added; the full suite was
-   running. NEXT: commit after green, then show films in the dashboard case view and on the reporter's status
-   page ("here is your problem, as you saw it; it's fixed"), then use them in the demo video.
+   and the PR body (films play inline on GitHub; stills are the fallback). Committed (f387fcb), suite green.
+   NEXT: show films in the dashboard case view (server must serve `.gif` from the shots dir) and on the
+   reporter's status page ("here is your problem, as you saw it; it's fixed"), then use them in the demo video.
 2. Benchmark run 13: read each case, fix what misses teach, rerun.
 
 **WOW / user-centric list (ranked, Oct 17)**: (1) replay film, building; (2) "hear what a blind user hears":
