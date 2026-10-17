@@ -72,6 +72,9 @@ Phase 1 tasks 1.0-1.7 (except 1.8) and most of 1.9/1.10 are built and tested (`u
 - 8733 reproduces for real every run (amount lost after tapping Cleared); the fixer sees table/utils.ts but keeps
   patching its caller. Actual hints (public, `benchmarks/actual-complaint-replay.toml`) now explain scheduled rows,
   the '✓' sort header and which transactions show a Reconciled switch.
+- Second benchmark app: rule = open source, one dev command, no database or login, 2026 fixes visible on the page,
+  take every fix in a window. Checked Oct 17 and rejected: IT-Tools (fixes 2023-24, likely in model training),
+  Homepage (fixes need outside services), Uptime Kuma and memos (login + setup first). Still open.
 - Lesson for me: never run two pytest suites at once here (shared `workspace/badshop`), and commit only after a
   green run.
 - Memory: the laptop ran out once (Chrome + Docker + two Actual dev servers). Docker Desktop is stopped; don't
