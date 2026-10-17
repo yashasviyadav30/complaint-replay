@@ -66,7 +66,8 @@ async def _drive(session: Session, complaint: str, condition: Condition, policy:
     last_result = "(page just opened)"
     judged = 0
     prev_view = None
-    for step in range(condition.max_steps):
+    # Keyboard users need many more presses than a tap to reach the same control (cloud case 8570 ran out of steps).
+    for step in range(condition.max_steps * (2 if condition.keyboard_only else 1)):
         obs = await session.observe()
         if not visited or visited[-1] != obs["url"]:
             visited.append(obs["url"])

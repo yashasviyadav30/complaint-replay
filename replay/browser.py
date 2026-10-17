@@ -455,6 +455,8 @@ class Session:
     async def act(self, action: dict) -> str:
         """Run one action. Returns 'ok' or a short error the model can react to."""
         self.step += 1
+        if action.get("type") == "tab":  # the model often writes {"type": "tab"} for the Tab key (cloud case 8570)
+            action = {**action, "type": "press", "key": "Tab"}
         page, kind = self.page, action.get("type")
         try:
             idx = int(action.get("target", -1))

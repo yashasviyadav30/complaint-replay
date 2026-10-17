@@ -57,7 +57,9 @@
     el.setAttribute('data-bc-idx', i);
     els.push(el);
     elements.push({ idx: i++, tag: el.tagName.toLowerCase(), role: el.getAttribute('role') || '',
-      label: name(el) || (nearText(el) ? `(no name) near '${nearText(el)}'` : ''),
+      // A small square with no name is almost always a checkbox or toggle: say so, so 'tick the box at the start
+      // of the row' can be matched (cloud case 8765).
+      label: name(el) || (nearText(el) ? `(no name${r.width <= 28 && r.height <= 28 ? ', small box' : ''}) near '${nearText(el)}'` : ''),
       value: (el.type === 'password' ? '' : el.value) || '', disabled: !!el.disabled });
     // A name with no letters ("1", "+", "x") tells a screen-reader user nothing about what the control does.
     if (!['input', 'select', 'textarea'].includes(el.tagName.toLowerCase()) && !/\p{L}/u.test(name(el))) {

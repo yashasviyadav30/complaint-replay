@@ -330,3 +330,23 @@ def test_typing_words_with_no_field_focused_is_refused_but_shortcuts_go_through(
 
     refused, shortcut, typed = asyncio.run(body())
     assert refused.startswith("error: no text field has focus") and shortcut.startswith("ok") and typed == "rent"
+
+
+def test_a_tab_action_presses_tab(site) -> None:
+    async def body() -> str:
+        async with browser.Session(f"{site}/popover.html", PHONE) as s:
+            await s.page.set_content("<button>a</button><button id=b>b</button>")
+            await s.act({"type": "tab", "times": 2})
+            return await s.page.evaluate("document.activeElement.id")
+
+    assert asyncio.run(body()) == "b"
+
+
+def test_a_small_unnamed_box_is_called_one(site) -> None:
+    async def body() -> list[str]:
+        async with browser.Session(f"{site}/popover.html", PHONE) as s:
+            await s.page.set_content("<div><div tabindex=0 style='width:12px;height:12px;border:1px solid'></div>"
+                                     "<span>Kroger 3.92</span></div>")
+            return [e["label"] for e in (await s.observe())["elements"]]
+
+    assert asyncio.run(body())[0].startswith("(no name, small box) near 'Kroger")
