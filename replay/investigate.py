@@ -27,6 +27,7 @@ BRANCHES = Path(tempfile.gettempdir()) / "complaint-replay" / "branches"
 LINKED = {"node_modules", ".venv", "venv"}
 GUARDS = ".complaint-replay/guards"
 FIX_ATTEMPTS = 3  # the third catches a malformed reply after a rejected edit (cloud case 9064)
+PROOF_ROUNDS = 2  # a patch the proof rejects gets one more try, told what the proof still saw
 Update = Callable[[dict], None]
 
 
@@ -127,35 +128,48 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
     stage("fixing")
     fix_model = await pick_fix_model(client)
     sources = await research([e for e in before.evidence if e.id in before.cited])
-    rejected = None
-    patch = None
-    errors = []  # every attempt's reason, not only the last: the first one often says more
-    for _ in range(FIX_ATTEMPTS):  # a rejected edit, or an unreadable reply, gets one retry with the reason
-        try:
-            tried = tuple(str(e.get("file", "")) for e in patch.edits) if patch else ()
-            patch = await propose_fix(client, fix_model, complaint, cond, before, branch, sources, rejected,
-                                      project.edit, tried)
-            diff = apply_patch(patch, branch, project.edit)
-            break
-        except ValueError as e:  # includes a reply that was not valid JSON (seen on a big real repo)
-            rejected = str(e)[:300]
-            errors.append(rejected)
-    else:
-        case["fix"] = {"model": fix_model, "explanation": patch.explanation if patch else "", "error": rejected,
-                       "errors": errors, "edits": list(patch.edits) if patch else []}  # what it tried, to learn from
-        stage("fix_failed")
-        return case
-    case["fix"] = {"model": fix_model, "explanation": patch.explanation, "diff": diff, "edits": list(patch.edits),
-                   "sources": [{"title": s["title"], "url": s["url"]} for s in sources]}
+    still_broken = None  # set when a patch applied but the replayed steps still showed the bug
+    tried: tuple[str, ...] = ()
+    for proof_round in range(PROOF_ROUNDS):
+        if proof_round:
+            branch = branch_copy(source, BRANCHES / case["id"])  # a fresh copy: the failed patch is gone
+            stage("fixing")
+        rejected, patch, errors = still_broken, None, []  # every attempt's reason: the first often says more
+        for _ in range(FIX_ATTEMPTS):  # a rejected edit, or an unreadable reply, gets a retry with the reason
+            try:
+                tried = tuple(str(e.get("file", "")) for e in patch.edits) if patch else tried
+                patch = await propose_fix(client, fix_model, complaint, cond, before, branch, sources, rejected,
+                                          project.edit, tried)
+                diff = apply_patch(patch, branch, project.edit)
+                break
+            except ValueError as e:  # includes a reply that was not valid JSON (seen on a big real repo)
+                rejected = str(e)[:300]
+                errors.append(rejected)
+        else:
+            case["fix"] = {"model": fix_model, "explanation": patch.explanation if patch else "", "error": rejected,
+                           "errors": errors, "edits": list(patch.edits) if patch else []}  # what it tried
+            stage("fix_failed")
+            return case
+        case["fix"] = {"model": fix_model, "explanation": patch.explanation, "diff": diff, "edits": list(patch.edits),
+                       "sources": [{"title": s["title"], "url": s["url"]} for s in sources]}
 
-    # Proof and guard are one thing: the exact steps that triggered the bug, replayed by code, no model.
-    # A fresh model-driven proof replay once "proved" a fix by never reaching the broken screen at all.
-    stage("proving")
-    guard_file = branch / GUARDS / f"{case['id']}.json"
-    guard_file.parent.mkdir(parents=True, exist_ok=True)
-    guard_file.write_text(json.dumps(guard, ensure_ascii=False, indent=2), encoding="utf-8")
-    with running_app(branch) as url:
-        on_fix = await run_guard(url, guard, project.auth_file, shot("after"), project.check_scripts, project.ready_text)
+        # Proof and guard are one thing: the exact steps that triggered the bug, replayed by code, no model.
+        # A fresh model-driven proof replay once "proved" a fix by never reaching the broken screen at all.
+        stage("proving")
+        guard_file = branch / GUARDS / f"{case['id']}.json"
+        guard_file.parent.mkdir(parents=True, exist_ok=True)
+        guard_file.write_text(json.dumps(guard, ensure_ascii=False, indent=2), encoding="utf-8")
+        with running_app(branch) as url:
+            on_fix = await run_guard(url, guard, project.auth_file, shot("after"), project.check_scripts,
+                                     project.ready_text)
+        if on_fix["passed"]:
+            break
+        # One more round with what the proof saw. Cloud case 8733 (run 8) named the right function
+        # (deserializeTransaction) but patched its caller; the guard said no, and the fixer never heard why.
+        tried = tuple(str(e.get("file", "")) for e in patch.edits)
+        still_broken = ("your patch applied, but replaying the user's steps on it still shows the bug: "
+                        + json.dumps(on_fix["evidence"], ensure_ascii=False)[:300]
+                        + ". Look again for the real cause, maybe in a function the code you changed calls")
     on_bug = await run_guard(live_url, guard, project.auth_file, checks=project.check_scripts,
                              ready_text=project.ready_text)
     case["proof"] = {"passed": on_fix["passed"], "evidence": on_fix["evidence"], "steps": len(guard["steps"])}
