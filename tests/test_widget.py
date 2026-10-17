@@ -83,3 +83,35 @@ def test_a_fixed_report_links_the_reporter_to_the_film_of_it_working(service) ->
     seen = asyncio.run(run())
     assert seen["text"] == "अब इसे ठीक चलते हुए देखें" and seen["href"] == service + "/shots/c1-after.gif"
 
+
+# The browser's speech service, faked: headless Chromium can't hear. It "hears" one sentence on start().
+FAKE_SPEECH = """window.webkitSpeechRecognition = class {
+  start() { this.started = true; setTimeout(() => {
+    this.onresult({ results: [[{ transcript: 'पेमेंट बटन काम नहीं करता' }]] }); this.onend(); }, 50); }
+  stop() { this.onend(); }
+};
+window.SpeechRecognition = window.webkitSpeechRecognition;"""
+
+
+def test_a_visitor_can_speak_the_complaint_in_their_language(service) -> None:
+    async def run() -> dict:
+        page_html = f'<!doctype html><html><body><script src="{service}/widget.js" data-project="demo"></script></body></html>'
+        async with async_playwright() as pw:
+            browser = await pw.chromium.launch()
+            context = await browser.new_context(locale="hi-IN")
+            await context.add_init_script(FAKE_SPEECH)
+            page = await context.new_page()
+            await page.route(service + SHOP_PATH, lambda r: r.fulfill(status=200, content_type="text/html", body=page_html))
+            await page.goto(service + SHOP_PATH)
+            await page.locator("#cr-widget > button").click()
+            mic = page.locator("#cr-widget .mic")
+            seen = {"label": await mic.inner_text()}
+            await mic.click()
+            await page.wait_for_function("document.querySelector('#cr-text').value.length > 0")
+            seen["text"] = await page.locator("#cr-text").input_value()
+            seen["pressed"] = await mic.get_attribute("aria-pressed")
+            await browser.close()
+        return seen
+
+    seen = asyncio.run(run())
+    assert seen == {"label": "🎤 बोलकर बताएँ", "text": "पेमेंट बटन काम नहीं करता", "pressed": "false"}

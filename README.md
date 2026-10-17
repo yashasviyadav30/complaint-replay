@@ -6,7 +6,7 @@ A customer writes *"OTP never comes!"*, *"الزر لا يعمل"* or *"I use a 
 
 Complaint Replay turns the complaint into a pull request:
 
-1. **Hears** it: a one-line widget on your site takes the complaint in any language, plus silent signals (rage clicks, page errors, failed or slow requests), plus the user's real conditions: screen, device, network, language, timezone, dark mode, reduced motion.
+1. **Hears** it: a one-line widget on your site takes the complaint in any language, typed or spoken, plus silent signals (rage clicks, page errors, failed or slow requests), plus the user's real conditions: screen, device, network, language, timezone, dark mode, reduced motion.
 2. **Reproduces** it: an AI twin opens a real browser **under those exact conditions** and repeats what the user did. If the user says they use a screen reader or only a keyboard, the twin does too.
 3. **Proves** it with machine evidence only. The AI may only cite what code watching the browser recorded.
 4. **Fixes** it: NVIDIA Nemotron reads the evidence and the relevant source files and writes the smallest fix.
@@ -156,6 +156,7 @@ flowchart LR
 
 ## Privacy and security
 
+- Users can speak a complaint instead of typing it. The browser's own speech service turns it into text (in Chrome, that service is Google's) and the user checks the text before sending; no audio reaches Complaint Replay.
 - The widget never sends what users type into your forms, only button names. Emails, phone numbers (digits in any script), card and account numbers, PAN and Aadhaar are masked before storage and before any model sees them.
 - Your source code stays in your CI; the server receives evidence, steps and verdicts. Screenshots live in the pull request branch.
 - Fixes only ever land on a new branch and a pull request, committed as "Complaint Replay", never as a person, and only to the repo's own `origin`.
