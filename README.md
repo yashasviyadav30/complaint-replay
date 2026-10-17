@@ -81,7 +81,7 @@ Conditions come from the widget (measured on the real user's device) plus what t
 
 ## What counts as evidence
 
-Code watching the browser records: failed requests, HTTP errors, console errors, slow requests, controls off screen or covered by something else, text cut off, the page wider than the screen, missing images, slow pages and layout jumps (web vitals), spinners stuck for 15 s, redirect loops, taps that did nothing at all, taps that something else intercepted, messages not in the user's language (fastText language ID on CPU), right-to-left pages laid out left-to-right, invisible keyboard focus, things a keyboard can't reach, controls a screen reader announces only as "1" or "+", accessibility violations (axe-core, WCAG 2.2 AA), money values that disagree between API calls, and the same payment sent twice. Teams can add their own rules too: list JavaScript files under `checks` in `complaint-replay.toml`, each a function returning problems ("the invoice total doesn't match its lines"), and they run on every replay and every guard. Every item says where on the page it happened ("in the navigation", "near 'Book $10.99'").
+Code watching the browser records: failed requests, HTTP errors, console errors, slow requests, controls off screen or covered by something else, text cut off, the page wider than the screen, missing images, slow pages and layout jumps (web vitals), spinners stuck for 15 s, redirect loops, taps that did nothing at all, taps that something else intercepted, values the user typed that vanish after another tap, Enter saving a different option than the highlighted one, date fields whose picker never opens, messages not in the user's language (fastText language ID on CPU), right-to-left pages laid out left-to-right, invisible keyboard focus, things a keyboard can't reach, controls a screen reader announces only as "1" or "+", accessibility violations (axe-core, WCAG 2.2 AA), money values that disagree between API calls, and the same payment sent twice. Teams can add their own rules too: list JavaScript files under `checks` in `complaint-replay.toml`, each a function returning problems ("the invoice total doesn't match its lines"), and they run on every replay and every guard. Every item says where on the page it happened ("in the navigation", "near 'Book $10.99'").
 
 ## Results
 
@@ -95,7 +95,18 @@ Code watching the browser records: failed requests, HTTP errors, console errors,
 | "...the buttons next to the book only say plus and minus" | Quantity buttons announced as "+" and "−" | `aria-label` on both | GitHub Actions, started by hand |
 | "I'm blind... the product pictures are not described at all" | `image-alt` violation on every product image | `alt` text on the images | Full loop: widget, server, GitHub Actions, PR, status back to the widget |
 
-Each guard passed on the fix and failed on the old code when the pipeline checked it; for the first pull request the same check also ran in CI (`crp guard --base main`). Three is a small number: it shows the chain works on code we did not write, not how often it works. A larger benchmark on real, closed issues of open-source apps is in progress.
+Each guard passed on the fix and failed on the old code when the pipeline checked it; for the first pull request the same check also ran in CI (`crp guard --base main`). Three is a small number: it shows the chain works on code we did not write, not how often it works.
+
+### On real bugs from a real product, misses included
+
+[Actual Budget](https://github.com/actualbudget/actual), an open-source budgeting app, fixed these 8 bugs between August and October 2026. For each one we put the bug back by reversing the real fix, gave Complaint Replay only a complaint written like a user would write it, and let it run in GitHub Actions ([`real-bugs.yml`](.github/workflows/real-bugs.yml)). The real fix is the answer key.
+
+Latest full run (Oct 17, Nemotron 3 Super, [table](benchmarks/real-bugs.md)):
+
+- **Solved, strict: 0 of 8.** Fixed, guarded, and in a file the real fix also changed.
+- **Fixed and guarded in any file: 1 of 8.** "I type the amount, tap Cleared, and the amount disappears" was reproduced, fixed and guarded: the user's own steps, replayed by code, show the bug on the old code and not on ours. Our fix corrects the caller that passed the wrong data; upstream fixed the function it calls. [Read our diff](benchmarks/real-bugs-8733-our-fix.diff) and judge it yourself.
+
+The first runs scored 0 for bad reasons: the twin wandered, and the judge accepted "page loaded slowly" or a tap on a greyed-out field as proof. Each miss became a fix with a test (26 commits since Oct 16): a disabled control or a tap behind an open menu is never proof; the twin's own claims go through the judge; the fixer may never edit tests; a rejected patch gets a second round with what the proof saw; switches drawn as labels and focusable `div`s count as controls; new evidence catches date fields whose picker never opens. Four of the eight need things no general check can see (a missing option, an app-specific balance, a lock icon, a non-current month); the [table](benchmarks/real-bugs.md) says which and why.
 
 ### On the demo shop, 7 planted bugs, 3 runs each
 

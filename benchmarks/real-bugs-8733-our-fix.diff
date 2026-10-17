@@ -1,0 +1,22 @@
+--- a/packages/desktop-client/src/components/mobile/transactions/TransactionEdit.tsx
++++ b/packages/desktop-client/src/components/mobile/transactions/TransactionEdit.tsx
+@@ -84,6 +84,7 @@
+ import { propagateRuleChangeToSubtransactions } from '#components/transactions/applyRulesToTransaction';
+ import {
+   getClearedFieldNames,
++  serializeTransaction,
+   shouldApplyRuleChange,
+   trackClearedField,
+ } from '#components/transactions/table/utils';
+@@ -1727,9 +1728,10 @@
+       serializedTransaction: TransactionEntity,
+       updatedField: keyof TransactionEntity,
+     ) => {
++      const serialized = serializeTransaction(serializedTransaction);
+       const transaction = deserializeTransaction(
++        serialized,
+         serializedTransaction,
+-        null,
+         dateFormat,
+       );
+ 
