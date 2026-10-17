@@ -48,7 +48,7 @@ def main() -> None:
         print(f"Fix ({case['fix']['model']}): {case['fix'].get('explanation') or case['fix'].get('error')}")
         print(case["fix"].get("diff", ""))
     if "proof" in case:
-        print(f"Proof replay: {case['proof']['verdict']}")
+        print(f"Proof (same steps on the fix): {'passed' if case['proof'].get('passed') else 'failed'}")
 
 
 if __name__ == "__main__":

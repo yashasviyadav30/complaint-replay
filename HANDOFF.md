@@ -71,8 +71,17 @@ read it whole) is `~/.claude/projects/C--Users-yasha-Downloads-Nebius-x-NVIDIA-G
   `showPicker()`, ours patched the screen; 8733 same pattern); cases record `fix.shown` and `show_case.py` says
   whether the real fix file was shown. 8926's real fix is a new feature across 6 files: stays an honest miss.
 
+- Run 13 final (39040748961, before tonight's fixes): solved 0/8, fixed in any file 0/8 (run 11 had 1/8).
+  Fixed after it, with tests: a tap reports the control's new state ("it is now checked", "it now shows a mark",
+  "its mark went away"; 8765 toggled one row 8 times on bare "ok"s) and no longer says "nothing visible
+  changed" over it; keyboard twins' stop summary states their real budget (50, not 25); screen-reader name check
+  ignores aria-hidden text and reads aria-labelledby (the demo cart was reported as "announced as '0'" while a
+  screen reader says just "button").
+- Demo cases re-recorded with films (bug 4: Pay off a 360 px screen; bug 10: screen reader + transcript), both
+  guarded. Video script updated to use voice, Listen, films and MCP.
+
 **In flight**
-1. Benchmark run 13 (39040748961): 8733, 8765, 8570, 9038 were still to land. Then run 14 with tonight's fixes.
+1. Benchmark run 14: start it after the commit that holds tonight's fixes; read each case as before.
 2. Demo dashboard (gh-pages) has no films/transcripts yet: record fresh demo-shop cases (one screen-reader), then
    `scripts/deploy_demo.sh` (it pushes gh-pages: ask the user first, it is public).
 

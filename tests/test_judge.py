@@ -204,6 +204,7 @@ def test_a_screen_reader_replay_keeps_what_the_user_heard(tmp_path) -> None:
     assert list(heard) == ["Cart, heading level 2", "1, button", "image", "Home, link", "Apples $3", "Qty", "Qty, edit, 2"]
     assert spoken('- checkbox "Gift" [checked]\n- button "Pay" [disabled]') == ["Gift, check box, checked",
                                                                               "Pay, button, unavailable"]
+    assert spoken('- button "Add Chai": Add') == ["Add Chai, button"]  # its own text is not a value
     assert asyncio.run(_sighted(tmp_path, policy)) == ()
 
 
@@ -214,3 +215,29 @@ async def _sighted(root, policy) -> list:
 
     with running_app(root) as url:
         return (await replay(url, "x", CONDITIONS["fast_desktop"], policy)).heard
+
+
+def test_the_twin_is_told_whether_a_tapped_box_is_now_ticked(tmp_path) -> None:
+    import asyncio
+
+    from replay.agent import replay
+    from replay.conditions import CONDITIONS
+    from replay.project import running_app
+
+    # Cloud case 8765 (run 13): Actual's row box shows "selected" only as a checkmark SVG, and every tap said just
+    # "ok", so the twin ticked and unticked the same row eight times.
+    (tmp_path / "index.html").write_text(
+        '<div tabindex="0" style="width:12px;height:12px;border:1px solid" '
+        'onclick="this.innerHTML = this.innerHTML ? \'\' : \'<svg width=6 height=6></svg>\'"></div>'
+        '<input type="checkbox" aria-label="Gift">', encoding="utf-8")
+    results = []
+
+    async def policy(ctx: dict) -> dict:
+        results.append(ctx["last_result"])
+        script = [{"type": "click", "target": 0}, {"type": "click", "target": 0}, {"type": "click", "target": 1}]
+        return script[len(results) - 1] if len(results) <= len(script) else {"type": "verdict"}
+
+    with running_app(tmp_path) as url:
+        asyncio.run(replay(url, "x", CONDITIONS["fast_desktop"], policy))
+    assert "nothing visible changed" not in results[1]
+    assert "now shows a mark" in results[1] and "mark went away" in results[2] and "now checked" in results[3]

@@ -111,6 +111,13 @@ DIALOG_TEXT_JS = r"""() => { const d = [...document.querySelectorAll('[role=dial
   .filter((e) => e.getBoundingClientRect().width > 0).pop();
   return d ? d.innerText.trim().replace(/\s+/g, ' ').slice(0, 160) : ''; }"""
 READY_TEXT_TIMEOUT_S = 180
+# A tapped control's own state: checked/selected/pressed, else how many marks (tick icons) it holds. Actual's row
+# box shows "selected" only as a checkmark SVG (cloud case 8765).
+STATE_JS = r"""(el) => {
+  const aria = el.getAttribute('aria-checked') ?? el.getAttribute('aria-selected') ?? el.getAttribute('aria-pressed');
+  const state = el.type === 'checkbox' || el.type === 'radio' ? String(el.checked) : aria;
+  return { state: state ?? '', marks: el.querySelectorAll('svg, img').length };
+}"""
 BUSY_JS = """() => [...document.querySelectorAll('[aria-busy=true], [role=progressbar], [class*=spinner], [class*=loading]')]
   .some((e) => e.getBoundingClientRect().width > 0)"""
 # Playwright's click error names what took the tap: "- <div class=...> intercepts pointer events".
@@ -475,6 +482,8 @@ class Session:
         dialog_before = await self._dialog_text() if taps else ""
         requests_before = self._requests
         tabs_before = len(self._new_tabs)
+        tapped = page.locator(f'[data-bc-idx="{idx}"]').first if kind == "click" else None
+        state_before = await self._state(tapped)
         try:
             if kind == "click":
                 await tap(page.locator(f'[data-bc-idx="{int(action["target"])}"]'), action)
@@ -581,7 +590,26 @@ class Session:
                 # Cloud case 9064 (run 7): told only "a dialog is open", the twin reopened a scheduled payment's
                 # menu nine times looking for a transaction's edit screen.
                 return f"ok, a dialog opened: '{dialog}'"
-        return "ok"
+        return "ok" + self._state_note(state_before, await self._state(tapped))
+
+    async def _state(self, el) -> dict | None:
+        try:
+            return await el.evaluate(STATE_JS, timeout=1000) if el else None
+        except Exception:
+            return None
+
+    @staticmethod
+    def _state_note(before: dict | None, after: dict | None) -> str:
+        """Ticked or not, said plainly: told only "ok", the twin ticked and unticked one row eight times (8765)."""
+        if not before or not after:
+            return ""
+        if after["state"] in ("true", "false") and after["state"] != before["state"]:
+            return f", it is now {'checked' if after['state'] == 'true' else 'unchecked'}"
+        if after["marks"] > before["marks"]:
+            return ", it now shows a mark (ticked or selected)"
+        if after["marks"] < before["marks"]:
+            return ", its mark went away (unticked or unselected)"
+        return ""
 
     async def _check_picker(self, action: dict) -> None:
         selector = f'[data-bc-idx="{self.last_idx}"]' if self.last_idx is not None else action.get("selector")

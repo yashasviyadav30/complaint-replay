@@ -36,6 +36,7 @@ ROLE_WORDS = {"img": "image", "textbox": "edit", "combobox": "combo box", "check
               "radio": "radio button", "searchbox": "search edit", "spinbutton": "spin button"}
 STATE_WORDS = {"disabled": "unavailable", "checked": "checked", "expanded": "expanded", "pressed": "pressed",
                "selected": "selected", "required": "required"}
+VALUE_ROLES = {"textbox", "searchbox", "combobox", "spinbutton", "slider"}  # after the colon: a value, not a label
 SILENT = {"list", "group", "generic", "none", "presentation", "rowgroup", "table", "row", "main", "navigation",
           "banner", "contentinfo", "region", "form", "article", "section"}
 ARIA_LINE = re.compile(r'^(?P<role>[a-z]+)(?: "(?P<name>(?:[^"\\]|\\.)*)")?(?P<attrs>(?: \[[^\]]+\])*)'
@@ -60,6 +61,7 @@ def spoken(aria: str, limit: int = 80) -> list[str]:
             continue
         if role in SILENT and not name:
             continue
+        val = val if role in VALUE_ROLES else ""
         role_said = " ".join([ROLE_WORDS.get(role, role)] + [w for w in words if w.startswith("level")])
         said.append(", ".join(x for x in [name, role_said, *[w for w in words if w and not w.startswith("level")],
                                           val] if x))
@@ -139,13 +141,14 @@ async def _drive(session: Session, complaint: str, condition: Condition, policy:
     prev_view = None
     seen: dict[int, str] = {}  # control number -> its name when last on screen
     # Keyboard users need many more presses than a tap to reach the same control (cloud case 8570 ran out of steps).
-    for step in range(condition.max_steps * (2 if condition.keyboard_only else 1)):
+    budget = condition.max_steps * (2 if condition.keyboard_only else 1)
+    for step in range(budget):
         obs = await session.observe()
         seen.update({e["idx"]: e["label"] for e in obs.get("elements", [])})
         if not visited or visited[-1] != obs["url"]:
             visited.append(obs["url"])
         view = page_signature(obs)
-        if steps and view == prev_view:
+        if steps and view == prev_view and not last_result.startswith(("ok, it now", "ok, its mark", "ok, it is now")):
             last_result += " (nothing visible changed)"
         recent = {json.dumps({k: v for k, v in s["action"].items() if k != "why"}, sort_keys=True)
                   for s in steps[-REPEAT_LIMIT:]}
@@ -202,7 +205,7 @@ async def _drive(session: Session, complaint: str, condition: Condition, policy:
         match = await matcher(complaint, list(session.evidence))
         if match.get("evidence"):
             return judge({"verdict": "reproduced", **match}, session.evidence, steps)
-    stop = {"verdict": "not_reproduced", "summary": f"Stopped after {condition.max_steps} steps."}
+    stop = {"verdict": "not_reproduced", "summary": f"Stopped after {budget} steps."}
     return judge(stop, session.evidence, steps)
 
 

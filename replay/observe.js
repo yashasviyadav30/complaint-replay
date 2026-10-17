@@ -15,6 +15,14 @@
       .map((s) => (s || '').trim()).filter(Boolean);
     return [...new Set(parts)].join(' ').replace(/\s+/g, ' ').slice(0, 60);
   };
+  // What a screen reader announces: aria-labelledby, aria-label, else the text that isn't aria-hidden (demo bug 10:
+  // a hidden count badge "0" is not read, so the cart button is just "button").
+  const heardText = (node) => [...node.childNodes].map((c) => c.nodeType === 3 ? c.textContent
+    : c.nodeType === 1 && c.getAttribute('aria-hidden') !== 'true' ? (c.getAttribute('alt') || heardText(c)) : '').join(' ');
+  const heardName = (el) => ((el.getAttribute('aria-labelledby') || '').split(/\s+/)
+    .map((id) => document.getElementById(id)).filter(Boolean).map(heardText).join(' ').trim()
+    || (el.getAttribute('aria-label') || '').trim() || heardText(el).replace(/\s+/g, ' ').trim() || el.title || '')
+    .slice(0, 60);
   // A control with no name of its own (a bare toggle) is described by the text beside it, so it can be found.
   const nearText = (el) => {
     for (let a = el.parentElement, i = 0; a && i < 3; a = a.parentElement, i++) {
@@ -62,8 +70,8 @@
       label: name(el) || (nearText(el) ? `(no name${r.width <= 28 && r.height <= 28 ? ', small box' : ''}) near '${nearText(el)}'` : ''),
       value: (el.type === 'password' ? '' : el.value) || '', disabled: !!el.disabled });
     // A name with no letters ("1", "+", "x") tells a screen-reader user nothing about what the control does.
-    if (!['input', 'select', 'textarea'].includes(el.tagName.toLowerCase()) && !/\p{L}/u.test(name(el))) {
-      unnamed.push({ label: name(el), tag: el.tagName.toLowerCase(), where: where(el) });
+    if (!['input', 'select', 'textarea'].includes(el.tagName.toLowerCase()) && !/\p{L}/u.test(heardName(el))) {
+      unnamed.push({ label: heardName(el), tag: el.tagName.toLowerCase(), where: where(el) });
     }
     // Covered: fully on screen, yet the point at its centre belongs to something else (overlay, banner).
     if ((!modal || modal.contains(el)) && r.top >= 0 && r.bottom <= vh && r.left >= 0 && r.right <= vw) {

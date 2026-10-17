@@ -350,3 +350,9 @@ def test_a_small_unnamed_box_is_called_one(site) -> None:
             return [e["label"] for e in (await s.observe())["elements"]]
 
     assert asyncio.run(body())[0].startswith("(no name, small box) near 'Kroger")
+
+
+def test_unclear_name_reports_what_is_announced_not_hidden_text(site) -> None:
+    # Demo bug 10: the count badge is aria-hidden, so a screen reader says just "button", not "0".
+    found = kinds(f"{site}/unnamed_hidden.html", CONDITIONS["screen_reader"], [])
+    assert any(f.startswith("unclear_name:") and "'(nothing)'" in f for f in found), found
