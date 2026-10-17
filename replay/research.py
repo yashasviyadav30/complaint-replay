@@ -23,6 +23,12 @@ QUERIES = {
     "language_mismatch": "hard-coded English error message shown in a localized app, i18n fix",
     "amount_mismatch": "checkout charges full price although the cart shows the coupon discount, bug cause",
     "duplicate_request": "prevent double submit of payment button, duplicate order on slow network",
+    # The symptom, the way a developer would search it; never the answer (that would game the benchmark).
+    "picker_not_opened": "tapping an html input type=date does not open the date picker when the calendar icon "
+                         "is hidden, Chrome Android",
+    "typed_value_lost": "value typed in a React input resets to empty after tapping another control, cause",
+    "wrong_option_chosen": "keyboard Enter in a combobox selects a different option than the highlighted one",
+    "tap_blocked": "element intercepts pointer events, a button can't be tapped on mobile, CSS cause",
 }
 Post = Callable[[str, dict, str], dict]
 
