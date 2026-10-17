@@ -4,5 +4,5 @@ ready = "/"
 ready_text = "Try the demo"
 hints = """Actual is a budgeting app. It takes several seconds to load. First screen: press 'Try the demo' to open a demo budget with accounts and transactions.
 Desktop: the left sidebar has Budget, Reports, Schedules, 'All accounts' and each account; an account shows its transactions table. To select a transaction, tap the small empty box at the start of its row (the '✓' column header only sorts by cleared); select several, then a menu above the table offers bulk edits such as the date. A 'Take the tour' button in the sidebar starts the guided tour.
-Phone: the budget opens first; an 'Accounts' tab lists the accounts, and opening one shows its transactions, where new transactions can be added and opened. A transaction has payee, category, amount, date and Cleared/Reconciled switches."""
+Phone: the budget opens first; an 'Accounts' tab lists the accounts, and opening one shows its transactions, where new transactions can be added and opened. Rows marked 'Upcoming' or 'Due' are scheduled payments: they open a schedule menu, not the editor, so open an ordinary row to edit a transaction. A transaction has payee, category, amount, date and Cleared/Reconciled switches."""
 edit = ["packages/desktop-client/src/**", "packages/loot-core/src/**", "packages/component-library/src/**"]

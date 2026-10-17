@@ -140,3 +140,23 @@ def test_the_twins_own_reproduced_claim_goes_through_the_judge(tmp_path) -> None
     with running_app(tmp_path) as url:
         result = asyncio.run(replay(url, "Pay does nothing", CONDITIONS["fast_desktop"], policy, strict_judge))
     assert result.verdict == "not_reproduced"
+
+
+def test_the_twin_is_refused_a_sixth_tap_on_the_same_control(tmp_path) -> None:
+    import asyncio
+
+    from replay.agent import replay
+    from replay.conditions import CONDITIONS
+    from replay.project import running_app
+
+    (tmp_path / "index.html").write_text("<button onclick=\"this.dataset.n=(+this.dataset.n||0)+1\">Upcoming</button>"
+                                         "<button>Groceries</button>", encoding="utf-8")
+    results = []
+
+    async def policy(ctx: dict) -> dict:
+        results.append(ctx["last_result"])
+        return {"type": "click", "target": 0} if len(results) < 8 else {"type": "verdict", "verdict": "not_reproduced"}
+
+    with running_app(tmp_path) as url:
+        asyncio.run(replay(url, "x", CONDITIONS["fast_desktop"], policy))
+    assert any(r.startswith("error: not tapped. You already opened 'Upcoming' 5 times") for r in results)

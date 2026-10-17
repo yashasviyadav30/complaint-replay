@@ -169,7 +169,8 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
         tried = tuple(str(e.get("file", "")) for e in patch.edits)
         still_broken = ("your patch applied, but replaying the user's steps on it still shows the bug: "
                         + json.dumps(on_fix["evidence"], ensure_ascii=False)[:300]
-                        + ". Look again for the real cause, maybe in a function the code you changed calls")
+                        + ". Do not repeat that change. The value is probably lost further down: read the functions "
+                          "the code you changed calls (often in a file it imports) and fix it there")
     on_bug = await run_guard(live_url, guard, project.auth_file, checks=project.check_scripts,
                              ready_text=project.ready_text)
     case["proof"] = {"passed": on_fix["passed"], "evidence": on_fix["evidence"], "steps": len(guard["steps"])}

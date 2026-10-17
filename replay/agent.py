@@ -103,6 +103,13 @@ async def _drive(session: Session, complaint: str, condition: Condition, policy:
                           {"verdict": "not_reproduced",
                            "summary": str(action.get("summary", "")) + " [The judge found no evidence of this problem.]"})
             return judge(action, session.evidence, steps)
+        label = next((e["label"] for e in obs.get("elements", []) if e["idx"] == action.get("target")), None)
+        taps = sum(1 for s in steps if s.get("target") == label and s["action"].get("type") == "click") if label else 0
+        if action.get("type") == "click" and taps >= BLOCK_LIMIT:
+            # Notes alone did not stop it: cloud case 9064 (run 9) reopened one scheduled payment eleven times.
+            last_result = (f"error: not tapped. You already opened '{label}' {taps} times and it is not what you need; "
+                           "choose a different control")
+            continue
         last_result = await session.act(action)
         steps.append({"action": action, "result": last_result, "target": session.last_target, "idx": session.last_idx})
         last_result += revisit_note(steps)
@@ -162,6 +169,7 @@ This user has no mouse. "Focused" shows where the keyboard is now; press Tab to 
 
 
 REVISIT_LIMIT = 3
+BLOCK_LIMIT = 5  # taps on one control before the twin is refused another
 
 
 def revisit_note(steps: list[dict]) -> str:

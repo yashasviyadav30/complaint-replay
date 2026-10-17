@@ -477,6 +477,8 @@ class Session:
                     await page.keyboard.press(key)
                 if highlighted:
                     await self._check_choice(highlighted)
+            elif kind == "type" and str(action.get("text", "")).strip() in KEYS:
+                await page.keyboard.press(str(action["text"]).strip())  # "type Tab" means the key (cloud case 8570)
             elif kind == "type":
                 await page.keyboard.type(str(action.get("text", "")), delay=30)
             elif kind == "click_css":  # scripted tests only

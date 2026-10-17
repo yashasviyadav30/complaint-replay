@@ -266,3 +266,14 @@ def test_framework_dev_warnings_are_not_console_errors() -> None:
     assert not browser.is_real_error("In HTML, %s cannot be a descendant of <%s>.")
     assert not browser.is_real_error("Using kebab-case for css properties in objects is not supported.")
     assert browser.is_real_error("TypeError: Cannot read properties of undefined (reading 'date')")
+
+
+def test_typing_a_key_name_presses_the_key(site) -> None:
+    async def body() -> str:
+        async with browser.Session(f"{site}/popover.html", PHONE) as s:
+            await s.page.set_content("<button>a</button><button id=b>b</button>")
+            await s.act({"type": "type", "text": "Tab"})
+            await s.act({"type": "type", "text": "Tab"})
+            return await s.page.evaluate("document.activeElement.id")
+
+    assert asyncio.run(body()) == "b"
