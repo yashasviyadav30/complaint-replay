@@ -15,3 +15,22 @@ def test_settings_have_safe_defaults(tmp_path, monkeypatch) -> None:
     import replay.grouping as g
     monkeypatch.setattr(g, "SETTINGS", tmp_path / "missing.json")
     assert settings() == {"embed_text": "raw", "top_k": 3}
+
+
+def test_embedding_model_comes_from_the_providers_catalog(monkeypatch) -> None:
+    import asyncio
+    from types import SimpleNamespace
+
+    from replay import grouping
+
+    monkeypatch.delenv("EMBED_MODEL", raising=False)
+
+    class Models:
+        async def list(self):
+            return SimpleNamespace(data=[SimpleNamespace(id="nvidia/nemotron-3-super-120b-a12b"),
+                                         SimpleNamespace(id="nvidia/Nemotron-Embed-1B-v2")])
+
+    client = SimpleNamespace(models=Models())
+    assert asyncio.run(grouping.embed_model(client)) == "nvidia/Nemotron-Embed-1B-v2"
+    monkeypatch.setenv("EMBED_MODEL", "mine")
+    assert asyncio.run(grouping.embed_model(client)) == "mine"

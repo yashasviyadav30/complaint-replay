@@ -14,7 +14,7 @@ from openai import AsyncOpenAI
 
 from replay.llm import Chat, parse_json, throttle
 
-EMBED_MODEL = os.getenv("EMBED_MODEL", "nvidia/nemotron-3-embed-1b")
+EMBED_MODEL = "nvidia/nemotron-3-embed-1b"  # fallback when the catalog lists no Nemotron embedding model; EMBED_MODEL env wins
 SETTINGS = Path(__file__).with_name("grouping.json")
 NORMALIZE_SYSTEM = """Rewrite the customer's complaint about an online shop as ONE short plain-English sentence that
 states only the problem (what failed, where). Translate Hindi or Hinglish. No emotion, no apology.
@@ -30,10 +30,35 @@ def cosine(a: list[float], b: list[float]) -> float:
     return dot / norm if norm else 0.0
 
 
+_embed_model: dict[int, str] = {}  # per client: the catalog differs between NVIDIA's endpoint and Token Factory
+
+
+async def embed_model(client: AsyncOpenAI) -> str:
+    """EMBED_MODEL if set, else a Nemotron embedding model from this provider's own catalog (names may differ)."""
+    if os.getenv("EMBED_MODEL"):
+        return os.environ["EMBED_MODEL"]
+    if id(client) not in _embed_model:
+        try:
+            ids = [m.id for m in (await client.models.list()).data]
+        except Exception:
+            ids = []
+        # The measured model first (benchmarks/triage.md numbers were made with it), then any Nemotron embedder.
+        same = next((m for m in ids if m.lower() == EMBED_MODEL.lower()), None)
+        _embed_model[id(client)] = same or next(
+            (m for m in ids if "nemotron" in m.lower() and "embed" in m.lower()), EMBED_MODEL)
+    return _embed_model[id(client)]
+
+
 async def embed(client: AsyncOpenAI, texts: list[str]) -> list[list[float]]:
+    from openai import BadRequestError
+
     await throttle()
-    resp = await client.embeddings.create(model=EMBED_MODEL, input=texts,
-                                          extra_body={"input_type": "query", "truncate": "END"})
+    model = await embed_model(client)
+    try:
+        resp = await client.embeddings.create(model=model, input=texts,
+                                              extra_body={"input_type": "query", "truncate": "END"})
+    except BadRequestError:  # those two settings are NVIDIA NIM's; another provider may refuse them
+        resp = await client.embeddings.create(model=model, input=texts)
     return [d.embedding for d in resp.data]
 
 
