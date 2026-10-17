@@ -503,6 +503,12 @@ class Session:
             covered = INTERCEPTS.search(str(e))
             if "element is not enabled" in str(e):
                 # Cloud cases 8926 and 9071 "proved" bugs by tapping fields the app had disabled on purpose.
+                # A real finger still lands on the screen, and that tap ends the edit in progress (the focused field
+                # loses focus), which is what enables the control. Playwright never touches the screen for a disabled
+                # control, so the twin stayed stuck forever (cloud case 9071, run 10).
+                if kind == "click" and self.last_idx is not None and await self._tap_where(self.last_idx):
+                    return ("error: that control was disabled (greyed out) when tapped; the tap still landed and "
+                            "ended what was being edited, so try it again now")
                 return ("error: that control is disabled right now (greyed out), so a user can't tap it either; "
                         "finish or close what is open first")
             if covered and await self._dialog_open():
@@ -542,6 +548,18 @@ class Session:
                 # menu nine times looking for a transaction's edit screen.
                 return f"ok, a dialog opened: '{dialog}'"
         return "ok"
+
+    async def _tap_where(self, idx: int) -> bool:
+        """Tap the screen where a control is, the way a finger does, whatever the control's state."""
+        try:
+            box = await self.page.locator(f'[data-bc-idx="{idx}"]').first.bounding_box(timeout=2000)
+            if not box:
+                return False
+            await self.page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
+            await self.settle()
+            return True
+        except Exception:
+            return False
 
     async def _dialog_text(self) -> str:
         try:

@@ -180,7 +180,7 @@ def test_a_disabled_control_is_not_evidence_and_the_twin_hears_why(site, monkeyp
             return await s.act({"type": "click", "target": idx}), [e.kind for e in s.evidence]
 
     result, kinds_seen = asyncio.run(body())
-    assert result.startswith("error: that control is disabled") and "tap_blocked" not in kinds_seen
+    assert result.startswith("error: that control") and "disabled" in result and "tap_blocked" not in kinds_seen
 
 
 def test_keyboard_twin_can_hold_tab(site) -> None:
@@ -277,3 +277,22 @@ def test_typing_a_key_name_presses_the_key(site) -> None:
             return await s.page.evaluate("document.activeElement.id")
 
     assert asyncio.run(body()) == "b"
+
+
+def test_a_tap_on_a_disabled_field_still_ends_the_edit_in_progress(site) -> None:
+    # The Actual pattern: other fields are disabled while the amount has focus; a finger's tap blurs the amount.
+    async def body() -> tuple[str, str]:
+        async with browser.Session(f"{site}/popover.html", PHONE) as s:
+            await s.page.set_content(
+                "<input id=amount onfocus=\"date.disabled=true\" onblur=\"date.disabled=false\">"
+                "<button id=date style='display:block;margin-top:40px' onclick=\"this.textContent='open'\">2026-10-17</button>")
+            await s.page.focus("#amount")
+            obs = await s.observe()
+            idx = next(e["idx"] for e in obs["elements"] if e["label"] == "2026-10-17")
+            first = await s.act({"type": "click", "target": idx})
+            await s.observe()
+            await s.act({"type": "click", "target": idx})
+            return first, await s.page.inner_text("#date")
+
+    first, text = asyncio.run(body())
+    assert first.startswith("error: that control was disabled") and text == "open"
