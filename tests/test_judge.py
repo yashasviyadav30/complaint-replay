@@ -291,3 +291,26 @@ def test_a_link_that_opened_an_outside_tab_is_not_tapped_again(tmp_path) -> None
     with running_app(tmp_path) as url:
         result = asyncio.run(replay(url, "x", CONDITIONS["fast_desktop"], policy))
     assert "opened a new tab" in results[1] and results[2].startswith("error: not tapped") and len(result.steps) == 1
+
+
+def test_a_fill_says_what_the_field_shows_when_the_app_reformats_it(tmp_path) -> None:
+    import asyncio
+
+    from replay.agent import replay
+    from replay.conditions import CONDITIONS
+    from replay.project import running_app
+
+    # Cloud case 8733 (run 16): Actual reads digits as cents, so '100' showed '1.00'; told only "ok", the twin
+    # refilled '100' eleven times until it was stopped as stuck.
+    (tmp_path / "index.html").write_text(
+        '<input aria-label="Amount" oninput="this.value = (this.value.replace(/\D/g, \'\') / 100).toFixed(2)">'
+        '<button>Save</button>', encoding="utf-8")
+    results = []
+
+    async def policy(ctx: dict) -> dict:
+        results.append(ctx["last_result"])
+        return {"type": "fill", "target": 0, "text": "100"} if len(results) == 1 else {"type": "verdict"}
+
+    with running_app(tmp_path) as url:
+        asyncio.run(replay(url, "x", CONDITIONS["fast_desktop"], policy))
+    assert "now shows '1.00'" in results[1], results[1]

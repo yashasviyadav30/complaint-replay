@@ -16,6 +16,9 @@ read it whole) is `~/.claude/projects/C--Users-yasha-Downloads-Nebius-x-NVIDIA-G
 - Never submit, publish, post or send anything in the user's name without an explicit yes. Budget ₹0.
   Never type card or bank details; the user adds the card themselves.
 - Run one pytest suite at a time (shared `workspace/badshop`); commit only after a green run.
+- Stopping a background task (TaskStop) kills its shell, NOT the pytest inside: an orphan full suite ran from
+  Oct 17 22:01 to Oct 18 15:28 beside every later run (random failures, hour-long runs). Before trusting a slow or
+  odd run: `Get-CimInstance Win32_Process -Filter "Name='python.exe'"` and stop stale `pytest.exe` processes.
 - The GateGuard hook asks for facts before each first edit of a file and before some Bash calls: state them, retry.
 - Heredoc/python string edits turn `\n` inside strings into real newlines: use the Edit tool for those.
 
@@ -116,6 +119,18 @@ read it whole) is `~/.claude/projects/C--Users-yasha-Downloads-Nebius-x-NVIDIA-G
 screen-reader audio of the page for screen-reader bugs; (3) MCP server so coding agents (Claude Code, Cursor,
 Copilot) can run replays and guards; (4) "Who does this PR hurt?": pre-merge replay under the real users'
 device/network/language mix from widget data; (5) voice complaints in the widget; (6) bug cost in rupees.
+
+**Oct 18 decisions (user):** the benchmark loop is CLOSED: no run 17, no more benchmark runs; the published result
+stays run 15 (1/8 strict). Name: **Complaint Replay** (final). Public demo page republished with films + Listen
+(gh-pages, Oct 18). Next work, each with a fixed finish line, nothing else:
+1. WOW "Try it yourself" (user picked A): `action.yml` + `replay/workflow.yml` accept `/replay [user] text` issue
+   comments with a daily cap (`daily-limit`, default 20). Committed if the suite passed (see git log). STILL TO DO:
+   copy the new trigger into `crp-demo-shopping-cart/.github/workflows/complaint-replay.yml`, check that repo for
+   secrets, make it public (user agreed by picking A), open one pinned issue "Try it: comment /replay ...", and try
+   one real comment end to end. Then a README line + video shot.
+2. Premium README + repo (user asked Oct 18): films at the top, short "how it works", one-command setup; repo
+   description, topics, social preview image. Finish line: those items, nothing more.
+3. Then only user-unblocked items: Devpost draft text, Token Factory key, Render, video (Oct 26-27), submit Oct 29.
 
 **What "project complete" means here** (user agreed): benchmark as good as it honestly gets; deploy-ready
 (one command, the user only signs up); fresh-machine run of the README (done Oct 17: install from GitHub,

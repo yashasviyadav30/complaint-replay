@@ -491,6 +491,7 @@ class Session:
         tabs_before = len(self._new_tabs)
         tapped = page.locator(f'[data-bc-idx="{idx}"]').first if kind == "click" else None
         state_before = await self._state(tapped)
+        shown_note = ""  # a fill the app reformatted says what the field shows
         try:
             if kind == "click":
                 await tap(page.locator(f'[data-bc-idx="{int(action["target"])}"]'), action)
@@ -498,6 +499,7 @@ class Session:
                 field = page.locator(f'[data-bc-idx="{int(action["target"])}"]')
                 await field.fill(str(action["text"]), timeout=5000)
                 await self._remember_typed(field, self.last_target, str(action["text"]))
+                shown_note = await self._shown_note(field, str(action["text"]))
             elif kind in ("click_role", "fill_role"):
                 if not action.get("name"):
                     return "error: a screen reader cannot use a control without a name"
@@ -603,7 +605,19 @@ class Session:
                 # Cloud case 9064 (run 7): told only "a dialog is open", the twin reopened a scheduled payment's
                 # menu nine times looking for a transaction's edit screen.
                 return f"ok, a dialog opened: '{dialog}'"
-        return "ok" + self._state_note(state_before, await self._state(tapped))
+        return "ok" + shown_note + self._state_note(state_before, await self._state(tapped))
+
+    @staticmethod
+    async def _shown_note(field, typed: str) -> str:
+        """Cloud case 8733 (run 16): Actual reads digits as cents, so '100' showed '1.00'; told only "ok", the twin
+        refilled '100' eleven times."""
+        try:
+            shown = await field.input_value(timeout=2000)
+        except Exception:
+            return ""
+        if " ".join(shown.split()) == " ".join(typed.split()):
+            return ""
+        return f", the field now shows '{shown[:40]}' (you typed '{typed[:40]}'): the app reformats what is typed"
 
     async def _typing_into(self) -> bool:
         try:
