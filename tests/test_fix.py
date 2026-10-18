@@ -128,6 +128,16 @@ def test_patch_tolerates_changed_indentation_but_not_ambiguity(tmp_path) -> None
 def test_a_missed_find_text_shows_the_closest_real_text(tmp_path) -> None:
     (tmp_path / "Edit.tsx").write_text("<input\n  style={{\n    appearance: 'none',\n  }}\n/>\n", encoding="utf-8")
     with pytest.raises(ValueError) as e:
-        apply_patch(Patch("", ({"file": "Edit.tsx", "find": "style={\n    appearance: 'none',\n  }", "replace": "x"},)),
+        apply_patch(Patch("", ({"file": "Edit.tsx", "find": "style={{\n    appearance: 'auto',\n  }}", "replace": "x"},)),
                     tmp_path)
     assert "closest text in the file is" in str(e.value) and "style={{" in str(e.value)
+
+
+def test_a_find_that_dropped_jsx_double_braces_still_applies(tmp_path: Path) -> None:
+    # Cloud case 9071 (run 16): three attempts wrote style={ ... } for style={{ ... }}, the fix never applied.
+    (tmp_path / "Edit.tsx").write_text("<input\n  style={{\n    minWidth: '150px',\n    appearance: 'none',\n  }}\n/>\n",
+                                       encoding="utf-8")
+    find = "style={\n    minWidth: '150px',\n    appearance: 'none',\n  }"
+    replace = "style={\n    minWidth: '150px',\n  }"
+    apply_patch(Patch("x", ({"file": "Edit.tsx", "find": find, "replace": replace},)), tmp_path)
+    assert (tmp_path / "Edit.tsx").read_text(encoding="utf-8") == "<input\n  style={{\n    minWidth: '150px',\n  }}\n/>\n"

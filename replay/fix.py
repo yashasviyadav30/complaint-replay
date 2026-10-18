@@ -142,6 +142,11 @@ def loose_match(text: str, find: str) -> tuple[int, int] | None:
     return found[0].span() if len(found) == 1 else None
 
 
+def doubled(code: str) -> str:
+    """Single braces made double: '{' -> '{{', '}' -> '}}', leaving existing doubles alone."""
+    return re.sub(r"(?<![{])[{](?![{])", "{{", re.sub(r"(?<![}])[}](?![}])", "}}", code))
+
+
 def apply_patch(patch: Patch, root: Path, allowed: tuple[str, ...] = ()) -> str:
     """Apply all edits or none. Returns a unified diff; raises ValueError on an unsafe or ambiguous edit.
 
@@ -169,6 +174,11 @@ def apply_patch(patch: Patch, root: Path, allowed: tuple[str, ...] = ()) -> str:
             current[path] = current[path].replace(find, replace)
             continue
         span = loose_match(current[path], find) if count == 0 and find.strip() else None
+        if not span and count == 0 and find.strip():
+            # Cloud case 9071 (run 16): three attempts wrote style={ ... } for JSX's style={{ ... }}. Doubled, the
+            # braces must match exactly once, and the replacement gets the same doubling.
+            span = loose_match(current[path], doubled(find))
+            replace = doubled(replace) if span else replace
         if not span:
             near = closest(current[path], find) if count == 0 else ""
             raise ValueError(f"'find' text must appear exactly once in {edit.get('file')}, but it appears {count} times"
