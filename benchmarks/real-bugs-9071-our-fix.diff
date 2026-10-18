@@ -1,0 +1,11 @@
+--- a/packages/desktop-client/src/components/mobile/MobileForms.tsx
++++ b/packages/desktop-client/src/components/mobile/MobileForms.tsx
+@@ -124,7 +124,7 @@
+           {...props}
+           className={renderProps =>
+             cx(
+-              hideNativeDateIconClassName,
++              props.type !== 'date' && hideNativeDateIconClassName,
+               typeof className === 'function'
+                 ? className(renderProps)
+                 : className,

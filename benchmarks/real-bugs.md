@@ -2,20 +2,20 @@
 
 Measured 2026-10-17 with `uv run python scripts/bench_real.py <actual checkout>`, model `nvidia/nemotron-3-super-120b-a12b`. Each bug was fixed upstream; it is re-created by reverse-applying that fix to today's code, and the complaint is written from the real report. "Same file" means our fix edited a file the real fix edited. Every case is listed, misses included.
 
-**Solved 0 of 8.** Solved means fixed and guarded AND our fix edited a file the real fix edited. A "fixed" with a different file is counted as a miss: the guard may have proven the wrong thing.
+**Solved 1 of 8.** Solved means fixed and guarded AND our fix edited a file the real fix edited. A "fixed" with a different file is counted as a miss: the guard may have proven the wrong thing.
 
 **Fixed and guarded in any file: 1 of 8.** The user's steps, replayed by code, show the bug on the old code and not on ours; our fix may differ from the upstream one, so read its diff before trusting it.
 
 | Upstream fix | Complaint | User | Result | Proof (evidence kinds) | Same file as real fix | Solved | Time |
 |---|---|---|---|---|---|---|---|
-| [#9071](https://github.com/actualbudget/actual/pull/9071) | On my Android phone, when I add a transaction and tap the date, the ca… | Pixel 7 (412x839) | fix_failed | no_response | no | no | 16 min |
-| [#9064](https://github.com/actualbudget/actual/pull/9064) | On my phone the Reconciled switch on a transaction does nothing when I… | Pixel 7 (412x839) | not_reproduced | - |  | no | 6 min |
-| [#8926](https://github.com/actualbudget/actual/pull/8926) | On my phone I picked the wrong payee for a new transaction and now the… | Pixel 7 (412x839) | not_reproduced | - |  | no | 1 min |
+| [#9071](https://github.com/actualbudget/actual/pull/9071) | On my Android phone, when I add a transaction and tap the date, the ca… | Pixel 7 (412x839) | guarded | picker_not_opened | yes | **yes** | 6 min |
+| [#9064](https://github.com/actualbudget/actual/pull/9064) | On my phone the Reconciled switch on a transaction does nothing when I… | Pixel 7 (412x839) | not_reproduced | - |  | no | 3 min |
+| [#8926](https://github.com/actualbudget/actual/pull/8926) | On my phone I picked the wrong payee for a new transaction and now the… | Pixel 7 (412x839) | fixed | no_response | no | no | 8 min |
 | [#9107](https://github.com/actualbudget/actual/pull/9107) | On my phone, with hide reconciled transactions turned on, the balance … | Pixel 7 (412x839) | not_reproduced | - |  | no | 2 min |
-| [#8733](https://github.com/actualbudget/actual/pull/8733) | On my phone I type the amount for a new transaction and then tap the C… | Pixel 7 (412x839) | guarded | typed_value_lost | no | no | 27 min |
-| [#8570](https://github.com/actualbudget/actual/pull/8570) | I only use the keyboard. When I choose a category for a transaction wi… | desktop 1280x800, keyboard only, no mouse | not_reproduced | - |  | no | 4 min |
+| [#8733](https://github.com/actualbudget/actual/pull/8733) | On my phone I type the amount for a new transaction and then tap the C… | Pixel 7 (412x839) | fix_unproven | typed_value_lost | no | no | 58 min |
+| [#8570](https://github.com/actualbudget/actual/pull/8570) | I only use the keyboard. When I choose a category for a transaction wi… | desktop 1280x800, keyboard only, no mouse | not_reproduced | - |  | no | 20 min |
 | [#8765](https://github.com/actualbudget/actual/pull/8765) | When I select several transactions and use bulk edit to change the dat… | desktop 1280x800 | not_reproduced | - |  | no | 6 min |
-| [#9038](https://github.com/actualbudget/actual/pull/9038) | In the guided tour, the To Budget step highlights nothing I can see. T… | desktop 1280x800 | not_reproduced | - |  | no | 3 min |
+| [#9038](https://github.com/actualbudget/actual/pull/9038) | In the guided tour, the To Budget step highlights nothing I can see. T… | desktop 1280x800 | not_reproduced | - |  | no | 6 min |
 
 ## What each case needs (our reading of the misses, not a measurement)
 
@@ -27,3 +27,7 @@ Measured 2026-10-17 with `uv run python scripts/bench_real.py <actual checkout>`
 - [#8570](https://github.com/actualbudget/actual/pull/8570): Keyboard-only user in a large desktop app: the hardest navigation of the set.
 - [#8765](https://github.com/actualbudget/actual/pull/8765): Row select boxes are focusable divs, invisible to the twin until Oct 17.
 - [#9038](https://github.com/actualbudget/actual/pull/9038): Shows only when a month other than the current one is on screen; the complaint does not say so.
+
+## Our fix next to the real one
+
+- [#9071](https://github.com/actualbudget/actual/pull/9071) (solved, run 15): both change `MobileForms.tsx`. Upstream calls `showPicker()` when a date field is tapped and keeps the calendar icon hidden; ours stops hiding the browser's calendar button on date fields, so the user can open the picker with it. Both let the user change the date; upstream's keeps the design. [Our diff](real-bugs-9071-our-fix.diff).

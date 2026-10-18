@@ -98,9 +98,17 @@ read it whole) is `~/.claude/projects/C--Users-yasha-Downloads-Nebius-x-NVIDIA-G
   120). 8570 Tab-wandered 50 steps on the budget page; 8765 ticked budget-page boxes, never opened an account
   (navigation, not the new state note); 9038 walked the tour, highlight only off-screen in a non-current month.
 
+- Run 15 (39061678952, on 76fadc0): **solved 1/8 strict** (first ever): 9071 guarded in MobileForms.tsx, the
+  upstream file; our fix shows the calendar button instead of upstream's showPicker() (said in README + table,
+  diff in `benchmarks/real-bugs-9071-our-fix.diff`). Published in README, `benchmarks/real-bugs.md`, write-up
+  (only `[FILL]` left: live dashboard URL). README states results vary (8733 fixed in run 11, not in 13-15).
+  Also from run 15: 8926 "proved" a bug by tapping a text box (fixed: focus in a text field is a response);
+  8733 still patches the caller with utils.ts shown (a file-level ban would break same-file helper fixes: not
+  done). 9107 now navigates to the right screen; needs an app-specific balance check (`checks`) to go further.
+
 **In flight**
-1. Run 15 (39061678952, on 76fadc0, every fix from the Oct 17 night). Read each case; publish the table if it
-   improves, keep run 11's numbers otherwise (README says run 11: 0/8 strict, 1/8 any file).
+1. Next benchmark run (16) when there are new engine fixes; the hints change (be6a4f2) and the text-box fix
+   (dc067c1) are not measured yet.
 2. Demo dashboard (gh-pages) has no films/transcripts yet: record fresh demo-shop cases (one screen-reader), then
    `scripts/deploy_demo.sh` (it pushes gh-pages: ask the user first, it is public).
 
