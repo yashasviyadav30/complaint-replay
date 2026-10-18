@@ -269,3 +269,25 @@ def test_a_tap_behind_an_open_menu_is_told_the_menus_own_controls(tmp_path) -> N
     with running_app(tmp_path) as url:
         asyncio.run(replay(url, "x", CONDITIONS["fast_desktop"], policy))
     assert "[1] Hide reconciled transactions" in results[1] and "Escape" in results[1]
+
+
+def test_a_link_that_opened_an_outside_tab_is_not_tapped_again(tmp_path) -> None:
+    import asyncio
+
+    from replay.agent import replay
+    from replay.conditions import CONDITIONS
+    from replay.project import running_app
+
+    # Cloud case 9038 (run 15): five taps on a docs link, each opening the same page in a new tab.
+    (tmp_path / "index.html").write_text('<a href="/docs.html" target="_blank">guided tour</a><button>Start</button>',
+                                         encoding="utf-8")
+    (tmp_path / "docs.html").write_text("docs", encoding="utf-8")
+    results = []
+
+    async def policy(ctx: dict) -> dict:
+        results.append(ctx["last_result"])
+        return {"type": "click", "target": 0} if len(results) <= 2 else {"type": "verdict"}
+
+    with running_app(tmp_path) as url:
+        result = asyncio.run(replay(url, "x", CONDITIONS["fast_desktop"], policy))
+    assert "opened a new tab" in results[1] and results[2].startswith("error: not tapped") and len(result.steps) == 1

@@ -195,6 +195,11 @@ async def _drive(session: Session, complaint: str, condition: Condition, policy:
                            f"it is not on this one (a menu or dialog closed). Controls here now: {', '.join(here)}")
             continue
         taps =sum(1 for s in steps if s.get("target") == label and s["action"].get("type") == "click") if label else 0
+        if action.get("type") == "click" and label and any(
+                s.get("target") == label and s["result"].startswith("ok, it opened a new tab") for s in steps):
+            # Cloud case 9038 (run 15): five taps on a docs link, each opening the same outside page.
+            last_result = f"error: not tapped. '{label}' only opens a page outside this app; the problem is in the app"
+            continue
         if action.get("type") == "click" and taps >= BLOCK_LIMIT:
             # Notes alone did not stop it: cloud case 9064 (run 9) reopened one scheduled payment eleven times.
             last_result = (f"error: not tapped. You already opened '{label}' {taps} times and it is not what you need; "
