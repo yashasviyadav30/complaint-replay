@@ -126,6 +126,7 @@ it, ready user `iphone`); slow users (`slow` on Condition, elderly is slow) read
 key, evidence `error_after_wait` (shop: OTP expires after 5 min; bug 16 = 10 s); payment interrupted (network
 `tunnel`/flaky lose the first payment reply after the server took it, evidence `charged_twice`; Back/Reload
 actions; shop has payment keys; bug 17 = new key per tap; ready user `train`). Money/date formats NOT built (next).
+Linux check (run 39249081833, `new-features.yml`): all 3 guarded, Safari engine installs and runs in CI.
 User said: no video changes now; stop after this. Video still shows the earlier feature set (still accurate).
 
 **Oct 19: READY TO SUBMIT (user submits today).** Claims made honest (free NVIDIA API catalog; no Token Factory:

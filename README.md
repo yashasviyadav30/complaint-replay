@@ -149,7 +149,7 @@ The first runs scored 0 for bad reasons: the twin wandered, and the judge accept
 Measured Oct 14, 2026 with `uv run python bench.py 3` (NVIDIA API catalog endpoint, Nemotron 3 Super):
 **21/21 reproduced, 20/21 fixed and proven, 20/21 guarded, 0 false alarms** on the clean shop ([per-bug table](benchmarks/demo-shop.md)). These are bugs we planted ourselves: a working demonstration, not a broad benchmark.
 
-Added Oct 19 and run once each end to end (all three reproduced, fixed and guarded): the Pay button off an iPhone 15's screen, replayed in Safari's engine; an OTP that expires after 10 seconds, met by the slow older user; and a retry after a dropped signal that charges twice. One run each is a demonstration, not a rate.
+Added Oct 19 and run end to end once on Windows and once on Linux in GitHub Actions ([`new-features.yml`](.github/workflows/new-features.yml)), all three reproduced, fixed and guarded both times: the Pay button off an iPhone 15's screen, replayed in Safari's engine; an OTP that expires after 10 seconds, met by the slow older user; and a retry after a dropped signal that charges twice. Two runs each are a demonstration, not a rate.
 
 ### Any language
 
