@@ -1,15 +1,14 @@
 # Devpost write-up
 
-> Do not paste until the Token Factory blocker in `checklist.md` is resolved and every `[FILL]` below is
-> replaced with a measured number. Every sentence must be true on the day you submit.
+> Final (Oct 19). Paste each section into the matching Devpost field. Every number here was measured.
 
-**Project name:** Complaint Replay (working name; final name due Oct 18)
+**Project name:** Complaint Replay
 
 **Tagline (under 60 characters):** Your users' complaints, reproduced, fixed and guarded.
 
 **Track:** Coding and Agentic Engineering
 
-**Built with:** nvidia-nemotron, nebius-token-factory, tavily, python, fastapi, playwright, github-actions, react, vite, tailwindcss, axe-core, fasttext
+**Built with:** nvidia-nemotron, nvidia-api-catalog, tavily, python, fastapi, playwright, github-actions, react, vite, tailwindcss, axe-core, fasttext
 
 ---
 
@@ -36,7 +35,7 @@ The source code never leaves the team's CI. Teams set it up in about ten minutes
 
 ## How we built it
 
-- **NVIDIA Nemotron 3 Super on Nebius Token Factory**, in four roles with different settings. The navigator picks one click or keystroke at a time with thinking off, because "tap Pay" needs speed. A judge, plus a second skeptic question per item, decides whether each piece of evidence shows the problem the user described. A reader picks out what users say about themselves ("I'm blind", "मुझे बड़े अक्षर चाहिए"). The fixer reads evidence and code with reasoning on.
+- **NVIDIA Nemotron 3 Super**, on NVIDIA's free API catalog (the same client calls Nebius Token Factory when given a Nebius key), in four roles with different settings. The navigator picks one click or keystroke at a time with thinking off, because "tap Pay" needs speed. A judge, plus a second skeptic question per item, decides whether each piece of evidence shows the problem the user described. A reader picks out what users say about themselves ("I'm blind", "मुझे बड़े अक्षर चाहिए"). The fixer reads evidence and code with reasoning on.
 - **Nemotron Embed** groups the same bug reported in different languages, so one bug gets one investigation and a count of how many people it hurts.
 - **Playwright** drives real Chromium. Conditions are enforced, not role-played: 207 device profiles, eight network profiles from 4G to "drops after load", locale and timezone, right-to-left, forced colors, 200% text, an accessibility-tree-only view for the screen-reader twin, Tab-only for the keyboard twin.
 - **axe-core** and **fastText language ID** give hard accessibility and language evidence on CPU.
@@ -83,5 +82,6 @@ The source code never leaves the team's CI. Teams set it up in about ten minutes
 ## Try it
 
 - Repo: https://github.com/yashasviyadav30/complaint-replay
-- Live dashboard: [FILL once hosted]
-- Recorded demo (real cases, read-only): https://yashasviyadav30.github.io/complaint-replay/
+- Live demo (real recorded cases: films, Listen, evidence, fixes): https://yashasviyadav30.github.io/complaint-replay/
+- Try it yourself: comment `/replay <what went wrong>` on https://github.com/yashasviyadav30/crp-demo-shopping-cart/issues/7 and the bot replies with its proof and a pull request (20 a day)
+- Pull requests it opened on code we did not write: https://github.com/yashasviyadav30/crp-demo-shopping-cart/pulls

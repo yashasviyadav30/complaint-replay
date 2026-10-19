@@ -2,6 +2,27 @@
 
 **Your users already told you what's broken. Complaint Replay proves it, fixes it, and makes sure it never comes back.**
 
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
+[![Tests](https://img.shields.io/badge/tests-179%20passing-brightgreen)](#run-the-tests)
+[![NVIDIA Nemotron](https://img.shields.io/badge/NVIDIA-Nemotron%203%20Super-76b900)](#how-nvidia-nemotron-and-nebius-are-used)
+[![Runs in GitHub Actions](https://img.shields.io/badge/runs%20in-your%20GitHub%20Actions-2088ff)](#set-it-up-on-your-app-about-10-minutes)
+
+**[Live demo](https://yashasviyadav30.github.io/complaint-replay/)** · **[Try it yourself: comment `/replay` on this issue](https://github.com/yashasviyadav30/crp-demo-shopping-cart/issues/7)** · **[Real-bug benchmark, misses included](benchmarks/real-bugs.md)**
+
+<table>
+<tr>
+<th>The user's complaint, replayed on their 360&nbsp;px phone</th>
+<th>The same steps on the fix Complaint Replay wrote</th>
+</tr>
+<tr>
+<td><img src="docs/media/pay-button-before.gif" alt="Replay film: on a 360 px phone the Pay now button is pushed off the screen; the last frame says Found: 'Pay now' is outside the screen" width="300"></td>
+<td><img src="docs/media/pay-button-after.gif" alt="Replay film on the fixed code: the Pay now button is visible; the last frame says the problem is gone" width="300"></td>
+</tr>
+<tr>
+<td colspan="2"><em>"I added everything to my cart but there is no button to pay."</em> Every frame is a real step the AI twin took in a real browser; the films go into the pull request.</td>
+</tr>
+</table>
+
 A customer writes *"OTP never comes!"*, *"الزر لا يعمل"* or *"I use a screen reader and can't find the cart"*. The developer tries it on a fast laptop, it works, and the complaint is closed as "can't reproduce". Studies of real bug trackers put that at 13-24% of all bug reports ([ICSME 2020](https://marco-c.github.io/publications/non_reproducibility-icsme2020.pdf)), and a large share fail because the user's device, network or settings differ from the developer's.
 
 Complaint Replay turns the complaint into a pull request:
@@ -16,6 +37,15 @@ Complaint Replay turns the complaint into a pull request:
 
 It runs inside **your own GitHub Actions**, so your source code never leaves your CI. Open source, Apache 2.0.
 
+### What you won't find elsewhere
+
+- **Conditions are real, not role-played.** 207 device profiles, slow and flaky networks, Hindi, Arabic right-to-left, 200% text, keyboard-only and screen-reader users. The browser is slow; the model is not told to pretend.
+- **Hear what a blind user hears.** For screen-reader bugs, press *Listen* in the dashboard: the browser reads the page the way the user met it ("BadShop, heading level 1. Button."). Which button is the cart?
+- **Speak the complaint.** Older users and people who'd rather not type tap the mic in the widget and talk, in their own language.
+- **Watch it fixed.** The person who complained gets a link to the film of their own problem, now working.
+- **Proof the model can't fake.** "Reproduced" needs evidence the browser recorded; a fix counts only when code replays the user's steps and the bug is gone.
+- **Coding agents can drive it.** `crp mcp` gives Claude Code, Cursor or Copilot tools to replay a bug and run its guard until it passes.
+
 Built for the Nebius x NVIDIA Global AI Hackathon (Coding and Agentic Engineering track).
 
 ## Set it up on your app (about 10 minutes)
@@ -28,7 +58,7 @@ Built for the Nebius x NVIDIA Global AI Hackathon (Coding and Agentic Engineerin
    ```bash
    uvx --from git+https://github.com/yashasviyadav30/complaint-replay crp init
    ```
-   Set `start` in `complaint-replay.toml`, add `NEBIUS_API_KEY` as a repository secret, and in Settings > Actions turn on *Allow GitHub Actions to create and approve pull requests*.
+   Set `start` in `complaint-replay.toml`, add `NVIDIA_API_KEY` (free at build.nvidia.com) or `NEBIUS_API_KEY` as a repository secret, and in Settings > Actions turn on *Allow GitHub Actions to create and approve pull requests*.
 3. **Connect GitHub**: install the Complaint Replay GitHub App on the repo (one click from the dashboard's Set Up page), or for a single team set `GITHUB_TOKEN` on your server.
 4. **Send a test complaint** from the Set Up page and watch it move across the board.
 
@@ -126,18 +156,18 @@ Treat these as a check that nothing breaks across scripts. Real complaints are m
 
 ## How NVIDIA Nemotron and Nebius are used
 
-| Job | Model | Runs on |
+| Job | Model | Ran on (all results here) |
 |---|---|---|
-| Navigator: one click or keystroke at a time | Nemotron 3 Super (thinking off) | Nebius Token Factory |
-| Judge: does this evidence match the complaint? | Nemotron 3 Super (thinking off) | Nebius Token Factory |
-| Stated needs: screen reader, keyboard, bigger text | Nemotron 3 Super | Nebius Token Factory |
-| Fixer: reads evidence + the relevant source files, writes the patch | Nemotron 3 Super (reasoning on) | Nebius Token Factory |
-| Duplicate grouping | Nemotron Embed + Nemotron 3.5 Lightning check | Nebius Token Factory |
+| Navigator: one click or keystroke at a time | Nemotron 3 Super (thinking off) | NVIDIA API catalog (free tier) |
+| Judge: does this evidence match the complaint? | Nemotron 3 Super (thinking off) | NVIDIA API catalog (free tier) |
+| Stated needs: screen reader, keyboard, bigger text | Nemotron 3 Super | NVIDIA API catalog (free tier) |
+| Fixer: reads evidence + the relevant source files, writes the patch | Nemotron 3 Super (reasoning on) | NVIDIA API catalog (free tier) |
+| Duplicate grouping | Nemotron Embed + Nemotron 3.5 Lightning check | NVIDIA API catalog (free tier) |
 | Triage: bug, confusion, feature request, spam | Small model on Nemotron Embed vectors | CPU, trained on a laptop |
 | Language ID of complaints and page text | fastText lid.176 (GlotLID optional) | CPU |
 | Research before the fix | Tavily search API | Tavily |
 
-All model calls go through one OpenAI-compatible client (`replay/llm.py`): with `NEBIUS_API_KEY` it calls **Nebius Token Factory**; with only `NVIDIA_API_KEY` it calls NVIDIA's API catalog. The results above were measured on NVIDIA's API catalog endpoint with the same models. A hard token budget per run (`REPLAY_TOKEN_BUDGET`) stops a looping agent.
+All model calls go through one OpenAI-compatible client (`replay/llm.py`). Everything in this README ran on NVIDIA's free API catalog (`NVIDIA_API_KEY`). Set `NEBIUS_API_KEY` instead and the same code calls **Nebius Token Factory**: model names are looked up in the provider's own catalog, so nothing else changes. We have not run the benchmark on Token Factory. A hard token budget per run (`REPLAY_TOKEN_BUDGET`) stops a looping agent.
 
 ## How it fits together
 
