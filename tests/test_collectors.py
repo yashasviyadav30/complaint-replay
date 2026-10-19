@@ -40,6 +40,7 @@ CASES = [
     ("no_label.html", replace(PHONE, audit=True), [], "a11y_violation"),  # public-sector pack: everyone audited
     ("amount.html", PHONE, [{"type": "fill_css", "selector": "#amount", "text": "42.50"},
                             {"type": "click_css", "selector": "#buggy-cleared"}], "typed_value_lost"),
+    ("safari_only.html", profile("iPhone 15"), [], "console_error"),  # iPhones replay in Safari's engine
 ]
 # The same problem fixed: these must stay silent.
 CLEAN = [
@@ -56,6 +57,8 @@ CLEAN = [
     ("dead_button.html", PHONE, [{"type": "click_css", "selector": "#toggle"}]),  # a toggle that toggles
     # Tapping a text box puts the cursor in it: that is its response (cloud case 8926, run 15, "proved" a bug so).
     ("dead_button.html", PHONE, [{"type": "click_css", "selector": "#search"}]),
+    ("safari_only.html", profile("Pixel 7"), []),  # the same page is fine in Chrome
+
 ]
 
 
@@ -358,3 +361,14 @@ def test_unclear_name_reports_what_is_announced_not_hidden_text(site) -> None:
     # Demo bug 10: the count badge is aria-hidden, so a screen reader says just "button", not "0".
     found = kinds(f"{site}/unnamed_hidden.html", CONDITIONS["screen_reader"], [])
     assert any(f.startswith("unclear_name:") and "'(nothing)'" in f for f in found), found
+
+
+def test_a_slow_user_meets_an_expiry_a_fast_one_never_sees(site, monkeypatch) -> None:
+    # Older users read, then type key by key: an OTP that expires too soon locks them out. Scaled to seconds here.
+    monkeypatch.setattr(browser, "SLOW_THINK_S", 1.5)
+    steps = [{"type": "fill_css", "selector": "#otp", "text": "123456"}, {"type": "click_css", "selector": "#verify"}]
+    slow = kinds(f"{site}/otp_expiry.html", replace(PHONE, slow=True), steps)
+    fast = kinds(f"{site}/otp_expiry.html", PHONE, steps)
+    assert any(f.startswith("error_after_wait:") and "Code expired" in f for f in slow), slow
+    assert not any(f.startswith("error_after_wait:") for f in fast), fast
+

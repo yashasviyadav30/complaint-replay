@@ -41,6 +41,12 @@ BUGS = (
         "I added everything to my cart but there is no button to pay. How am I supposed to order??",
     ),
     Bug(
+        16, "elderly", "OTP expires after 10 seconds, too soon for a slow reader",
+        "app.py", "OTP_VALID_S = 300", "OTP_VALID_S = 10",
+        "By the time I find the code in my messages and type it in, it says the code has expired. I tried three "
+        "times and still cannot log in.",
+    ),
+    Bug(
         7, "hindi", "Wrong-OTP error shown only in English",
         "static/app.js",
         'return showLoginError(t("invalidOtp"));',

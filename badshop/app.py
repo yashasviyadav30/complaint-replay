@@ -6,6 +6,7 @@ replay/bugs.py, so Complaint Replay can find and fix them like a real repo.
 
 import asyncio
 import re
+import time
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -15,6 +16,8 @@ from pydantic import BaseModel, Field
 STATIC_DIR = Path(__file__).parent / "static"
 DEMO_OTP = "123456"
 SMS_GATEWAY_DELAY_S = 2.5  # a real SMS gateway is slow; fine on fast networks
+OTP_VALID_S = 300  # how long a sent code works: long enough to find the SMS and type it slowly
+sent_at: dict[str, float] = {}  # phone -> when its code was sent
 COUPONS = {"SAVE10": 0.10}
 PRODUCTS = [
     {"id": 1, "name": "Masala Chai", "name_hi": "मसाला चाय", "price": 120},
@@ -69,12 +72,15 @@ def products():
 async def otp_send(req: OtpSend):
     check_phone(req.phone)
     await asyncio.sleep(SMS_GATEWAY_DELAY_S)
+    sent_at[req.phone] = time.monotonic()
     return {"sent": True, "demo_otp": DEMO_OTP}
 
 
 @app.post("/api/otp/verify")
 def otp_verify(req: OtpVerify):
     check_phone(req.phone)
+    if time.monotonic() - sent_at.get(req.phone, time.monotonic()) > OTP_VALID_S:
+        raise HTTPException(400, {"error": "otp_expired"})
     if req.otp != DEMO_OTP:
         raise HTTPException(400, {"error": "invalid_otp"})
     return {"ok": True}

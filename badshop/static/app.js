@@ -60,7 +60,8 @@ $("send-otp").addEventListener("click", async () => {
 
 $("verify-otp").addEventListener("click", async () => {
   showLoginError("");
-  const { ok } = await postJson("/api/otp/verify", { phone: state.phone, otp: $("otp").value.trim() });
+  const { ok, data } = await postJson("/api/otp/verify", { phone: state.phone, otp: $("otp").value.trim() });
+  if (!ok && data?.detail?.error === "otp_expired") return showLoginError(t("otpExpired"));
   if (!ok) return showLoginError(t("invalidOtp"));
   $("login").hidden = true;
   $("shop").hidden = false;

@@ -7,7 +7,7 @@ RUN npm ci --no-audit --no-fund
 COPY dashboard/ ./
 RUN npm run build
 
-# Playwright's image already holds Chromium and its system libraries, matching playwright==1.63.0.
+# Playwright's image already holds Chromium, WebKit (Safari's engine) and their libraries, matching playwright==1.63.0.
 FROM mcr.microsoft.com/playwright/python:v1.63.0-noble
 COPY --from=ghcr.io/astral-sh/uv:0.10.9 /uv /usr/local/bin/uv
 WORKDIR /app

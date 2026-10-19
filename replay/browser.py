@@ -82,6 +82,12 @@ FOCUS_JS = r"""() => { const a = document.activeElement;
 DIALOG_OPEN_JS = """() => [...document.querySelectorAll('[role=dialog], [role=alertdialog], [aria-modal=true], dialog[open]')]
   .some((e) => e.getBoundingClientRect().width > 0)"""
 MAX_KEY_REPEAT = 15
+# A slow user (older, or reading an SMS on another screen) reads before each step and types key by key. A real
+# OTP or session that expires before they finish locks them out; a developer typing fast never sees it.
+SLOW_THINK_S = 6.0
+SLOW_KEY_MS = 350
+ALERTS_JS = """() => [...document.querySelectorAll('[role=alert], [aria-live], .error, .alert, [class*=toast]')]
+  .filter((e) => e.offsetParent !== null).map((e) => e.innerText.trim()).filter(Boolean)"""
 EDITABLE_FOCUS_JS = """() => { const a = document.activeElement;
   return !!a && (a.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(a.tagName)); }"""
 # The text of the dialog on top, so the twin knows WHAT opened (a scheduled-payment menu is not the editor).
@@ -229,7 +235,7 @@ class Session:
 
     async def __aenter__(self) -> "Session":
         self._pw = await async_playwright().start()
-        self._browser = await self._pw.chromium.launch()
+        self._browser = await getattr(self._pw, self.condition.engine).launch()  # chromium, or webkit for Safari
         extra = {"storage_state": str(self.storage_state)} if self.storage_state else {}
         context = self._context = await self._browser.new_context(**self.condition.context, **extra)
         await context.add_init_script(VITALS_JS)
@@ -241,7 +247,7 @@ class Session:
         await context.route("**/*", self._route)
         self.page = await context.new_page()
         self._listen()
-        if self.condition.cpu_slowdown > 1:
+        if self.condition.cpu_slowdown > 1 and self.condition.engine == "chromium":  # a Chrome DevTools feature
             cdp = await context.new_cdp_session(self.page)
             await cdp.send("Emulation.setCPUThrottlingRate", {"rate": self.condition.cpu_slowdown})
         await self.page.goto(self.base_url, wait_until="load", timeout=60_000)
@@ -492,12 +498,15 @@ class Session:
         tapped = page.locator(f'[data-bc-idx="{idx}"]').first if kind == "click" else None
         state_before = await self._state(tapped)
         shown_note = ""  # a fill the app reformatted says what the field shows
+        if self.condition.slow:
+            await asyncio.sleep(SLOW_THINK_S)  # reading the screen, or finding the SMS, before acting
+        alerts_before = await self._alerts() if self.condition.slow else []
         try:
             if kind == "click":
                 await tap(page.locator(f'[data-bc-idx="{int(action["target"])}"]'), action)
             elif kind == "fill":
                 field = page.locator(f'[data-bc-idx="{int(action["target"])}"]')
-                await field.fill(str(action["text"]), timeout=5000)
+                await self._type(field, str(action["text"]))
                 await self._remember_typed(field, self.last_target, str(action["text"]))
                 shown_note = await self._shown_note(field, str(action["text"]))
             elif kind in ("click_role", "fill_role"):
@@ -535,7 +544,7 @@ class Session:
                 await tap(page.locator(action["selector"]).first, action)
             elif kind == "fill_css":  # scripted tests only
                 field = page.locator(action["selector"]).first
-                await field.fill(str(action["text"]), timeout=5000)
+                await self._type(field, str(action["text"]))
                 await self._remember_typed(field, action["selector"], str(action["text"]))
             elif kind == "goto":  # open another path of the same site (deep links in complaints, guards)
                 await page.goto(self.base_url.rstrip("/") + "/" + str(action.get("path", "")).lstrip("/"))
@@ -589,6 +598,10 @@ class Session:
             await self._check_typed(self.last_target or action.get("selector") or action.get("key") or "a control")
         if taps:
             await self._check_picker(action)  # runs even when the tap changed nothing: that is this bug's symptom
+        if self.condition.slow:
+            for text in [a for a in await self._alerts() if a not in alerts_before]:
+                self.add("error_after_wait", f"after reading for {SLOW_THINK_S:.0f} s and typing key by key like this "
+                                             f"user, the page showed: '{text[:140]}'")
         if len(self._new_tabs) > tabs_before:
             # An external link opened a new tab: a response, not a dead button (cloud case 9038's "guided tour"
             # docs link was cited as proof). The twin stays on the app.
@@ -618,6 +631,20 @@ class Session:
         if " ".join(shown.split()) == " ".join(typed.split()):
             return ""
         return f", the field now shows '{shown[:40]}' (you typed '{typed[:40]}'): the app reformats what is typed"
+
+    async def _type(self, field, text: str) -> None:
+        """Fill a field: at once, or key by key at a slow user's pace."""
+        if not self.condition.slow:
+            await field.fill(text, timeout=5000)
+            return
+        await field.fill("", timeout=5000)
+        await field.press_sequentially(text, delay=SLOW_KEY_MS, timeout=5000 + SLOW_KEY_MS * len(text))
+
+    async def _alerts(self) -> list[str]:
+        try:
+            return await self.page.evaluate(ALERTS_JS)
+        except Exception:
+            return []
 
     async def _typing_into(self) -> bool:
         try:

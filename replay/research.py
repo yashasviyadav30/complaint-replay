@@ -27,6 +27,7 @@ QUERIES = {
     "picker_not_opened": "tapping an html input type=date does not open the date picker when the calendar icon "
                          "is hidden, Chrome Android",
     "typed_value_lost": "value typed in a React input resets to empty after tapping another control, cause",
+    "error_after_wait": "OTP or session expires too soon for slow users, recommended expiry time accessibility",
     "wrong_option_chosen": "keyboard Enter in a combobox selects a different option than the highlighted one",
     "tap_blocked": "element intercepts pointer events, a button can't be tapped on mobile, CSS cause",
 }

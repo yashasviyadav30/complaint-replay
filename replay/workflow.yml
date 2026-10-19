@@ -8,14 +8,14 @@ on:
   issues:
     types: [labeled]          # label a bug report "replay" (add "mobile", "screen-reader"... to pick the user)
   issue_comment:
-    types: [created]          # or comment "/replay [screen-reader|mobile|hindi...] what went wrong" (capped per day)
+    types: [created]          # or comment "/replay [screen-reader|mobile|iphone|hindi...] what went wrong" (capped per day)
   workflow_dispatch:          # or start one by hand from the Actions tab
     inputs:
       complaint:
         description: What the user said, in their own words
         required: true
       user:
-        description: "Who to replay as: slow_3g_android, hindi, arabic, elderly, keyboard, screen_reader, flaky_network, fast_desktop"
+        description: "Who to replay as: slow_3g_android, iphone, hindi, arabic, elderly, keyboard, screen_reader, flaky_network, fast_desktop"
         default: slow_3g_android
   pull_request:
   push:

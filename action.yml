@@ -82,7 +82,7 @@ runs:
         event = json.load(open(os.environ["GITHUB_EVENT_PATH"]))
         issue = event["issue"]
         users = {"mobile": "slow_3g_android", "screen-reader": "screen_reader", "keyboard": "keyboard",
-                 "hindi": "hindi", "arabic": "arabic", "elderly": "elderly", "slow-network": "flaky_network"}
+                 "hindi": "hindi", "arabic": "arabic", "elderly": "elderly", "slow-network": "flaky_network", "iphone": "iphone"}
         labels = [l["name"].lower() for l in issue.get("labels", [])]
         user = next((users[l] for l in labels if l in users), "fast_desktop")
         text = (issue["title"] + chr(10) + (issue.get("body") or ""))[:1500]

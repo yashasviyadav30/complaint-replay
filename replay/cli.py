@@ -240,11 +240,11 @@ def cmd_devices(args: argparse.Namespace) -> int:
 
 
 def cmd_setup(_: argparse.Namespace) -> int:
-    """Download the browser the twin drives (and, on Linux CI, the system libraries it needs)."""
+    """Download the browsers the twin drives, Chrome's and Safari's engines (and, on Linux CI, their libraries)."""
     import subprocess
 
     extra = ["--with-deps"] if sys.platform == "linux" else []
-    return subprocess.call([sys.executable, "-m", "playwright", "install", *extra, "chromium"])
+    return subprocess.call([sys.executable, "-m", "playwright", "install", *extra, "chromium", "webkit"])
 
 
 def guess_start(repo: Path) -> str:

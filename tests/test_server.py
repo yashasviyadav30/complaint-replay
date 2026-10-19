@@ -292,3 +292,12 @@ def test_on_render_the_public_address_needs_no_setting(monkeypatch) -> None:
     monkeypatch.delenv("PUBLIC_URL", raising=False)
     monkeypatch.setenv("RENDER_EXTERNAL_URL", "https://crp.onrender.com/")
     assert srv.public_url(None) == "https://crp.onrender.com"
+
+
+def test_a_complaint_from_an_iphone_is_replayed_in_safaris_engine() -> None:
+    iphone = {**ENV, "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 "
+                                   "(KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1"}
+    chrome_on_iphone = {**iphone, "user_agent": iphone["user_agent"].replace("Version/18.0", "CriOS/130.0")}
+    assert twin_condition(iphone).engine == "webkit" and "Safari" in twin_condition(iphone).persona
+    assert twin_condition(chrome_on_iphone).engine == "webkit"  # every iOS browser is WebKit underneath
+    assert twin_condition(ENV).engine == "chromium"

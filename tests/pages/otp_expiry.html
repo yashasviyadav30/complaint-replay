@@ -1,0 +1,10 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
+<body><label>OTP <input id="otp" inputmode="numeric"></label><button id="verify">Verify</button>
+<p id="msg" role="alert"></p>
+<script>
+  // The code is valid for 2 s (a real app: 30 s). A fast user makes it; an older user reading the SMS does not.
+  const sent = Date.now();
+  document.getElementById("verify").onclick = () => {
+    document.getElementById("msg").textContent = Date.now() - sent > 2000 ? "Code expired. Request a new one." : "Verified";
+  };
+</script></body></html>

@@ -50,6 +50,8 @@ class Condition:
     keyboard_only: bool = False
     max_steps: int = 20
     audit: bool = False  # run accessibility checks for every user (public-sector projects)
+    engine: str = "chromium"  # "webkit": Safari's engine, for iPhones, iPads and Safari users
+    slow: bool = False  # reads before each step and types key by key (older users): finds too-short timeouts
 
     @property
     def locale(self) -> str:
@@ -72,7 +74,7 @@ def device(name: str) -> tuple[str, dict]:
     if not key:
         close = [k for k in devices() if name.lower() in k.lower()][:5]
         raise ValueError(f"unknown device {name!r}" + (f"; did you mean: {', '.join(close)}" if close else ""))
-    # All profiles run in Chromium; Safari-engine (WebKit) differences are not emulated yet.
+    # The engine is not a context option: profile() launches it (iPhones and iPads run in WebKit, Safari's engine).
     return key, {k: v for k, v in devices()[key].items() if k != "default_browser_type"}
 
 
@@ -85,9 +87,12 @@ def profile(device_name: str = "", network: str = "wifi", locale: str = "", time
         raise ValueError(f"unknown network {network!r}; one of: {', '.join(NETWORKS)}")
     context: dict = {"viewport": {"width": 1280, "height": 800}}
     parts = []
+    engine = "chromium"
     if device_name:
         name, context = device(device_name)
-        parts.append(f"{name} ({context['viewport']['width']}x{context['viewport']['height']})")
+        engine = devices()[name].get("default_browser_type", "chromium")
+        parts.append(f"{name} ({context['viewport']['width']}x{context['viewport']['height']})"
+                     + (", Safari" if engine == "webkit" else ""))
     else:
         parts.append("desktop 1280x800")
     if network != "wifi":
@@ -111,7 +116,14 @@ def profile(device_name: str = "", network: str = "wifi", locale: str = "", time
         parts.append("screen reader")
     persona = "A user on " + ", ".join(parts) + "."
     return Condition("custom", ", ".join(parts), persona, context, NETWORKS[network], zoom=zoom,
-                     screen_reader=screen_reader, keyboard_only=keyboard_only, max_steps=max_steps)
+                     screen_reader=screen_reader, keyboard_only=keyboard_only, max_steps=max_steps, engine=engine)
+
+
+def safari_engine(user_agent: str) -> bool:
+    """Every browser on an iPhone or iPad is Safari's engine underneath; on a Mac, only Safari itself is."""
+    if any(device in user_agent for device in ("iPhone", "iPad", "iPod")):
+        return True
+    return "Safari" in user_agent and not any(other in user_agent for other in ("Chrome", "Chromium", "Android", "Edg"))
 
 
 def twin_condition(env: dict) -> Condition:
@@ -142,9 +154,12 @@ def twin_condition(env: dict) -> Condition:
         parts.append("high-contrast colors")
     if latency:
         parts.append(f"{env.get('effective_type') or 'slow'} network (+{latency} ms per request)")
+    engine = "webkit" if safari_engine(env.get("user_agent", "")) else "chromium"
+    if engine == "webkit":
+        parts.append("Safari")
     return Condition(
         "twin", ", ".join(parts[:2]), "The real user who reported this: " + ", ".join(parts) + ".",
-        context, network={"latency": latency} if latency else None,
+        context, network={"latency": latency} if latency else None, engine=engine,
     )
 
 
@@ -197,8 +212,14 @@ CONDITIONS = {
         ),
         Condition(
             "elderly", "Elderly first-time user",
-            "An elderly first-time smartphone user with 200% zoom who gives up after a few confusing steps.",
-            dict(PHONE), zoom=2.0, max_steps=8,
+            "An elderly first-time smartphone user with 200% zoom who reads slowly, types one key at a time, and "
+            "gives up after a few confusing steps.",
+            dict(PHONE), zoom=2.0, max_steps=8, slow=True,
+        ),
+        Condition(
+            "iphone", "iPhone Safari",
+            "A user on an iPhone 15 in Safari, on 4G. Safari's engine (WebKit) behaves differently from Chrome's.",
+            device("iPhone 15")[1], network=NETWORKS["4g"], engine="webkit",
         ),
         Condition(
             "flaky_network", "Flaky mobile network",
