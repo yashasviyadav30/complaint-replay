@@ -52,6 +52,7 @@ export const EVIDENCE: Record<string, string> = {
   tap_blocked: "Tap blocked",
   typed_value_lost: "Typed value lost",
   error_after_wait: "Expired before a slow user finished",
+  charged_twice: "Charged twice",
   wrong_option_chosen: "Wrong option chosen",
 };
 

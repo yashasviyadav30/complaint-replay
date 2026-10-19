@@ -47,6 +47,12 @@ BUGS = (
         "times and still cannot log in.",
     ),
     Bug(
+        17, "train", "A retry after a dropped signal charges twice: every tap makes a new payment key",
+        "static/app.js", "state.payKey ||= crypto.randomUUID();", "state.payKey = crypto.randomUUID();",
+        "I paid on the train, the network dropped and the app said something went wrong. I tapped Pay again and "
+        "now I have two orders and the money was taken twice!",
+    ),
+    Bug(
         7, "hindi", "Wrong-OTP error shown only in English",
         "static/app.js",
         'return showLoginError(t("invalidOtp"));',
@@ -68,8 +74,8 @@ BUGS = (
     Bug(
         15, "fast_desktop", "Coupon shown in cart but not applied at payment",
         "app.py",
-        'return {"order_id": "BS-1042", "charged": total}',
-        'return {"order_id": "BS-1042", "charged": subtotal}',
+        'order = {"order_id": f"BS-{1042 + len(orders)}", "charged": total}',
+        'order = {"order_id": f"BS-{1042 + len(orders)}", "charged": subtotal}',
         "Applied SAVE10, the cart showed the discounted total, but I was charged the full price!",
     ),
 )

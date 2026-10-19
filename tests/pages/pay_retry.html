@@ -1,0 +1,14 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
+<body><button id="pay">Pay ₹120</button><p id="msg" role="alert"></p>
+<script>
+  // ?safe keeps one key per cart, so a retry is the same order; without it every tap makes a new key.
+  let key = null;
+  document.getElementById("pay").onclick = async () => {
+    key = location.search.includes("safe") ? (key || crypto.randomUUID()) : crypto.randomUUID();
+    try {
+      const res = await fetch("/api/checkout", {method: "POST", headers: {"Content-Type": "application/json"},
+                                               body: JSON.stringify({items: [["chai", 1]], key})});
+      document.getElementById("msg").textContent = res.ok ? "Paid" : "Payment failed";
+    } catch { document.getElementById("msg").textContent = "Something went wrong. Please try again."; }
+  };
+</script></body></html>

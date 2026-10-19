@@ -23,7 +23,7 @@ That is not rare. Studies of real bug trackers find 13-24% of bug reports are ne
 Complaint Replay turns a user's complaint into a pull request: proof of the bug, the fix, and a test that stops it from coming back.
 
 1. **Hears.** A one-line widget adds "Report a problem" to any site, in 17 languages, typed or spoken. With each complaint it records the user's real conditions: screen, device, network, language, timezone, dark mode, reduced motion. It also catches silent frustration (rage clicks, page errors, failed requests), and takes complaints from GitHub issues, support-desk email and Sentry.
-2. **Reproduces.** In the team's own GitHub Actions, an AI twin opens a real browser under those exact conditions and repeats what the user did. If the user says they use a screen reader or only a keyboard, in any language, the twin does too.
+2. **Reproduces.** In the team's own GitHub Actions, an AI twin opens a real browser under those exact conditions and repeats what the user did. If the user says they use a screen reader or only a keyboard, in any language, the twin does too. iPhone users replay in Safari's own engine, older users at their own slower pace, and commuters with a signal that drops mid-payment.
 3. **Proves.** Evidence comes only from code watching the browser: failed requests, a button pushed off a phone screen, an English error shown to a Hindi user, a control a screen reader announces only as "button", the same payment sent twice. The model may cite evidence; it cannot invent it. For screen-reader bugs, the developer can press Listen and hear the page the way a blind user does.
 4. **Fixes.** NVIDIA Nemotron reads the evidence, web research about it, and the relevant source files, and writes the smallest fix on a new branch.
 5. **Guards.** The steps that triggered the bug run again on the fix, by code, with no model. They become a test that must pass on the fix and fail on the old code, and it runs in CI on every later pull request.
@@ -75,13 +75,9 @@ The source code never leaves the team's CI. Teams set it up in about ten minutes
 
 ## What's next
 
-New users for the twin, chosen by where bugs cost the most money or lock people out:
+Built after the first draft, each tested on a planted bug end to end (reproduced, fixed, guarded): iPhone users in Safari's own engine, older users at their own pace (an OTP that expired before they finished typing), and a payment interrupted by a dropped signal (charged twice on retry). Next:
 
-1. **Interrupted payments.** Back button, a switched tab, an incoming call or an expired session in the middle of paying: the double charge, the lost order, the money taken with no order made.
-2. **iPhone Safari.** About half of mobile users in the US and Europe, and many bugs appear only there while developers test in Chrome. Playwright already runs Safari's engine.
-3. **Slow users and timeouts.** An OTP that expires before an older user finishes typing it, a session that ends mid-form. The twin will move at the user's own speed.
-4. **Money and date formats.** "1,00,000" against "100,000", month-end and year-end dates, time zones: the wrong amount charged, the wrong due date.
-
+1. **Money and date formats.** "1,00,000" against "100,000", month-end and year-end dates, time zones: the wrong amount charged, the wrong due date.
 Then: five design-partner teams with pull requests merged by people who are not us, and native Android apps with an emulator in GitHub Actions.
 
 ## Try it

@@ -372,3 +372,29 @@ def test_a_slow_user_meets_an_expiry_a_fast_one_never_sees(site, monkeypatch) ->
     assert any(f.startswith("error_after_wait:") and "Code expired" in f for f in slow), slow
     assert not any(f.startswith("error_after_wait:") for f in fast), fast
 
+
+CHECKOUT_SERVER = '''import http.server, json, sys, uuid
+orders = {}  # payment key -> order: a retry with the same key is the same order, not a second charge
+class H(http.server.SimpleHTTPRequestHandler):
+    def do_POST(self):
+        body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
+        order = orders.setdefault(body["key"], {"order": uuid.uuid4().hex, "charged": 120})
+        data = json.dumps(order).encode()
+        self.send_response(200); self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(data))); self.end_headers(); self.wfile.write(data)
+http.server.ThreadingHTTPServer(("127.0.0.1", int(sys.argv[1])), H).serve_forever()
+'''
+
+
+@pytest.mark.parametrize("query,charged_twice", [("", True), ("?safe", False)])
+def test_a_payment_whose_reply_was_lost_is_not_charged_again(tmp_path, query, charged_twice) -> None:
+    # The signal drops after the payment reached the server: the phone says "went wrong", the user pays again.
+    (tmp_path / "index.html").write_text((PAGES / "pay_retry.html").read_text(encoding="utf-8"), encoding="utf-8")
+    (tmp_path / "server.py").write_text(CHECKOUT_SERVER, encoding="utf-8")
+    (tmp_path / "complaint-replay.toml").write_text('[app]\nstart = "{python} server.py {port}"\nready = "/"\n',
+                                                     encoding="utf-8")
+    train = replace(PHONE, network={"latency": 100, "lose_first_payment_reply": True})
+    pay = {"type": "click_css", "selector": "#pay"}
+    with running_app(tmp_path) as url:
+        found = kinds(f"{url}/index.html{query}", train, [pay, pay])
+    assert any(f.startswith("charged_twice:") for f in found) == charged_twice, found

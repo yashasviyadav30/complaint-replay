@@ -30,7 +30,8 @@ NETWORKS: dict[str, dict | None] = {
     "slow-3g": {"latency": 3000},
     "2g": {"latency": 5000},
     "satellite": {"latency": 800},
-    "flaky": {"latency": 400, "fail_rate": 0.25},
+    "flaky": {"latency": 400, "fail_rate": 0.25, "lose_first_payment_reply": True},
+    "tunnel": {"latency": 300, "lose_first_payment_reply": True},  # fine, until the signal drops while paying
     "drops": {"latency": 200, "drop_after_load": True},
 }
 SLOW_TYPES = {"slow-2g": 5000, "2g": 3000, "3g": 1500}  # added latency (ms) when only the type is known
@@ -222,8 +223,15 @@ CONDITIONS = {
             device("iPhone 15")[1], network=NETWORKS["4g"], engine="webkit",
         ),
         Condition(
+            "train", "Signal drops while paying",
+            "A commuter whose train goes into a tunnel while paying: the server takes the money but the reply never "
+            "reaches the phone.",
+            dict(PHONE), network=NETWORKS["tunnel"],
+        ),
+        Condition(
             "flaky_network", "Flaky mobile network",
-            "A commuter on a train whose connection keeps dropping: a quarter of requests fail.",
+            "A commuter on a train whose connection keeps dropping: a quarter of requests fail, and a reply can be "
+            "lost after the server already took a payment.",
             dict(PHONE), network=NETWORKS["flaky"],
         ),
     )

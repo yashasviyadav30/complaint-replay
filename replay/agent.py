@@ -259,6 +259,10 @@ Rules:
 SIGHTED_ACTIONS = """{"type": "click", "target": <idx>}   (add "times": 2 to tap twice quickly, like an impatient user)
 {"type": "fill", "target": <idx>, "text": "..."}
 {"type": "press", "key": "Escape"}   (closes an open menu or dialog)"""
+# Anyone can be interrupted; complaints about double charges and lost orders often start here.
+INTERRUPTIONS = """
+{"type": "back"}   (the browser's Back button)
+{"type": "reload"}   (refresh the page, as users do when something seems stuck)"""
 SCREEN_READER_ACTIONS = """{"type": "click_role", "role": "button", "name": "<exact accessible name>"}
 {"type": "fill_role", "role": "textbox", "name": "<exact accessible name>", "text": "..."}
 You can only use controls that have a name in the accessibility tree."""
@@ -304,7 +308,7 @@ def evidence_brief(evidence: list) -> str:
 def build_prompt(ctx: dict) -> tuple[str, str]:
     cond: Condition = ctx["condition"]
     actions = (KEYBOARD_ACTIONS if cond.keyboard_only else SCREEN_READER_ACTIONS if cond.screen_reader
-               else SIGHTED_ACTIONS)
+               else SIGHTED_ACTIONS) + INTERRUPTIONS
     obs = ctx["obs"]
     page = (
         f"Accessibility tree (what the screen reader announces):\n{obs['aria']}"

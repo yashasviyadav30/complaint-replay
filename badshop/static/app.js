@@ -128,9 +128,12 @@ $("pay").addEventListener("click", async () => {
   if (!state.cart.size) return ($("cart-error").textContent = t("emptyCart"));
   if ($("pay").dataset.busy) return; // a second tap while paying must not create a second order
   $("pay").dataset.busy = "1";
-  const { ok, data } = await postJson("/api/checkout", { items: cartItems(), coupon: state.coupon });
+  state.payKey ||= crypto.randomUUID(); // kept until this payment succeeds: a retry is the same order
+  const { ok, data } = await postJson("/api/checkout", { items: cartItems(), coupon: state.coupon, key: state.payKey })
+    .catch(() => ({ ok: false })); // the signal dropped: say so, and let the user try again
   delete $("pay").dataset.busy;
   if (!ok) return ($("cart-error").textContent = t("otpFailed"));
+  state.payKey = null;
   $("shop").hidden = true;
   $("cart").hidden = true;
   $("done").hidden = false;

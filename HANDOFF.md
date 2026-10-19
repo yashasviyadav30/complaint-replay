@@ -120,6 +120,14 @@ screen-reader audio of the page for screen-reader bugs; (3) MCP server so coding
 Copilot) can run replays and guards; (4) "Who does this PR hurt?": pre-merge replay under the real users'
 device/network/language mix from widget data; (5) voice complaints in the widget; (6) bug cost in rupees.
 
+**Oct 19 later: 3 roadmap features built (user asked), each tested end to end on a planted bug, 185 tests.**
+iPhone/iPad and iPhone complaints replay in WebKit (Safari's engine; `engine` on Condition, `crp setup` installs
+it, ready user `iphone`); slow users (`slow` on Condition, elderly is slow) read before each step and type key by
+key, evidence `error_after_wait` (shop: OTP expires after 5 min; bug 16 = 10 s); payment interrupted (network
+`tunnel`/flaky lose the first payment reply after the server took it, evidence `charged_twice`; Back/Reload
+actions; shop has payment keys; bug 17 = new key per tap; ready user `train`). Money/date formats NOT built (next).
+User said: no video changes now; stop after this. Video still shows the earlier feature set (still accurate).
+
 **Oct 19: READY TO SUBMIT (user submits today).** Claims made honest (free NVIDIA API catalog; no Token Factory:
 user won't add a card). Demo repo public; pinned issue #7 "Try it": a live `/replay` comment was reproduced, fixed
 and guarded -> PR #8 (verified). README top: films, links, "what you won't find elsewhere"; repo description,

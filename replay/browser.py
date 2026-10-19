@@ -5,6 +5,7 @@ That is the "no evidence, no verdict" rule.
 """
 
 import asyncio
+import json
 import re
 import time
 from collections import deque
@@ -25,6 +26,18 @@ SETTLE_TIMEOUT_S = 20
 # ponytail: payment-like paths by name; a per-app list of non-idempotent endpoints is the upgrade.
 PAYMENT_PATH = re.compile(r"checkout|order|pay|purchase|transfer|booking", re.I)
 DUPLICATE_WINDOW_S = 5
+VOLATILE = re.compile(r"key|nonce|token|time|stamp|^id$|_id$", re.I)  # fields that differ between two tries
+
+
+def same_cart(body: str) -> str:
+    """A payment request without its per-try fields (idempotency key, timestamp): what the user is paying for."""
+    try:
+        data = json.loads(body)
+    except ValueError:
+        return body
+    if isinstance(data, dict):
+        data = {k: v for k, v in data.items() if not VOLATILE.search(k)}
+    return json.dumps(data, sort_keys=True)
 DOUBLE_TAP_GAP_MS = 300
 OUR_PATHS = ("/widget.js", "/api/complaints")
 SLOW_REQUEST_S = 10        # a request the user waited on this long
@@ -226,6 +239,8 @@ class Session:
         self._loaded = False  # flaky / dropping networks spare the first page load, or nothing would open
         self._after_load = 0  # requests since the page loaded; every Nth fails, so a replay is repeatable
         self._new_tabs: list[str] = []  # URLs of tabs the app opened (external links)
+        self._charges: list[tuple[float, str, str, bool]] = []  # (time, cart, server reply, reply lost) per payment
+        self._dropped: set = set()  # requests whose reply we dropped to imitate the user's network: not app bugs
 
     def add(self, kind: str, detail: str) -> None:
         if (kind, evidence_key(kind, detail)) in self._seen:
@@ -305,7 +320,34 @@ class Session:
             # CDP network throttling was silently ignored in tests (Playwright 1.63), so latency is
             # added per request here.
             await asyncio.sleep(net["latency"] / 1000)
+        request = route.request
+        if request.method == "POST" and PAYMENT_PATH.search(urlparse(request.url).path):
+            await self._pay(route, net)
+            return
         await route.continue_()
+
+    async def _pay(self, route, net: dict) -> None:
+        """A payment goes to the server; on a dropping network its first reply is lost on the way back, the way a
+        train or a lift cuts a phone off after the bank already took the money."""
+        try:
+            response = await route.fetch()
+        except Exception:
+            await route.abort("connectionreset")
+            return
+        lost = bool(net.get("lose_first_payment_reply")) and not any(c[3] for c in self._charges)
+        reply, cart, now = await response.text(), same_cart(route.request.post_data or ""), time.monotonic()
+        if response.ok:
+            for at, seen_cart, seen_reply, seen_lost in self._charges:
+                if seen_cart == cart and seen_reply != reply:
+                    self.add("charged_twice", f"POST {urlparse(route.request.url).path} was accepted twice for the same "
+                             f"cart, {now - at:.0f} s apart, as two different orders"
+                             + (" (the phone never got the first reply: the signal dropped)" if seen_lost else ""))
+            self._charges.append((now, cart, reply, lost))
+        if lost:
+            self._dropped.add(route.request)
+            await route.abort("connectionreset")
+        else:
+            await route.fulfill(response=response)
 
     def _listen(self) -> None:
         page = self.page
@@ -314,8 +356,15 @@ class Session:
         page.on("requestfailed", self._on_failed)
         page.on("response", self._on_response)
         page.on("framenavigated", self._on_navigated)
-        page.on("console", lambda m: m.type == "error" and is_real_error(m.text) and self.add("console_error", m.text[:200]))
+        page.on("console", self._on_console)
         page.on("pageerror", lambda e: self.add("console_error", str(e)[:200]))
+
+    def _on_console(self, message) -> None:
+        if message.type != "error" or not is_real_error(message.text):
+            return
+        if self._dropped and "ERR_CONNECTION_RESET" in message.text:
+            return  # the browser logging the reply we dropped on purpose: the user's network, not the app
+        self.add("console_error", message.text[:200])
 
     def _on_request(self, request) -> None:
         self._track(+1)
@@ -353,8 +402,9 @@ class Session:
     def _on_failed(self, request) -> None:
         self._track(-1)
         self._started.pop(request, None)
-        if is_ours(request.url):
-            return
+        if is_ours(request.url) or request in self._dropped:
+            return  # a reply we dropped to imitate the user's network is their condition; what the app does next is
+                    # the evidence (a payment that went wrong after a train went into a tunnel: bug 17, Oct 19)
         self.add("request_failed", f"{request.method} {urlparse(request.url).path} failed ({request.failure})")
 
     async def _on_response(self, response) -> None:
@@ -555,6 +605,10 @@ class Session:
                 await page.mouse.wheel(0, -600 if action.get("direction") == "up" else 600)
             elif kind == "wait":
                 await asyncio.sleep(min(int(action.get("ms", 1000)), 10_000) / 1000)
+            elif kind == "back":  # the browser's Back button, pressed mid-payment more often than anyone admits
+                await page.go_back(wait_until="load", timeout=30_000)
+            elif kind == "reload":  # "it's stuck, let me refresh"
+                await page.reload(wait_until="load", timeout=60_000)
             else:
                 return f"error: unknown action type {kind!r}"
         except Exception as e:  # report to the model; a failed click is information, not a crash

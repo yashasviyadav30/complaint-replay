@@ -3,7 +3,7 @@
 **Your users already told you what's broken. Complaint Replay proves it, fixes it, and makes sure it never comes back.**
 
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-179%20passing-brightgreen)](#run-the-tests)
+[![Tests](https://img.shields.io/badge/tests-185%20passing-brightgreen)](#run-the-tests)
 [![NVIDIA Nemotron](https://img.shields.io/badge/NVIDIA-Nemotron%203%20Super-76b900)](#how-nvidia-nemotron-and-nebius-are-used)
 [![Runs in GitHub Actions](https://img.shields.io/badge/runs%20in-your%20GitHub%20Actions-2088ff)](#set-it-up-on-your-app-about-10-minutes)
 
@@ -41,6 +41,7 @@ It runs inside **your own GitHub Actions**, so your source code never leaves you
 
 - **Conditions are real, not role-played.** 207 device profiles, slow and flaky networks, Hindi, Arabic right-to-left, 200% text, keyboard-only and screen-reader users. The browser is slow; the model is not told to pretend.
 - **Hear what a blind user hears.** For screen-reader bugs, press *Listen* in the dashboard: the browser reads the page the way the user met it ("BadShop, heading level 1. Button."). Which button is the cart?
+- **Every user, not just Chrome.** iPhone complaints replay in Safari's own engine; older users replay at their own pace, so the OTP that expires before they finish typing shows up; a train going into a tunnel mid-payment shows whether the user gets charged twice.
 - **Speak the complaint.** Older users and people who'd rather not type tap the mic in the widget and talk, in their own language.
 - **Watch it fixed.** The person who complained gets a link to the film of their own problem, now working.
 - **Proof the model can't fake.** "Reproduced" needs evidence the browser recorded; a fix counts only when code replays the user's steps and the bug is gone.
@@ -102,17 +103,20 @@ Each project also has a kind of product. Government, health and education projec
 | Condition | How it is enforced (never role-played) |
 |---|---|
 | Any of 207 phones, tablets and desktops | Playwright's device catalog: screen, pixel ratio, touch, user agent |
-| Network: 4g, 3g, slow-3g, 2g, satellite, flaky, drops | Latency added per request; flaky fails every 4th request; drops cuts the connection after the page loads |
+| iPhone and iPad users, Safari | Run in WebKit, Safari's real engine, not Chrome dressed up; a complaint sent from an iPhone replays in it automatically |
+| Network: 4g, 3g, slow-3g, 2g, satellite, flaky, drops, tunnel | Latency added per request; flaky fails every 4th request; drops cuts the connection after the page loads; on flaky and tunnel a payment reaches the server but its reply is lost, like a train going into a tunnel mid-payment |
 | Any language and timezone, right-to-left | Browser locale and timezone; RTL layout is checked |
 | Dark mode, forced colors, reduced motion, 200% text | Browser media settings and page zoom |
 | Screen reader | The twin sees only the accessibility tree and can only use named controls |
 | Keyboard only | The twin can only press Tab, Enter, Space and arrows |
+| Older and slower users | The twin reads for a few seconds before each step and types one key at a time, so a code or session that expires too soon locks it out, as it locks them out |
+| Interrupted users | The twin can press Back or reload mid-flow, as people do when something seems stuck |
 
 Conditions come from the widget (measured on the real user's device) plus what the user says about themselves in the complaint (Nemotron reads "I use a screen reader" in any language).
 
 ## What counts as evidence
 
-Code watching the browser records: failed requests, HTTP errors, console errors, slow requests, controls off screen or covered by something else, text cut off, the page wider than the screen, missing images, slow pages and layout jumps (web vitals), spinners stuck for 15 s, redirect loops, taps that did nothing at all, taps that something else intercepted, values the user typed that vanish after another tap, Enter saving a different option than the highlighted one, date fields whose picker never opens, messages not in the user's language (fastText language ID on CPU), right-to-left pages laid out left-to-right, invisible keyboard focus, things a keyboard can't reach, controls a screen reader announces only as "1" or "+", accessibility violations (axe-core, WCAG 2.2 AA), money values that disagree between API calls, and the same payment sent twice. Teams can add their own rules too: list JavaScript files under `checks` in `complaint-replay.toml`, each a function returning problems ("the invoice total doesn't match its lines"), and they run on every replay and every guard. Every item says where on the page it happened ("in the navigation", "near 'Book $10.99'").
+Code watching the browser records: failed requests, HTTP errors, console errors, slow requests, controls off screen or covered by something else, text cut off, the page wider than the screen, missing images, slow pages and layout jumps (web vitals), spinners stuck for 15 s, redirect loops, taps that did nothing at all, taps that something else intercepted, values the user typed that vanish after another tap, Enter saving a different option than the highlighted one, date fields whose picker never opens, messages not in the user's language (fastText language ID on CPU), right-to-left pages laid out left-to-right, invisible keyboard focus, things a keyboard can't reach, controls a screen reader announces only as "1" or "+", accessibility violations (axe-core, WCAG 2.2 AA), money values that disagree between API calls, the same payment sent twice, a payment accepted twice as two orders after the signal dropped, and a code or session that expired before a slow user finished. Teams can add their own rules too: list JavaScript files under `checks` in `complaint-replay.toml`, each a function returning problems ("the invoice total doesn't match its lines"), and they run on every replay and every guard. Every item says where on the page it happened ("in the navigation", "near 'Book $10.99'").
 
 ## Results
 
@@ -144,6 +148,8 @@ The first runs scored 0 for bad reasons: the twin wandered, and the judge accept
 
 Measured Oct 14, 2026 with `uv run python bench.py 3` (NVIDIA API catalog endpoint, Nemotron 3 Super):
 **21/21 reproduced, 20/21 fixed and proven, 20/21 guarded, 0 false alarms** on the clean shop ([per-bug table](benchmarks/demo-shop.md)). These are bugs we planted ourselves: a working demonstration, not a broad benchmark.
+
+Added Oct 19 and run once each end to end (all three reproduced, fixed and guarded): the Pay button off an iPhone 15's screen, replayed in Safari's engine; an OTP that expires after 10 seconds, met by the slow older user; and a retry after a dropped signal that charges twice. One run each is a demonstration, not a rate.
 
 ### Any language
 

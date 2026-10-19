@@ -47,6 +47,10 @@ class CartItem(BaseModel):
 class Cart(BaseModel):
     items: list[CartItem]
     coupon: str | None = None
+    key: str | None = None  # one per payment attempt: a retry with the same key is the same order
+
+
+orders: dict[str, dict] = {}  # payment key -> order, so a retry after a lost reply never charges twice
 
 
 def price(items: list[CartItem], coupon: str | None) -> tuple[int, int, int]:
@@ -97,7 +101,12 @@ def checkout(cart: Cart):
     if not cart.items:
         raise HTTPException(400, {"error": "empty_cart"})
     subtotal, discount, total = price(cart.items, cart.coupon)
-    return {"order_id": "BS-1042", "charged": total}
+    if cart.key and cart.key in orders:
+        return orders[cart.key]
+    order = {"order_id": f"BS-{1042 + len(orders)}", "charged": total}
+    if cart.key:
+        orders[cart.key] = order
+    return order
 
 
 app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
