@@ -141,3 +141,30 @@ def test_a_find_that_dropped_jsx_double_braces_still_applies(tmp_path: Path) -> 
     replace = "style={\n    minWidth: '150px',\n  }"
     apply_patch(Patch("x", ({"file": "Edit.tsx", "find": find, "replace": replace},)), tmp_path)
     assert (tmp_path / "Edit.tsx").read_text(encoding="utf-8") == "<input\n  style={{\n    minWidth: '150px',\n  }}\n/>\n"
+
+
+def test_a_fixer_that_ran_out_of_tokens_says_so(tmp_path: Path, monkeypatch) -> None:
+    # Actual case 8926: reasoning used every token and the reply was empty; "no JSON" hid the real reason.
+    import asyncio
+    from types import SimpleNamespace
+
+    import replay.fix as fix
+    from replay.agent import ReplayResult
+    from replay.conditions import CONDITIONS
+
+    async def no_wait() -> None:
+        return None
+
+    class Client:
+        class chat:
+            class completions:
+                @staticmethod
+                async def create(**kwargs):
+                    return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content=""),
+                                                                    finish_reason="length")])
+
+    monkeypatch.setattr(fix, "throttle", no_wait)
+    shop = make_shop(tmp_path)
+    result = ReplayResult("reproduced", "x", (), (), ())
+    with pytest.raises(ValueError, match="ran out of tokens"):
+        asyncio.run(fix.propose_fix(Client(), "m", "OTP never comes", CONDITIONS["fast_desktop"], result, shop))

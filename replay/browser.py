@@ -284,6 +284,16 @@ class Session:
         self._loaded = True
         return self
 
+    async def restart(self) -> None:
+        """Back to the app's first screen, as if just opened: where every app-map path starts."""
+        await self.page.goto(self.base_url, wait_until="load", timeout=60_000)
+        await self._wait_until_ready()
+        if self.ready_text:
+            try:
+                await self.page.get_by_text(self.ready_text).first.wait_for(timeout=READY_TEXT_TIMEOUT_S * 1000)
+            except Exception:  # not there: the twin sees the screen as it is
+                pass
+
     async def _wait_until_ready(self) -> None:
         """Big apps keep loading after the load event (bundles, workers, a splash screen). A user waits for that,
         so the twin does too: network quiet and no spinner on screen, up to READY_TIMEOUT_S."""
@@ -597,7 +607,10 @@ class Session:
                 await self._type(field, str(action["text"]))
                 await self._remember_typed(field, action["selector"], str(action["text"]))
             elif kind == "goto":  # open another path of the same site (deep links in complaints, guards)
-                await page.goto(self.base_url.rstrip("/") + "/" + str(action.get("path", "")).lstrip("/"))
+                if str(action.get("path", "")).strip("/"):
+                    await page.goto(self.base_url.rstrip("/") + "/" + str(action["path"]).lstrip("/"))
+                else:  # the first screen, waited for like a fresh start (app-map paths and their guards begin here)
+                    await self.restart()
             elif kind in ("scroll", "swipe"):
                 # From the middle of the screen: at (0, 0) the wheel hits the top bar and inner panels never move.
                 size = page.viewport_size or {"width": 800, "height": 600}
@@ -707,8 +720,9 @@ class Session:
             return False
 
     async def _state(self, el) -> dict | None:
+        # After a tap that opened another page the control is gone: waiting for it cost 1 s per navigation.
         try:
-            return await el.evaluate(STATE_JS, timeout=1000) if el else None
+            return await el.evaluate(STATE_JS, timeout=1000) if el and await el.count() else None
         except Exception:
             return None
 
@@ -730,7 +744,10 @@ class Session:
         if not selector:
             return
         try:
-            kind = await self.page.locator(selector).first.evaluate(PICKER_JS, timeout=2000)
+            field = self.page.locator(selector).first
+            if not await field.count():  # the tap opened another page: no field left to check (it cost 2 s a tap)
+                return
+            kind = await field.evaluate(PICKER_JS, timeout=2000)
         except Exception:
             return
         if kind:

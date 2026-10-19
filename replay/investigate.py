@@ -14,6 +14,7 @@ from pathlib import Path
 from openai import AsyncOpenAI
 
 from replay.agent import ReplayResult, replay
+from replay.appmap import build_map
 from replay.browser import evidence_key
 from replay.conditions import Condition, with_needs
 from replay.fix import apply_patch, pick_fix_model, propose_fix
@@ -120,7 +121,12 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
         case["condition"] = {"label": cond.label, "persona": cond.persona}
 
     stage("reproducing")
-    before = await replay(live_url, complaint, cond, policy, matcher, shot("before"), film=film("before"), **target)
+    # Map the app's screens first, so the twin goes where the complaint points instead of searching (keyboard users
+    # can't take the shortcut: they have no mouse).
+    app_map = [] if cond.keyboard_only else await build_map(live_url, cond, project.auth_file, project.ready_text)
+    case["app_map"] = [{"title": s["title"], "path": s["path"]} for s in app_map]
+    before = await replay(live_url, complaint, cond, policy, matcher, shot("before"), film=film("before"),
+                          app_map=app_map, **target)
     case["replay"] = as_dict(before)
     if not shots:  # projects that keep no screenshots keep no transcript of the screen either
         case["replay"].pop("heard", None)

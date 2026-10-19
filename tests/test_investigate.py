@@ -69,6 +69,11 @@ def test_a_patch_the_proof_rejects_gets_a_second_round_with_what_the_proof_saw(t
         return []
 
     monkeypatch.setattr(inv, "replay", fake_replay)
+
+    async def no_map(*args, **kwargs):
+        return []
+
+    monkeypatch.setattr(inv, "build_map", no_map)
     monkeypatch.setattr(inv, "propose_fix", fake_fix)
     monkeypatch.setattr(inv, "run_guard", fake_guard)
     monkeypatch.setattr(inv, "running_app", fake_app)

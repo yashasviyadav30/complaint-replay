@@ -120,9 +120,12 @@ async def cmd_replay(args: argparse.Namespace) -> int:
             case = await investigate(case, cond, url, repo, client, chat, save, out / "shots" if keep_shots else None)
         else:
             shot, film = f"{case['id']}-before.png", f"{case['id']}-before.gif"
+            from replay.appmap import build_map
+
+            app_map = [] if cond.keyboard_only else await build_map(url, cond, project.auth_file, project.ready_text)
             result = await replay(url, complaint, cond, llm_policy(chat), llm_matcher(chat), out / "shots" / shot,
                                   hints=project.hints, storage_state=project.auth_file, checks=project.check_scripts,
-                                  ready_text=project.ready_text, film=out / "shots" / film)
+                                  ready_text=project.ready_text, film=out / "shots" / film, app_map=app_map)
             case.update(replay=as_dict(result), stage=result.verdict, shots={"before": shot}, films={"before": film})
             save(case)
     show(case)

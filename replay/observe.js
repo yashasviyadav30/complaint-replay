@@ -68,7 +68,10 @@
       // A small square with no name is almost always a checkbox or toggle: say so, so 'tick the box at the start
       // of the row' can be matched (cloud case 8765).
       label: name(el) || (nearText(el) ? `(no name${r.width <= 28 && r.height <= 28 ? ', small box' : ''}) near '${nearText(el)}'` : ''),
-      value: (el.type === 'password' ? '' : el.value) || '', disabled: !!el.disabled });
+      value: (el.type === 'password' ? '' : el.value) || '', disabled: !!el.disabled,
+      // Leads somewhere: the app map explores only these (links, tabs, menu items, anything in a nav or sidebar)
+      nav: el.matches('a[href], [role=link], [role=tab], [role=menuitem]')
+        || !!el.closest('nav, aside, [role=navigation], [role=tablist], [role=menu], [role=menubar]') });
     // A name with no letters ("1", "+", "x") tells a screen-reader user nothing about what the control does.
     if (!['input', 'select', 'textarea'].includes(el.tagName.toLowerCase()) && !/\p{L}/u.test(heardName(el))) {
       unnamed.push({ label: heardName(el), tag: el.tagName.toLowerCase(), where: where(el) });

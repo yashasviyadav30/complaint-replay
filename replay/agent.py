@@ -7,6 +7,7 @@ from dataclasses import dataclass, replace
 from pathlib import Path
 
 from replay.film import describe, write_gif
+from replay.appmap import describe as describe_map, follow
 from replay.browser import Evidence, Session
 from replay.conditions import Condition
 
@@ -85,17 +86,18 @@ Matcher = Callable[[str, list[Evidence]], Awaitable[dict]]
 async def replay(base_url: str, complaint: str, condition: Condition, policy: Policy,
                  matcher: Matcher | None = None, screenshot: Path | None = None, hints: str = "",
                  storage_state: Path | None = None, checks: dict[str, str] | None = None,
-                 ready_text: str = "", film: Path | None = None) -> ReplayResult:
+                 ready_text: str = "", film: Path | None = None, app_map: list[dict] | None = None) -> ReplayResult:
     """Replay a complaint. If `screenshot` is given, save what the user sees at the moment of the verdict.
     If `film` is given, save the whole replay there as a captioned GIF, ending on what was found.
 
     `hints` are facts about the app the twin may need (test accounts, test data), from the project config.
     `storage_state` is a saved login, so the twin starts signed in.
+    `app_map` (from appmap.build_map) lets the twin go straight to any screen instead of searching for it.
     """
     async with Session(base_url, condition, storage_state, checks, ready_text) as session:
         frames: list | None = [] if film else None
         await snap(session, frames, f"The user's screen: {condition.label}")
-        result = await _drive(session, complaint, condition, policy, matcher, hints, frames)
+        result = await _drive(session, complaint, condition, policy, matcher, hints, frames, app_map)
         if screenshot:
             screenshot.parent.mkdir(parents=True, exist_ok=True)
             await session.page.screenshot(path=str(screenshot))
@@ -133,7 +135,8 @@ async def snap(session: Session, frames: list | None, caption: str, tone: str = 
 
 
 async def _drive(session: Session, complaint: str, condition: Condition, policy: Policy,
-                 matcher: Matcher | None, hints: str = "", frames: list | None = None) -> ReplayResult:
+                 matcher: Matcher | None, hints: str = "", frames: list | None = None,
+                 app_map: list[dict] | None = None) -> ReplayResult:
     steps: list[dict] = []
     visited: list[str] = []  # page paths in the order seen, so the twin can tell it is going in circles
     last_result = "(page just opened)"
@@ -171,6 +174,7 @@ async def _drive(session: Session, complaint: str, condition: Condition, policy:
         action = await policy({
             "complaint": complaint, "condition": condition, "obs": obs, "step": step,
             "evidence": list(session.evidence), "steps": steps, "last_result": last_result, "hints": hints, "visited": visited,
+            "app_map": app_map or [],
         })
         if action.get("type") == "verdict":
             if action.get("verdict") == "reproduced" and matcher:
@@ -187,6 +191,18 @@ async def _drive(session: Session, complaint: str, condition: Condition, policy:
                           {"verdict": "not_reproduced",
                            "summary": str(action.get("summary", "")) + " [The judge found no evidence of this problem.]"})
             return judge(action, session.evidence, steps)
+        if action.get("type") == "go":
+            # Straight to a mapped screen, by the same clicks a user would make: they become steps, so the guard
+            # replays them too (cloud case 8765 never found the transactions table by searching).
+            screen = next((s for s in app_map or [] if s["id"] == action.get("screen")), None)
+            taken = await follow(session, screen["path"]) if screen else None
+            if taken is None:
+                last_result = ("error: no such screen in the app map" if not screen else
+                               f"error: the way to '{screen['title']}' has changed; find it by hand")
+                continue
+            steps += taken
+            last_result = f"ok, you are on '{screen['title']}' (the first screen, then {' > '.join(screen['path']) or 'nothing'})"
+            continue
         label = next((e["label"] for e in obs.get("elements", []) if e["idx"] == action.get("target")), None)
         if action.get("type") in ("click", "fill") and label is None and action.get("target") in seen:
             # Cloud case 9107 (run 13): five taps on [32] from a menu that had closed, each a wasted step.
@@ -259,6 +275,8 @@ Rules:
 SIGHTED_ACTIONS = """{"type": "click", "target": <idx>}   (add "times": 2 to tap twice quickly, like an impatient user)
 {"type": "fill", "target": <idx>, "text": "..."}
 {"type": "press", "key": "Escape"}   (closes an open menu or dialog)"""
+GO_ACTION = """
+{"type": "go", "screen": <N>}   (go straight to screen S<N> from the app map, the way a user would get there)"""
 # Anyone can be interrupted; complaints about double charges and lost orders often start here.
 INTERRUPTIONS = """
 {"type": "back"}   (the browser's Back button)
@@ -326,6 +344,9 @@ def build_prompt(ctx: dict) -> tuple[str, str]:
             "\n\nControls you can see (in page order, roughly the Tab order; reach them only with keys):\n" + \
             "\n".join(f"- {e['tag']} '{e['label']}'" for e in obs["elements"]) + f"\n\nVisible text:\n{obs['text']}"
     about = f"About this app: {ctx['hints']}\n" if ctx.get("hints") else ""
+    if ctx.get("app_map") and not cond.keyboard_only:  # going there takes clicks; a keyboard user has no mouse
+        actions += GO_ACTION
+        about += f"App map (screens and the clicks that reach them):\n{describe_map(ctx['app_map'])}\n"
     evidence = evidence_brief(ctx["evidence"])
     # The name of what each action hit: with bare numbers, a twin "opening a transaction" pressed
     # 'Previous month' nine times without noticing (cloud case 9064).
