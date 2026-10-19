@@ -1,6 +1,7 @@
 """One planted bug, end to end from the command line: reproduce -> fix -> prove.
 
-Run: uv run python pipeline.py 1     (bug id from replay/bugs.py)
+Run: uv run python pipeline.py 1          (bug id from replay/bugs.py)
+     uv run python pipeline.py 4 iphone   (the same bug, replayed as another ready-made user)
 Writes results/cases/bug-<id>.json, the same case format the dashboard shows.
 """
 
@@ -26,12 +27,12 @@ def save(case: dict) -> None:
     (CASES_DIR / f"{case['id']}.json").write_text(json.dumps(case, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-async def run_bug(bug_id: int) -> dict:
+async def run_bug(bug_id: int, user: str = "") -> dict:
     bug = BUGS_BY_ID[bug_id]
-    cond = CONDITIONS[bug.condition]
+    cond = CONDITIONS[user or bug.condition]
     client = make_client()
     chat = Chat(client, await pick_model(client))
-    case = {"id": f"bug-{bug_id}", "created_at": datetime.now(timezone.utc).isoformat(), "kind": "spoken",
+    case = {"id": f"bug-{bug_id}" + (f"-{user}" if user else ""), "created_at": datetime.now(timezone.utc).isoformat(), "kind": "spoken",
             "complaint": bug.complaint, "condition": {"label": cond.label, "persona": cond.persona}, "stage": "heard"}
     shop = reset_workspace()
     inject(bug, shop)
@@ -42,7 +43,7 @@ async def run_bug(bug_id: int) -> dict:
 def main() -> None:
     load_dotenv()
     sys.stdout.reconfigure(encoding="utf-8")  # model text can hold characters the Windows console code page lacks
-    case =asyncio.run(run_bug(int(sys.argv[1]) if len(sys.argv) > 1 else 1))
+    case = asyncio.run(run_bug(int(sys.argv[1]) if len(sys.argv) > 1 else 1, sys.argv[2] if len(sys.argv) > 2 else ""))
     print(f"{case['id']}: stage={case['stage']}  verdict={case['replay']['verdict']}")
     if "fix" in case:
         print(f"Fix ({case['fix']['model']}): {case['fix'].get('explanation') or case['fix'].get('error')}")

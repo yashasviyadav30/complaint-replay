@@ -1,0 +1,36 @@
+# The Oct 19 features on Linux, the way customers run them: `crp setup` installs Chrome's and Safari's engines,
+# then three planted bugs replay end to end. Start it by hand from the Actions tab.
+name: New features on Linux
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    env:
+      NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+      TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+      PYTHONIOENCODING: utf-8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+      - name: Install both browser engines, as customers do
+        run: uv run crp setup
+      - name: iPhone in Safari's engine (Pay button off a 393 px screen)
+        run: uv run python pipeline.py 4 iphone
+      - name: Older user at their own pace (OTP expires after 10 s)
+        run: uv run python pipeline.py 16
+      - name: Signal drops mid-payment (retry charges twice)
+        run: uv run python pipeline.py 17
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: new-features
+          path: results/cases/
+          if-no-files-found: ignore
