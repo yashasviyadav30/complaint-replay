@@ -75,9 +75,14 @@ The source code never leaves the team's CI. Teams set it up in about ten minutes
 
 ## What's next
 
-1. Five design-partner teams, and pull requests merged by people who are not us.
-2. Native Android apps, with an emulator in GitHub Actions and the same evidence model.
-3. Sector packs with real rules: payments, health, government accessibility law.
+New users for the twin, chosen by where bugs cost the most money or lock people out:
+
+1. **Interrupted payments.** Back button, a switched tab, an incoming call or an expired session in the middle of paying: the double charge, the lost order, the money taken with no order made.
+2. **iPhone Safari.** About half of mobile users in the US and Europe, and many bugs appear only there while developers test in Chrome. Playwright already runs Safari's engine.
+3. **Slow users and timeouts.** An OTP that expires before an older user finishes typing it, a session that ends mid-form. The twin will move at the user's own speed.
+4. **Money and date formats.** "1,00,000" against "100,000", month-end and year-end dates, time zones: the wrong amount charged, the wrong due date.
+
+Then: five design-partner teams with pull requests merged by people who are not us, and native Android apps with an emulator in GitHub Actions.
 
 ## Try it
 
