@@ -120,6 +120,13 @@ screen-reader audio of the page for screen-reader bugs; (3) MCP server so coding
 Copilot) can run replays and guards; (4) "Who does this PR hurt?": pre-merge replay under the real users'
 device/network/language mix from widget data; (5) voice complaints in the widget; (6) bug cost in rupees.
 
+**Oct 19: READY TO SUBMIT (user submits today).** Claims made honest (free NVIDIA API catalog; no Token Factory:
+user won't add a card). Demo repo public; pinned issue #7 "Try it": a live `/replay` comment was reproduced, fixed
+and guarded -> PR #8 (verified). README top: films, links, "what you won't find elsewhere"; repo description,
+homepage, topics set. Write-up final, no [FILL]. Video `submission/complaint-replay-demo.mp4` (88 s, real screens,
+real films, Windows speech reading the real screen-reader transcript). Left for the user: upload the video
+(YouTube, public or unlisted), paste `submission/writeup.md` into Devpost, add the video link, Submit.
+
 **Oct 18 decisions (user):** the benchmark loop is CLOSED: no run 17, no more benchmark runs; the published result
 stays run 15 (1/8 strict). Name: **Complaint Replay** (final). Public demo page republished with films + Listen
 (gh-pages, Oct 18). Next work, each with a fixed finish line, nothing else:
