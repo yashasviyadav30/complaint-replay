@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Complaint Replay">
+  <rect width="64" height="64" rx="15" fill="#c2410c"/>
+  <g fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M37.47 15.96 A16 16 0 0 0 20.69 42.31 L14 52 L29.22 46.76 A16 16 0 0 0 47.45 26.86"/>
+    <path d="M44.28 33.66 L47.45 26.86 L53.59 31.17"/>
+  </g>
+  <path d="M28.5 24 L39.5 31 L28.5 38 Z" fill="#ffffff" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round"/>
+</svg>

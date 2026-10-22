@@ -1,4 +1,4 @@
-import { ArrowCounterClockwise, ArrowSquareOut, Bug, Detective, Kanban, Plus, Plugs } from "@phosphor-icons/react";
+import { ArrowCounterClockwise, ArrowSquareOut, Bug, Kanban, Plus, Plugs } from "@phosphor-icons/react";
 import { DEMO, type Live } from "../api";
 import type { Me, Project } from "../types";
 
@@ -28,7 +28,7 @@ export function Sidebar({ me, projects, project, view, live, busy, onProject, on
     <aside className="border-b border-line bg-surface lg:sticky lg:top-0 lg:flex lg:h-[100dvh] lg:flex-col lg:border-b-0 lg:border-r">
       <div className="flex items-center justify-between gap-3 px-4 py-4 lg:px-5 lg:py-5">
         <p className="inline-flex items-center gap-2 font-semibold tracking-tight text-ink">
-          <Detective size={22} weight="duotone" className="text-accent" aria-hidden="true" />
+          <img src={`${import.meta.env.BASE_URL}favicon.svg`} width={24} height={24} alt="" className="rounded-md" />
           Complaint Replay
         </p>
       </div>

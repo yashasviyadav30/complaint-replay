@@ -149,7 +149,7 @@ function SignIn() {
       <section className="w-full max-w-sm">
         <h1 className="text-2xl font-semibold tracking-tight text-ink">Complaint Replay</h1>
         <p className="mt-2 text-sm leading-relaxed text-muted">
-          Your users already told you what is broken. Sign in to see their complaints replayed, fixed and guarded.
+          Can't reproduce a bug? Sign in to see your users' complaints replayed under their own conditions, fixed and guarded.
         </p>
         <a href="/auth/login"
           className="mt-6 inline-flex items-center gap-2 rounded-lg bg-ink px-4 py-2.5 text-sm font-semibold text-bg hover:opacity-90 active:scale-[0.98]">

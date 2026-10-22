@@ -1,3 +1,5 @@
+<img src="docs/media/logo.svg" alt="Complaint Replay logo: a speech bubble whose outline is a replay arrow, with a play button inside" width="72">
+
 # Complaint Replay
 
 Reproduce a user's bug report in a real browser under that user's own conditions, prove it with evidence the browser
