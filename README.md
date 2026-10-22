@@ -35,7 +35,7 @@ optional self-hosted service that collects complaints from a one-line widget on 
 
 A user writes *"OTP never comes"*, *"الزر لا يعمل"* or *"I use a screen reader and can't find the cart"*. A developer
 tries it on a fast laptop, it works, and the report is closed as "can't reproduce". Studies of real bug trackers put
-non-reproducible reports at 13-24% of all bugs ([ICSME 2020](https://marco-c.github.io/publications/non_reproducibility-icsme2020.pdf)),
+non-reproducible reports at 13-24% of all bug reports ([ICSME 2020](https://marco-c.github.io/publications/non_reproducibility-icsme2020.pdf)),
 and a large share fail because the user's device, network or settings differ from the developer's.
 
 Complaint Replay recreates those conditions instead of asking the developer to guess them.
@@ -53,7 +53,7 @@ flowchart LR
 
 1. **Replay.** An agent drives Chromium or WebKit with the user's device, network, language, timezone, zoom, color
    scheme and input method. A screen-reader user is replayed through the accessibility tree only; a keyboard user
-   gets Tab, Enter and arrows only. The browser is slowed down for real; the model is never asked to pretend.
+   gets only the keys a keyboard user has (Tab, Enter, Space, Escape, arrows). The browser is slowed down for real; the model is never asked to pretend.
 2. **Prove.** Code watching the browser records evidence: failed requests, a control off screen, text in the wrong
    language, a button announced only as "1", a payment sent twice. The model may cite evidence. It cannot create it.
 3. **Fix.** NVIDIA Nemotron reads the cited evidence, the app functions that ran in that step (Chrome code coverage)
@@ -169,8 +169,8 @@ workflow and shows each case on a board. Hosting: see [DEPLOY.md](DEPLOY.md).
 | `fast_desktop` | A developer's laptop | Control case |
 
 Networks: `wifi`, `4g`, `3g`, `slow-3g`, `2g`, `satellite`, `flaky`, `tunnel`, `drops`. Complaints from the widget
-carry the real user's measured conditions. Needs the user states in any language ("I use a screen reader",
-"मुझे बड़े अक्षर चाहिए") are read by Nemotron and applied too.
+carry the real user's measured conditions. When the user states a need in any language ("I use a screen reader",
+"मुझे बड़े अक्षर चाहिए"), Nemotron reads it and the replay applies it too.
 
 ### Evidence
 
@@ -246,7 +246,7 @@ finishes, a retry that charges twice) each passed end to end on Windows and on L
 
 **Across languages.** Complaints in Hindi, Hinglish, Arabic, Tamil, Japanese and 15 more languages are grouped with
 the same bug reported in English and sorted into bug, confusion, feature request or spam. This was checked on 400
-complaints written by Nemotron, not real users, so it shows nothing breaks across scripts, not real-world accuracy
+complaints written by Nemotron, not real users, so it shows that nothing breaks across scripts, not real-world accuracy
 ([numbers](benchmarks/triage.md)).
 
 ## Models
