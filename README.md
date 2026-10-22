@@ -13,6 +13,7 @@ recorded, and open a pull request with the fix and a regression test.
 Complaint Replay ships as a **GitHub Action**, a **CLI** (`crp`) and an **MCP server** for coding agents, with an
 optional self-hosted service that collects complaints from a one-line widget on your site.
 
+[Watch the 90-second film](https://youtu.be/cWFVZ0VkMG4) ·
 [Live demo](https://yashasviyadav30.github.io/complaint-replay/) ·
 [Try it on a real issue](https://github.com/yashasviyadav30/crp-demo-shopping-cart/issues/7) ·
 [Real-bug benchmark](benchmarks/real-bugs.md)
