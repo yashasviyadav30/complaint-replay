@@ -1,4 +1,4 @@
-import { Bug, ChatText, HandTap, Hourglass, WifiSlash, type Icon } from "@phosphor-icons/react";
+import { Bug, ChatText, CheckCircle, HandTap, Hourglass, MagnifyingGlass, Prohibit, ShieldCheck, Warning, WifiSlash, type Icon } from "@phosphor-icons/react";
 import type { Case, Kind, Stage } from "./types";
 
 export const KIND: Record<Kind, { label: string; icon: Icon }> = {
@@ -9,21 +9,21 @@ export const KIND: Record<Kind, { label: string; icon: Icon }> = {
   slow_request: { label: "Slow request", icon: Hourglass },
 };
 
-export const STAGE: Record<Stage, { label: string; busy?: boolean; tone?: "ok" | "accent" | "muted" }> = {
-  heard: { label: "Heard", tone: "muted" },
+export const STAGE: Record<Stage, { label: string; busy?: boolean; tone?: "ok" | "accent" | "muted"; icon?: Icon }> = {
+  heard: { label: "Heard", tone: "muted", icon: ChatText },
   queued: { label: "Sent to your CI", busy: true },
   reproducing: { label: "Replaying as this user", busy: true },
-  reproduced: { label: "Bug proven", tone: "accent" },
-  not_reproduced: { label: "Could not reproduce", tone: "muted" },
-  ux_confusion: { label: "Works, but confusing", tone: "accent" },
+  reproduced: { label: "Bug proven", tone: "accent", icon: Bug },
+  not_reproduced: { label: "Could not reproduce", tone: "muted", icon: MagnifyingGlass },
+  ux_confusion: { label: "Works, but confusing", tone: "accent", icon: Warning },
   fixing: { label: "Nemotron is writing a fix", busy: true },
   proving: { label: "Replaying on the fix", busy: true },
-  fixed: { label: "Fix proven", tone: "ok" },
-  fix_unproven: { label: "Fix did not hold", tone: "accent" },
-  fix_failed: { label: "Fix could not be applied", tone: "accent" },
-  guarded: { label: "Guarded by a test", tone: "ok" },
-  error: { label: "Something broke", tone: "accent" },
-  not_a_bug: { label: "Not a bug: not replayed", tone: "muted" },
+  fixed: { label: "Fix proven", tone: "ok", icon: CheckCircle },
+  fix_unproven: { label: "Fix did not hold", tone: "accent", icon: Warning },
+  fix_failed: { label: "Fix could not be applied", tone: "accent", icon: Warning },
+  guarded: { label: "Guarded by a test", tone: "ok", icon: ShieldCheck },
+  error: { label: "Something broke", tone: "accent", icon: Warning },
+  not_a_bug: { label: "Not a bug: not replayed", tone: "muted", icon: Prohibit },
 };
 
 export const EVIDENCE: Record<string, string> = {

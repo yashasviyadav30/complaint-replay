@@ -30,8 +30,8 @@ export function CaseCard({ c, now, onOpen }: { c: Case; now: number; onOpen: (id
         </span>
       </div>
       <p className="mt-2 line-clamp-3 text-sm leading-snug text-ink">{whatTheySaid(c)}</p>
-      <p className="mt-3 truncate font-mono text-[11px] text-muted" title={twinSummary(c)}>
-        {twinSummary(c)}
+      <p className="mt-3 truncate text-xs font-medium text-muted" title={twinSummary(c)}>
+        {c.condition.label}
       </p>
       {(c.lang || (c.page && c.page !== "/")) && (
         <p className="mt-1 truncate text-[11px] text-muted">

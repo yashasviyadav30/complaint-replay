@@ -127,7 +127,8 @@ export default function App() {
           {view === "setup" && project && <SetupSteps project={project} me={me} onTested={refresh} />}
           {view === "cases" && project && (
             <>
-              <h1 className="mb-6 text-2xl font-semibold tracking-tight text-ink">{project.name}</h1>
+              <h1 className="text-2xl font-semibold tracking-tight text-ink">{project.name}</h1>
+              <p className="mb-8 mt-1 text-sm text-muted">{cases ? summary(cases) : " "}</p>
               {cases === null && !error && <BoardSkeleton />}
               {cases?.length === 0 && <EmptyState project={project} shopUrl={live?.url} onSetup={() => setView("setup")} />}
               {cases && cases.length > 0 && <Board cases={cases} now={now} onOpen={setOpenId} />}
@@ -199,4 +200,15 @@ function BoardSkeleton() {
       ))}
     </div>
   );
+}
+
+/** One line a team lead can read at a glance: how many complaints, and how many are now guarded. */
+function summary(cases: Case[]): string {
+  if (!cases.length) return "No complaints yet.";
+  const people = cases.reduce((n, c) => n + (c.reports ?? 1), 0);
+  const guarded = cases.filter((c) => c.stage === "guarded").length;
+  const open = cases.filter((c) => !["guarded", "fixed", "not_a_bug"].includes(c.stage)).length;
+  const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+  return [`${plural(cases.length, "case", "cases")} from ${plural(people, "person", "people")}`,
+    `${guarded} guarded by a test`, `${open} open`].join(", ") + ".";
 }

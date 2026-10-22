@@ -1,10 +1,11 @@
-import { ArrowClockwise, GitPullRequest, SpeakerHigh, Stop, X } from "@phosphor-icons/react";
+import { ArrowClockwise, CheckCircle, GitPullRequest, SpeakerHigh, Stop, WarningCircle, X } from "@phosphor-icons/react";
 import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { DEMO, replayCase, safeUrl, shotUrl } from "../api";
 import { EVIDENCE, KIND, languageName, twinSummary, whatTheySaid } from "../labels";
 import { proofPassed, type Case, type Replay } from "../types";
 import { Diff } from "./Diff";
+import { Journey } from "./Journey";
 import { StageLabel } from "./StageLabel";
 
 function EvidenceList({ replay }: { replay: Replay }) {
@@ -91,6 +92,16 @@ function Heard({ lines }: { lines: string[] }) {
   );
 }
 
+function Check({ ok, yes, no }: { ok: boolean; yes: string; no: string }) {
+  const Icon = ok ? CheckCircle : WarningCircle;
+  return (
+    <li className={`flex items-start gap-2 ${ok ? "text-ink" : "text-accent"}`}>
+      <Icon size={18} weight="fill" aria-hidden="true" className={`mt-px shrink-0 ${ok ? "text-ok" : "text-accent"}`} />
+      {ok ? yes : no}
+    </li>
+  );
+}
+
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="border-t border-line pt-5">
@@ -130,7 +141,7 @@ export function CaseDetail({ c, onClose }: { c: Case; onClose: () => void }) {
             <p className="inline-flex items-center gap-1.5 text-xs text-muted">
               <Icon size={14} weight="bold" aria-hidden="true" /> {KIND[c.kind].label}
             </p>
-            <h2 id="case-title" className="mt-1 text-lg font-semibold leading-snug text-ink">
+            <h2 id="case-title" className="mt-1 text-balance text-lg font-semibold leading-snug text-ink">
               “{whatTheySaid(c)}”
             </h2>
           </div>
@@ -141,12 +152,16 @@ export function CaseDetail({ c, onClose }: { c: Case; onClose: () => void }) {
         </header>
 
         <div className="grid grid-cols-1 gap-6 px-6 py-6">
-          <div className="grid gap-2">
-            <StageLabel stage={c.stage} />
-            <p className="text-sm text-muted">
-              Replayed as: <span className="font-mono text-[12px] text-ink">{twinSummary(c)}</span>
-            </p>
-            {c.lang && c.lang !== "en" && <p className="text-sm text-muted">Written in {languageName(c.lang)}</p>}
+          <div className="grid gap-4">
+            <Journey c={c} />
+            <div className="rounded-xl border border-line bg-surface p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm font-semibold text-ink">Replayed as: {c.condition.label}</p>
+                <StageLabel stage={c.stage} />
+              </div>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted">{twinSummary(c)}.</p>
+              {c.lang && c.lang !== "en" && <p className="mt-1 text-sm text-muted">Written in {languageName(c.lang)}.</p>}
+            </div>
             {c.error && <p className="text-sm text-accent">{c.error}</p>}
             <div className="mt-2 flex flex-wrap gap-2">
               {safeUrl(c.pr) && (
@@ -213,11 +228,11 @@ export function CaseDetail({ c, onClose }: { c: Case; onClose: () => void }) {
 
           {c.proof && (
             <Section title="Proof on the fixed code">
-              <p className={`text-sm ${proofPassed(c) ? "text-ok" : "text-accent"}`}>
-                {proofPassed(c)
-                  ? "The exact steps that triggered the bug were replayed on the fixed code, by the same user. The problem is gone."
-                  : "The problem still showed up when the same steps ran on the fixed code."}
-              </p>
+              <ul className="text-sm">
+                <Check ok={proofPassed(c)}
+                  yes="The exact steps that triggered the bug were replayed on the fixed code, by the same user. The problem is gone."
+                  no="The problem still showed up when the same steps ran on the fixed code." />
+              </ul>
               {"passed" in c.proof && c.proof.evidence.length > 0 && (
                 <ul className="mt-3 grid gap-1">
                   {c.proof.evidence.map((e, i) => (
@@ -234,13 +249,9 @@ export function CaseDetail({ c, onClose }: { c: Case; onClose: () => void }) {
                 The steps that triggered the bug are saved as <code translate="no" className="font-mono text-[12px]">{c.guard.file}</code>,{" "}
                 {c.guard.steps} steps, no AI needed to run it.
               </p>
-              <ul className="grid gap-1 text-sm">
-                <li className={c.guard.passes_on_fix ? "text-ok" : "text-accent"}>
-                  {c.guard.passes_on_fix ? "Passes on the fixed code" : "Does not pass on the fixed code"}
-                </li>
-                <li className={c.guard.catches_bug ? "text-ok" : "text-accent"}>
-                  {c.guard.catches_bug ? "Fails on the old code, so it catches the bug if it comes back" : "Does not catch the old bug"}
-                </li>
+              <ul className="grid gap-2 text-sm">
+                <Check ok={c.guard.passes_on_fix} yes="Passes on the fixed code" no="Does not pass on the fixed code" />
+                <Check ok={c.guard.catches_bug} yes="Fails on the old code, so it catches the bug if it comes back" no="Does not catch the old bug" />
               </ul>
             </Section>
           )}
