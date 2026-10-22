@@ -48,7 +48,7 @@ def test_a_patch_the_proof_rejects_gets_a_second_round_with_what_the_proof_saw(t
 
     asked = []
 
-    async def fake_fix(client, model, complaint, cond, before, branch, sources, rejected, allowed, also):
+    async def fake_fix(client, model, complaint, cond, before, branch, rejected, allowed, also):
         asked.append(rejected)
         find = "caller();" if len(asked) == 1 else "callee();"
         return Patch("x", ({"file": "app.js", "find": find, "replace": find.replace("()", "(fixed)")},))
@@ -65,9 +65,6 @@ def test_a_patch_the_proof_rejects_gets_a_second_round_with_what_the_proof_saw(t
     async def fake_model(client):
         return "m"
 
-    async def no_research(evidence):
-        return []
-
     monkeypatch.setattr(inv, "replay", fake_replay)
 
     async def no_map(*args, **kwargs):
@@ -78,7 +75,6 @@ def test_a_patch_the_proof_rejects_gets_a_second_round_with_what_the_proof_saw(t
     monkeypatch.setattr(inv, "run_guard", fake_guard)
     monkeypatch.setattr(inv, "running_app", fake_app)
     monkeypatch.setattr(inv, "pick_fix_model", fake_model)
-    monkeypatch.setattr(inv, "research", no_research)
     case = {"id": "c1", "complaint": "amount disappears"}
     cond = CONDITIONS["fast_desktop"]
     result = asyncio.run(inv.investigate(case, inv.with_needs(cond, {"screen_reader": True}), "live", app,

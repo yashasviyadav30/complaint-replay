@@ -19,7 +19,6 @@ from replay.browser import evidence_key
 from replay.conditions import Condition, with_needs
 from replay.fix import apply_patch, pick_fix_model, propose_fix
 from replay.guard import build_guard, run_guard
-from replay.research import research
 from replay.llm import Chat, llm_matcher, llm_policy, stated_needs
 from replay.project import load_project, running_app
 
@@ -37,6 +36,7 @@ def as_dict(r: ReplayResult) -> dict:
         "verdict": r.verdict, "summary": r.summary, "cited": list(r.cited),
         "evidence": [{"id": e.id, "kind": e.kind, "detail": e.detail, "step": e.step} for e in r.evidence],
         "steps": list(r.steps), **({"heard": list(r.heard)} if r.heard else {}),
+        **({"ran": {str(step): ran for step, ran in r.ran.items()}} if r.ran else {}),
     }
 
 
@@ -142,7 +142,6 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
     branch = branch_copy(source, BRANCHES / case["id"])
     stage("fixing")
     fix_model = await pick_fix_model(client)
-    sources = await research([e for e in before.evidence if e.id in before.cited])
     still_broken = None  # set when a patch applied but the replayed steps still showed the bug
     tried: tuple[str, ...] = ()
     for proof_round in range(PROOF_ROUNDS):
@@ -153,7 +152,7 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
         for _ in range(FIX_ATTEMPTS):  # a rejected edit, or an unreadable reply, gets a retry with the reason
             try:
                 tried = tuple(str(e.get("file", "")) for e in patch.edits) if patch else tried
-                patch = await propose_fix(client, fix_model, complaint, cond, before, branch, sources, rejected,
+                patch = await propose_fix(client, fix_model, complaint, cond, before, branch, rejected,
                                           project.edit, tried)
                 diff = apply_patch(patch, branch, project.edit)
                 break
@@ -167,7 +166,7 @@ async def investigate(case: dict, cond: Condition, live_url: str, source: Path,
             stage("fix_failed")
             return case
         case["fix"] = {"model": fix_model, "explanation": patch.explanation, "diff": diff, "edits": list(patch.edits),
-                       "shown": list(patch.shown), "sources": [{"title": s["title"], "url": s["url"]} for s in sources]}
+                       "shown": list(patch.shown)}
 
         # Proof and guard are one thing: the exact steps that triggered the bug, replayed by code, no model.
         # A fresh model-driven proof replay once "proved" a fix by never reaching the broken screen at all.

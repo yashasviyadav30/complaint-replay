@@ -1,4 +1,4 @@
-import { ArrowCounterClockwise, ArrowSquareOut, Detective, DiceFive, Kanban, Plus, Plugs } from "@phosphor-icons/react";
+import { ArrowCounterClockwise, ArrowSquareOut, Bug, Detective, Kanban, Plus, Plugs } from "@phosphor-icons/react";
 import { DEMO, type Live } from "../api";
 import type { Me, Project } from "../types";
 
@@ -71,12 +71,12 @@ export function Sidebar({ me, projects, project, view, live, busy, onProject, on
         {isDemo && !DEMO && (
           <div className="grid gap-2 rounded-xl border border-line bg-bg p-3">
             <p className="text-xs leading-relaxed text-muted">
-              The built-in demo shop. Plant a secret bug, use the shop like a customer, and complain.
+              The built-in demo shop. Turn on one of its known bugs, use the shop, and report the problem.
             </p>
             <div className="flex flex-wrap gap-2">
               <button type="button" onClick={onBreak} disabled={busy}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-sm font-semibold text-accent-ink hover:opacity-90 active:scale-[0.98] disabled:opacity-50">
-                <DiceFive size={14} weight="bold" aria-hidden="true" /> Break It
+                <Bug size={14} weight="bold" aria-hidden="true" /> Turn on a bug
               </button>
               {live?.broken && (
                 <button type="button" onClick={onReset} disabled={busy}

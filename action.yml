@@ -25,9 +25,6 @@ inputs:
   nvidia-api-key:
     description: build.nvidia.com key, used only when no Nebius key is set
     default: ""
-  tavily-api-key:
-    description: Optional web research before each fix
-    default: ""
   github-token:
     description: Token used to push the fix branch and open the pull request
     default: ${{ github.token }}
@@ -49,7 +46,6 @@ runs:
       env:
         NEBIUS_API_KEY: ${{ inputs.nebius-api-key }}
         NVIDIA_API_KEY: ${{ inputs.nvidia-api-key }}
-        TAVILY_API_KEY: ${{ inputs.tavily-api-key }}
         GH_TOKEN: ${{ inputs.github-token }}
         PAYLOAD: ${{ inputs.payload }}
         COMPLAINT: ${{ inputs.complaint }}

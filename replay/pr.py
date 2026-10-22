@@ -74,8 +74,6 @@ def body(case: dict, image_url: str = "") -> str:
         "### The fix",
         fix.get("explanation", ""),
     ]
-    if fix.get("sources"):
-        lines += ["", "Sources: " + ", ".join(f"[{s['title']}]({s['url']})" for s in fix["sources"])]
     # The films (captioned GIFs of the user's steps) play inline on GitHub; stills are the fallback.
     shots = {**(case.get("shots") or {}), **(case.get("films") or {})}
     if image_url and shots:

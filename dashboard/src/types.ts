@@ -35,7 +35,7 @@ export interface Case {
   impact?: number;
   triage?: { label: "bug" | "ux_confusion" | "feature_request" | "spam"; margin: number; replay: boolean };
   replay?: Replay;
-  fix?: { model: string; explanation: string; diff?: string; error?: string; sources?: { title: string; url: string }[] };
+  fix?: { model: string; explanation: string; diff?: string; error?: string };
   proof?: Proof | Replay;
   shots?: { before?: string; after?: string };
   films?: { before?: string; after?: string };

@@ -198,11 +198,10 @@ def test_spam_is_kept_but_not_replayed(client, monkeypatch) -> None:
 def test_progress_cannot_smuggle_paths_or_script_links(client) -> None:
     r = client.post("/api/v1/reports", json={"project": "demo", "kind": "spoken", "text": "Pay missing", "env": ENV})
     case_id = r.json()["id"]
-    bad = {"shots": {"before": "../secret.key"}, "pr": "javascript:alert(1)",
-           "fix": {"explanation": "x", "sources": [{"title": "t", "url": "javascript:alert(1)"}]}}
+    bad = {"shots": {"before": "../secret.key"}, "pr": "javascript:alert(1)"}
     client.post(f"/api/v1/cases/{case_id}/progress", json=bad, headers={"Authorization": f"Bearer {srv.case_token(case_id)}"})
     case = client.get(f"/api/v1/cases/{case_id}").json()
-    assert "shots" not in case and "pr" not in case and case["fix"]["sources"] == []
+    assert "shots" not in case and "pr" not in case
 
 
 def test_case_tokens_expire_and_cannot_log_anyone_in(client) -> None:

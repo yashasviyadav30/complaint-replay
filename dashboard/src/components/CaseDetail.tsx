@@ -208,18 +208,6 @@ export function CaseDetail({ c, onClose }: { c: Case; onClose: () => void }) {
               {c.fix.diff && <Diff text={c.fix.diff} />}
               {c.fix.error && <p className="text-sm text-accent">{c.fix.error}</p>}
               <p className="mt-2 font-mono text-[11px] text-muted">written by {c.fix.model}</p>
-              {c.fix.sources && c.fix.sources.length > 0 && (
-                <div className="mt-4">
-                  <p className="mb-1 text-xs text-muted">Researched with Tavily before writing the fix:</p>
-                  <ul className="grid gap-1 text-sm">
-                    {c.fix.sources.map((s) => (
-                      <li key={s.url} className="truncate">
-                        <a href={safeUrl(s.url)} target="_blank" rel="noreferrer" className="text-accent hover:underline">{s.title || s.url}</a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
             </Section>
           )}
 

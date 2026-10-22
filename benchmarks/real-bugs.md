@@ -6,6 +6,8 @@ Measured 2026-10-17 with `uv run python scripts/bench_real.py <actual checkout>`
 
 **Fixed and guarded in any file: 1 of 8.** The user's steps, replayed by code, show the bug on the old code and not on ours; our fix may differ from the upstream one, so read its diff before trusting it.
 
+**How tuned this is.** These 8 bugs were our development set: we ran them 15 times and changed the engine after reading each run, so this is not a blind test. The `picker_not_opened` evidence (the one that caught #9071) was added after #9071 failed in run 13; the app hints in `actual-complaint-replay.toml` were written while watching the runs; and run 15 had a web-search step (since removed) whose query for that evidence was written after the same failure and pointed at the calendar button. A fair score needs bugs the engine has never seen.
+
 | Upstream fix | Complaint | User | Result | Proof (evidence kinds) | Same file as real fix | Solved | Time |
 |---|---|---|---|---|---|---|---|
 | [#9071](https://github.com/actualbudget/actual/pull/9071) | On my Android phone, when I add a transaction and tap the date, the ca… | Pixel 7 (412x839) | guarded | picker_not_opened | yes | **yes** | 6 min |

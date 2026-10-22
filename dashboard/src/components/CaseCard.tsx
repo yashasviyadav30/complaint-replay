@@ -22,8 +22,8 @@ export function CaseCard({ c, now, onOpen }: { c: Case; now: number; onOpen: (id
         </span>
         <span className="inline-flex items-center gap-2">
           {(c.reports ?? 1) > 1 && (
-            <span className="whitespace-nowrap rounded-full bg-accent px-2 py-0.5 font-mono text-[11px] font-semibold text-accent-ink tabular-nums">
-              ×{c.reports} reports
+            <span className="whitespace-nowrap rounded-full border border-line px-2 py-0.5 text-[11px] font-medium text-ink tabular-nums">
+              {c.reports} people
             </span>
           )}
           <time dateTime={c.created_at} className="whitespace-nowrap tabular-nums">{timeAgo(c.created_at, now)}</time>

@@ -46,7 +46,16 @@ class Patch:
 def fix_clues(result: ReplayResult) -> list[str]:
     """Text to search the code for: the evidence and the names of the controls the twin used."""
     steps = [f"'{s['target']}'" for s in result.steps if s.get("target")]
-    return [e.detail for e in result.evidence if e.id in result.cited] + steps
+    cited = [e for e in result.evidence if e.id in result.cited]
+    ran = [entry.split(" ", 1)[-1] for e in cited for entry in result.ran.get(e.step, [])]  # function names
+    return [e.detail for e in cited] + list(dict.fromkeys(ran)) + steps
+
+
+def ran_text(result: ReplayResult, cited: list) -> str:
+    """The app's own functions that ran in the step that showed the problem: the cause is usually among them."""
+    ran = list(dict.fromkeys(entry for e in cited for entry in result.ran.get(e.step, [])))
+    return ("\nApp code that ran in the step that showed the problem (browser coverage; the cause is usually one of "
+            "these, often a shared helper rather than the screen):\n" + "\n".join(f"- {r}" for r in ran)) if ran else ""
 
 
 def steps_text(result: ReplayResult) -> str:
@@ -61,17 +70,8 @@ async def pick_fix_model(client: AsyncOpenAI) -> str:
     return next((m for m in ids if "nemotron" in m.lower() and "super" in m.lower()), os.getenv("REPLAY_MODEL", ""))
 
 
-def background(sources: list[dict]) -> str:
-    """Web research (Tavily) about the evidence; the model cites a URL only if it actually relied on it."""
-    if not sources:
-        return ""
-    lines = "\n".join(f"- {s['title']} ({s['url']}): {s['content']}" for s in sources)
-    return ("\n\nBackground found on the web. Use it only if relevant; if you rely on one, name its URL in the "
-            f"explanation:\n{lines}")
-
-
 async def propose_fix(client: AsyncOpenAI, model: str, complaint: str, condition: Condition,
-                      result: ReplayResult, root: Path, sources: list[dict] | None = None,
+                      result: ReplayResult, root: Path,
                       rejected: str | None = None, allowed: tuple[str, ...] = (),
                       also: tuple[str, ...] = ()) -> Patch:
     cited = [e for e in result.evidence if e.id in result.cited] or list(result.evidence)
@@ -84,8 +84,7 @@ async def propose_fix(client: AsyncOpenAI, model: str, complaint: str, condition
         f"Complaint: {complaint}\nUser conditions: {condition.persona}\n"
         f"Replay summary: {result.summary}\n"
         "Evidence:\n" + "\n".join(f"- [{e.kind}] {e.detail}" for e in cited) +
-        f"\nSteps that triggered it:\n{steps_text(result)}" +
-        background(sources or []) +
+        f"\nSteps that triggered it:\n{steps_text(result)}" + ran_text(result, cited) +
         f"\n\nSource files:\n{src.read(root, files)}" +
         (f"\n\nYour previous patch was rejected: {rejected}. Copy each 'find' text exactly from the file and include "
          "enough surrounding lines that it appears exactly once." if rejected else "")

@@ -514,9 +514,6 @@ async def case_progress(case_id: str, request: Request) -> dict:
     for link in ("pr", "issue"):
         if case.get(link) and not str(case[link]).startswith("https://github.com/"):
             case.pop(link)
-    if isinstance(case.get("fix"), dict):
-        case["fix"]["sources"] = [s for s in case["fix"].get("sources") or []
-                                  if isinstance(s, dict) and str(s.get("url", "")).startswith("https://")]
     project = store.get("project", case["project"]) or {}
     if case.get("pr") and project.get("repo"):
         # Screenshots are committed to the pull request branch, not uploaded here: the code stays in GitHub.

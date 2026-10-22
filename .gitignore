@@ -15,3 +15,11 @@ video/film/.hyperframes/
 video/film/renders/
 video/explainer/assets/vo/*.wav
 video/explainer/.hyperframes/
+
+# Working notes and submission material: kept locally, not part of the product
+HANDOFF.md
+plan.md
+risk_test.py
+docs/design-partners.md
+submission/
+video/

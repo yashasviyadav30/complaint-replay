@@ -56,7 +56,6 @@ jobs:
         env:
           NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
           NEBIUS_API_KEY: ${{ secrets.NEBIUS_API_KEY }}
-          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
           REPLAY_MAX_RPM: "25"
           CRP_START_TIMEOUT: "300"
           CRP_APP_LOG: ${{ github.workspace }}/results/app-${{ matrix.pr }}.log

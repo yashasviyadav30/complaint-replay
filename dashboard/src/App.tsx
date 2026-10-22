@@ -34,7 +34,7 @@ export default function App() {
   const [openId, setOpenId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(
-    DEMO ? "These are real cases recorded from the engine, not a mock-up. To run it on your own app, follow the README on GitHub." : null,
+    DEMO ? "Read-only demo: real replays of the bugs planted in our demo shop, with their films, evidence and fixes. To run it on your own app, see the README on GitHub." : null,
   );
   const [busy, setBusy] = useState(false);
   const [now, setNow] = useState(() => Date.now());
@@ -109,7 +109,7 @@ export default function App() {
         <Sidebar
           me={me} projects={projects} project={project} view={view} live={live} busy={busy}
           onProject={pick} onView={setView}
-          onBreak={() => act(breakShop, "A secret bug is planted in the shop. Use it like a customer and complain when something goes wrong.")}
+          onBreak={() => act(breakShop, "One of the demo shop's known bugs is now on. Use the shop as a customer would and report what goes wrong.")}
           onReset={() => act(resetShop, "The shop is clean again.")}
         />
         <main id="main" tabIndex={-1} className="min-w-0 px-4 py-8 md:px-8 lg:py-10">
@@ -163,8 +163,8 @@ function EmptyState({ project, shopUrl, onSetup }: { project: Project; shopUrl?:
       <section className="max-w-xl py-10">
         <h2 className="text-xl font-semibold tracking-tight text-ink">No complaints yet.</h2>
         <p className="mt-2 text-sm leading-relaxed text-muted">
-          Press Break It to plant a secret bug, then use the shop like a customer. Complain with the
-          Report a problem button, or just get frustrated. Every case lands here.
+          Turn on a bug in the built-in demo shop, then use the shop as a customer would and report the
+          problem with its Report a problem button. Rage clicks and page errors are caught too. Every case lands here.
         </p>
         {shopUrl && (
           <a href={shopUrl} target="_blank" rel="noreferrer" className="mt-4 inline-block text-sm font-semibold text-accent hover:underline">

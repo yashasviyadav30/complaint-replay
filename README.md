@@ -3,7 +3,6 @@
 **Your users already told you what's broken. Complaint Replay proves it, fixes it, and makes sure it never comes back.**
 
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-185%20passing-brightgreen)](#run-the-tests)
 [![NVIDIA Nemotron](https://img.shields.io/badge/NVIDIA-Nemotron%203%20Super-76b900)](#how-nvidia-nemotron-and-nebius-are-used)
 [![Runs in GitHub Actions](https://img.shields.io/badge/runs%20in-your%20GitHub%20Actions-2088ff)](#set-it-up-on-your-app-about-10-minutes)
 
@@ -30,7 +29,7 @@ Complaint Replay turns the complaint into a pull request:
 1. **Hears** it: a one-line widget on your site takes the complaint in any language, typed or spoken, plus silent signals (rage clicks, page errors, failed or slow requests), plus the user's real conditions: screen, device, network, language, timezone, dark mode, reduced motion.
 2. **Reproduces** it: an AI twin opens a real browser **under those exact conditions** and repeats what the user did. If the user says they use a screen reader or only a keyboard, the twin does too.
 3. **Proves** it with machine evidence only. The AI may only cite what code watching the browser recorded.
-4. **Fixes** it: NVIDIA Nemotron reads the evidence and the relevant source files and writes the smallest fix.
+4. **Fixes** it: NVIDIA Nemotron reads the evidence, the app functions that ran in the step that showed the bug (Chrome's code coverage), and the relevant source files, and writes the smallest fix.
 5. **Proves the fix**: the exact steps that triggered the bug run again on the fixed code, by code, no model.
 6. **Guards** it: those steps become a test that passes on the fix and fails on the old code, and runs in your CI on every pull request.
 7. **Closes the loop**: a pull request with the evidence, the guard and two short films (captioned GIFs of the user's steps: the bug, then the same steps on the fix); the person who complained sees "fixed" in the widget, with a link to watch it working.
@@ -42,8 +41,6 @@ It runs inside **your own GitHub Actions**, so your source code never leaves you
 - **Conditions are real, not role-played.** 207 device profiles, slow and flaky networks, Hindi, Arabic right-to-left, 200% text, keyboard-only and screen-reader users. The browser is slow; the model is not told to pretend.
 - **Hear what a blind user hears.** For screen-reader bugs, press *Listen* in the dashboard: the browser reads the page the way the user met it ("BadShop, heading level 1. Button."). Which button is the cart?
 - **Every user, not just Chrome.** iPhone complaints replay in Safari's own engine; older users replay at their own pace, so the OTP that expires before they finish typing shows up; a train going into a tunnel mid-payment shows whether the user gets charged twice.
-- **Speak the complaint.** Older users and people who'd rather not type tap the mic in the widget and talk, in their own language.
-- **Watch it fixed.** The person who complained gets a link to the film of their own problem, now working.
 - **Proof the model can't fake.** "Reproduced" needs evidence the browser recorded; a fix counts only when code replays the user's steps and the bug is gone.
 - **Coding agents can drive it.** `crp mcp` gives Claude Code, Cursor or Copilot tools to replay a bug and run its guard until it passes.
 
@@ -60,7 +57,7 @@ Built for the Nebius x NVIDIA Global AI Hackathon (Coding and Agentic Engineerin
    uvx --from git+https://github.com/yashasviyadav30/complaint-replay crp init
    ```
    Set `start` in `complaint-replay.toml`, add `NVIDIA_API_KEY` (free at build.nvidia.com) or `NEBIUS_API_KEY` as a repository secret, and in Settings > Actions turn on *Allow GitHub Actions to create and approve pull requests*.
-3. **Connect GitHub**: install the Complaint Replay GitHub App on the repo (one click from the dashboard's Set Up page), or for a single team set `GITHUB_TOKEN` on your server.
+3. **Connect GitHub**: set `GITHUB_TOKEN` (a token that can start workflows on the repo) on your server. This is how every result here ran. Hosting for several teams can use a GitHub App instead (below).
 4. **Send a test complaint** from the Set Up page and watch it move across the board.
 
 The dashboard walks you through the same four steps.
@@ -72,7 +69,7 @@ docker compose up          # API, dashboard, widget and the built-in demo shop o
 ```
 
 Hosting it for a team: see [DEPLOY.md](DEPLOY.md) (a free Render blueprint and a slim image with no browser inside).
-SQLite by default; set `DATABASE_URL=postgresql://...` for Postgres. Set `PUBLIC_URL` to the address GitHub Actions can reach (on Render it is set for you). GitHub login and per-repo installs need a GitHub App: open `/setup/github-app` and GitHub creates one from a manifest in one click (or set `GITHUB_APP_*` and `GITHUB_CLIENT_*`).
+SQLite by default; set `DATABASE_URL=postgresql://...` for Postgres. Set `PUBLIC_URL` to the address GitHub Actions can reach (on Render it is set for you). GitHub login and per-repo installs use a GitHub App: open `/setup/github-app` and GitHub creates one from a manifest (or set `GITHUB_APP_*` and `GITHUB_CLIENT_*`). This path is built and unit-tested but not yet run against a live App; the token above is the tested one.
 
 ### Or use the command line
 
@@ -93,10 +90,11 @@ crp mcp                                                        # the same, as to
 - **Support desks**: forward tickets from Zendesk, Intercom or an email bridge to the project's inbox address with its secret.
 - **Sentry**: point an issue-alert webhook at the project's Sentry address; new errors arrive as silent signals.
 - **Team chat**: a Slack-compatible webhook (Slack, Mattermost, Discord) hears when a bug is proven, fixed, or needs a person.
-- **Coding agents**: when the automatic fix fails or doesn't hold, the proven bug becomes a GitHub issue with the evidence, the steps and the guard test as its acceptance check, ready for GitHub Copilot's coding agent or a teammate. Agents can also drive Complaint Replay directly over MCP: `claude mcp add complaint-replay -- crp mcp` (Claude Code; Cursor and others take the same command) gives them `replay_complaint`, `run_guards` and `find_devices`, so an agent can reproduce the bug as the user, change the code, and rerun the guard until it passes. Install with `uv tool install "complaint-replay[mcp] @ git+https://github.com/yashasviyadav30/complaint-replay"`. It can also go to Linear or Jira (set `LINEAR_API_KEY` or the `JIRA_*` values in the repo; built to their documented APIs, not yet tried against live accounts).
+- **Coding agents**: when the automatic fix fails or doesn't hold, the proven bug becomes a GitHub issue with the evidence, the steps and the guard test as its acceptance check, ready for GitHub Copilot's coding agent or a teammate.
+- **MCP**: `claude mcp add complaint-replay -- crp mcp` (Claude Code; Cursor and others take the same command) gives an agent `replay_complaint`, `run_guards` and `find_devices`, so it can reproduce the bug as the user, change the code, and rerun the guard until it passes. Install with `uv tool install "complaint-replay[mcp] @ git+https://github.com/yashasviyadav30/complaint-replay"`.
 - **Your own model**: set `REPLAY_BASE_URL` and `REPLAY_API_KEY` to use any OpenAI-compatible server (vLLM, NVIDIA NIM, Ollama) instead of Token Factory.
 
-Each project also has a kind of product. Government, health and education projects get accessibility checks for every user, strict masking of any long number, and no screenshots; payments projects get strict masking.
+Each project names its sector. Public-sector projects run accessibility checks on every replay, mask any long number and keep no screenshots; payments projects mask any long number.
 
 ## What the twin can be
 
@@ -142,7 +140,9 @@ Latest full run (run 15, Oct 17, Nemotron 3 Super, [table](benchmarks/real-bugs.
 - **Fixed and guarded in any file: 1 of 8** (the same case).
 - **Results vary from run to run.** In run 11, "I type the amount, tap Cleared, and it disappears" was fixed and guarded in the caller rather than in the helper upstream fixed ([that diff](benchmarks/real-bugs-8733-our-fix.diff)); in runs 13-15 it reproduced every time but the fix did not hold. One run of 8 bugs is a small sample: read the numbers as "it can", not as a rate.
 
-The first runs scored 0 for bad reasons: the twin wandered, and the judge accepted "page loaded slowly" or a tap on a greyed-out field as proof. Each miss became a fix with a test (33 fix commits since Oct 16): a disabled control or a tap behind an open menu is never proof; the twin's own claims go through the judge; the fixer may never edit tests; a rejected patch gets a second round with what the proof saw; switches drawn as labels and focusable `div`s count as controls; new evidence catches date fields whose picker never opens. Four of the eight need things no general check can see (a missing option, an app-specific balance, a lock icon, a non-current month); the [table](benchmarks/real-bugs.md) says which and why.
+The first runs scored 0 for bad reasons: the twin wandered, and the judge accepted "page loaded slowly" or a tap on a greyed-out field as proof. Each miss became a fix with a test: a disabled control or a tap behind an open menu is never proof; the twin's own claims go through the judge; the fixer may never edit tests; a rejected patch gets a second round with what the proof saw; switches drawn as labels and focusable `div`s count as controls; new evidence catches date fields whose picker never opens. Four of the eight need things no general check can see (a missing option, an app-specific balance, a lock icon, a non-current month); the [table](benchmarks/real-bugs.md) says which and why.
+
+**How tuned this is.** We ran these same 8 bugs 15 times and changed the engine after reading each run, so this is a development set, not a blind test. The `picker_not_opened` evidence was added after 9071 failed in run 13, and the app hints in [`actual-complaint-replay.toml`](benchmarks/actual-complaint-replay.toml) were written while watching the runs. Run 15 also had a web-search step whose query for this evidence kind was written after that failure and pointed at the calendar button; we have since removed that step. A fair score needs bugs the engine has never seen, which we have not run yet.
 
 ### On the demo shop, 7 planted bugs, 3 runs each
 
@@ -153,12 +153,7 @@ Added Oct 19 and run end to end once on Windows and once on Linux in GitHub Acti
 
 ### Any language
 
-On 400 complaints in 20 languages and scripts (Hindi, Hinglish, Arabic, Urdu, Bengali, Tamil, Telugu, Marathi, Swahili, Japanese, Chinese and more), **written by Nemotron, not by real users**:
-
-- Same bug, different language: the nearest complaint in another language is the same bug **97%** of the time (99% within the top 3 that grouping verifies).
-- Triage (bug, confusion, feature request, spam): **98%** on a held-out half, with a small model trained on a laptop CPU. It is weak on wishes about topics it never saw; details in [benchmarks/triage.md](benchmarks/triage.md).
-
-Treat these as a check that nothing breaks across scripts. Real complaints are messier.
+Complaints in Hindi, Hinglish, Arabic, Tamil, Japanese and 15 more languages are grouped with the same bug reported in English, and sorted into bug, confusion, feature request or spam. We checked this on 400 complaints that Nemotron wrote, not real users, so it shows that nothing breaks across scripts, not how well it does on real complaints ([numbers](benchmarks/triage.md)).
 
 ## How NVIDIA Nemotron and Nebius are used
 
@@ -171,7 +166,6 @@ Treat these as a check that nothing breaks across scripts. Real complaints are m
 | Duplicate grouping | Nemotron Embed + Nemotron 3.5 Lightning check | NVIDIA API catalog (free tier) |
 | Triage: bug, confusion, feature request, spam | Small model on Nemotron Embed vectors | CPU, trained on a laptop |
 | Language ID of complaints and page text | fastText lid.176 (GlotLID optional) | CPU |
-| Research before the fix | Tavily search API | Tavily |
 
 All model calls go through one OpenAI-compatible client (`replay/llm.py`). Everything in this README ran on NVIDIA's free API catalog (`NVIDIA_API_KEY`). Set `NEBIUS_API_KEY` instead and the same code calls **Nebius Token Factory**: model names are looked up in the provider's own catalog, so nothing else changes. We have not run the benchmark on Token Factory. A hard token budget per run (`REPLAY_TOKEN_BUDGET`) stops a looping agent.
 
@@ -186,7 +180,7 @@ flowchart LR
     T -->|"machine evidence only"| F["Nemotron fix on a branch"]
     F --> P["Same steps replayed on the fix"]
     P --> G["Guard test: passes on fix,<br/>fails on old code"]
-    G --> PR["Pull request with evidence,<br/>screenshots, guard"]
+    G --> PR["Pull request with evidence,<br/>films, guard"]
     A -. "progress, signed" .-> S
     S -. "status" .-> W
 ```
@@ -204,9 +198,9 @@ flowchart LR
 
 - Web apps only. Native mobile apps need emulators (planned).
 - Fixing works best on small, local bugs: a label, a CSS rule, a timeout, a wrong variable. Larger refactors are out of scope.
-- The real-app results above are three bugs on one app. A wider benchmark is still being run.
+- The real-bug benchmark is 8 bugs on one app, used to develop the engine (see above). Bugs it has never seen are the next test.
 - Translations in the widget are machine-assisted; corrections from native speakers are welcome.
-- Pull requests opened with the default Actions token don't trigger your other workflows (a GitHub rule); the GitHub App token does.
+- Pull requests opened with the default Actions token don't trigger your other workflows (a GitHub rule); a GitHub App token would.
 
 ## Run the tests
 

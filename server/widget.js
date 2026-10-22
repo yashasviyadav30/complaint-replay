@@ -160,7 +160,7 @@
       #cr-widget textarea{width:100%;min-height:90px;box-sizing:border-box;font:inherit;padding:8px;border:1px solid #bbb;border-radius:8px;resize:vertical}
       #cr-widget .row{display:flex;gap:8px;margin-top:10px} #cr-widget .row button{flex:1}
       #cr-widget .ghost{background:#eee;color:#1d1b18}
-      #cr-widget .mic{width:100%;margin-bottom:8px} #cr-widget .mic[aria-pressed=true]{background:#e8590c;color:#fff}
+      #cr-widget .mic{width:100%;margin:4px 0 8px;font-size:13px} #cr-widget .mic[aria-pressed=true]{background:#e8590c;color:#fff}
       #cr-widget .status{margin:0 0 10px;padding:8px 10px;background:#f3f0ea;border-radius:8px;font-size:13px}
       #cr-widget .status a{color:inherit;font-weight:600;text-decoration:underline}
       #cr-widget[data-open] form{display:block} #cr-widget[data-open] > button{display:none}
@@ -171,8 +171,8 @@
     <form role="dialog" aria-labelledby="cr-ask">
       <p class="status" role="status" hidden></p>
       <label id="cr-ask" for="cr-text"></label>
-      <button type="button" class="ghost mic" aria-pressed="false" hidden></button>
       <textarea id="cr-text" maxlength="1000" required></textarea>
+      <button type="button" class="ghost mic" aria-pressed="false" hidden></button>
       <div class="row"><button type="submit"></button><button type="button" class="ghost"></button></div>
     </form>`;
   const open = ui.querySelector(":scope > button");
