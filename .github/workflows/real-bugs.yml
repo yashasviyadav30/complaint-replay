@@ -29,18 +29,18 @@ jobs:
         id: want
         run: |
           if [ -z "${{ inputs.prs }}" ] || echo ",${{ inputs.prs }}," | grep -q ",${{ matrix.pr }},"; then echo "run=yes" >> "$GITHUB_OUTPUT"; fi
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         if: steps.want.outputs.run == 'yes'
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         if: steps.want.outputs.run == 'yes'
         with:
           repository: actualbudget/actual
           ref: ${{ env.ACTUAL_COMMIT }}
           fetch-depth: 400       # the upstream fix commits must be in history to reverse-apply them
           path: actual
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@v7
         if: steps.want.outputs.run == 'yes'
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         if: steps.want.outputs.run == 'yes'
         with:
           node-version: 22
@@ -60,7 +60,7 @@ jobs:
           CRP_START_TIMEOUT: "300"
           CRP_APP_LOG: ${{ github.workspace }}/results/app-${{ matrix.pr }}.log
         run: mkdir -p results && uv run python scripts/bench_real.py actual ${{ matrix.pr }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always() && steps.want.outputs.run == 'yes'
         with:
           name: case-${{ matrix.pr }}
@@ -74,9 +74,9 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v7
+      - uses: actions/download-artifact@v7
         with:
           pattern: case-*
           path: downloaded
@@ -86,7 +86,7 @@ jobs:
           find downloaded -path '*real-bugs/pr*.json' -exec cp {} results/real-bugs/ \;
           uv run python scripts/bench_real.py --report
           cat benchmarks/real-bugs.md >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: report
           path: benchmarks/real-bugs.md

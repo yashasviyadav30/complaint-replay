@@ -34,7 +34,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: astral-sh/setup-uv@v6
+    - uses: astral-sh/setup-uv@v7
     - name: Install Complaint Replay
       shell: bash
       run: |
@@ -113,7 +113,7 @@ runs:
         fi
     - name: Keep the evidence
       if: always() && inputs.mode == 'replay'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: complaint-replay-${{ github.run_id }}
         path: .complaint-replay/runs/
