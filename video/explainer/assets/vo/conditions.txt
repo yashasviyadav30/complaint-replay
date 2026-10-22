@@ -1,1 +1,0 @@
-These conditions are real, not role-play. For a slow 3G phone, the browser really adds three seconds to every request, on a three hundred and sixty pixel screen. For a Hindi user, the browser really runs in Hindi. For a screen-reader user, the twin sees only the accessibility tree.

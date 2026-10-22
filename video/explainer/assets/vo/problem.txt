@@ -1,1 +1,0 @@
-Here is the problem. A customer writes: OTP never comes. The developer tries it on a fast laptop with good Wi-Fi. It works. So the complaint is closed as: can't reproduce. Studies of real bug trackers put that at thirteen to twenty-four percent of all bug reports. It only shows up on the customer's slow phone, small screen, or language setting.

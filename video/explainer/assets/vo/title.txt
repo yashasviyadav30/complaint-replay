@@ -1,1 +1,0 @@
-This is Complaint Replay. In the next few minutes, you'll see what it does, how it works inside, and how well it works.

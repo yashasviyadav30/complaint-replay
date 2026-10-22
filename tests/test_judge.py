@@ -314,3 +314,27 @@ def test_a_fill_says_what_the_field_shows_when_the_app_reformats_it(tmp_path) ->
     with running_app(tmp_path) as url:
         asyncio.run(replay(url, "x", CONDITIONS["fast_desktop"], policy))
     assert "now shows '1.00'" in results[1], results[1]
+
+
+def test_a_keyboard_twin_can_tab_straight_to_a_named_control(tmp_path) -> None:
+    import asyncio
+
+    from replay.agent import replay
+    from replay.conditions import CONDITIONS
+    from replay.project import running_app
+
+    # Cloud case 8570: fifty guessed Tab counts and the keyboard twin never reached the category field.
+    buttons = "".join(f"<button>Item {i}</button>" for i in range(12))
+    (tmp_path / "index.html").write_text(buttons + '<label>Category <input id="cat"></label>'
+                                         '<div onclick="1">Hidden from Tab</div>', encoding="utf-8")
+    results = []
+
+    async def policy(ctx: dict) -> dict:
+        results.append(ctx["last_result"])
+        script = [{"type": "tab_to", "name": "Category"}, {"type": "tab_to", "name": "Hidden from Tab"}]
+        return script[len(results) - 1] if len(results) <= len(script) else {"type": "verdict"}
+
+    with running_app(tmp_path) as url:
+        asyncio.run(replay(url, "x", CONDITIONS["keyboard"], policy))
+    assert results[1].startswith("ok, focus is now on") and "Category" in results[1] and "13 Tab" in results[1]
+    assert results[2].startswith("error: Tab never reached 'Hidden from Tab'")

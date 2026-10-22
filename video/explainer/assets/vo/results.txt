@@ -1,1 +1,0 @@
-Here are the results. Seven bugs, three full runs each. Twenty-one out of twenty-one reproduced. Twenty out of twenty-one fixed and proven. Twenty out of twenty-one guarded by a test. And zero false alarms when the same complaints were replayed on the clean shop. The one miss was a fix that could not be applied, so that case stopped honestly at fix failed.

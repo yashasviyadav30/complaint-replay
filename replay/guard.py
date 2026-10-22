@@ -31,8 +31,8 @@ def build_guard(case_id: str, complaint: str, cond: Condition, steps: list[dict]
             kept.append({"do": a["type"], "label": s["target"], **extra, **position})
         elif a["type"] in ("click_role", "fill_role"):
             kept.append({k: v for k, v in a.items() if k in ("role", "name", "text")} | {"do": a["type"], **position})
-        elif a["type"] in ("wait", "scroll", "press", "type", "goto", "back", "reload"):
-            keep = ("ms", "direction", "key", "text", "path")
+        elif a["type"] in ("wait", "scroll", "press", "type", "goto", "back", "reload", "tab_to"):
+            keep = ("ms", "direction", "key", "text", "path", "name")
             kept.append({"do": a["type"], **{k: v for k, v in a.items() if k in keep}})
     return {"case": case_id, "complaint": complaint, "condition": dataclasses.asdict(cond),
             "must_not_see": sorted(keys), "steps": kept}

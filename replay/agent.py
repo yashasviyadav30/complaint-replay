@@ -3,7 +3,7 @@
 import json
 import re
 from collections.abc import Awaitable, Callable
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 from replay.film import describe, write_gif
@@ -30,6 +30,7 @@ class ReplayResult:
     evidence: tuple[Evidence, ...]
     steps: tuple[dict, ...]
     heard: tuple[str, ...] = ()  # screen-reader users: what the last screen announces, in screen-reader words
+    ran: dict = field(default_factory=dict)  # evidence step -> app functions that ran in it (Chrome coverage)
 
 
 # Roughly how screen readers name roles and states; structure with no words of its own is not spoken.
@@ -98,6 +99,7 @@ async def replay(base_url: str, complaint: str, condition: Condition, policy: Po
         frames: list | None = [] if film else None
         await snap(session, frames, f"The user's screen: {condition.label}")
         result = await _drive(session, complaint, condition, policy, matcher, hints, frames, app_map)
+        result = replace(result, ran={e.step: session.ran[e.step] for e in result.evidence if session.ran.get(e.step)})
         if screenshot:
             screenshot.parent.mkdir(parents=True, exist_ok=True)
             await session.page.screenshot(path=str(screenshot))
@@ -286,6 +288,7 @@ SCREEN_READER_ACTIONS = """{"type": "click_role", "role": "button", "name": "<ex
 You can only use controls that have a name in the accessibility tree."""
 KEYBOARD_ACTIONS = """{"type": "press", "key": "Tab" | "Shift+Tab" | "Enter" | "Space" | "Escape" | "ArrowDown" | "ArrowUp"}
    (add "times": 2-15 to press it several times, like holding Tab to move down the page)
+{"type": "tab_to", "name": "<visible name>"}   (press Tab until that control has the focus; says how many presses)
 {"type": "type", "text": "..."}   (types into the focused field)
 This user has no mouse. "Focused" shows where the keyboard is now; press Tab to move to the next control."""
 

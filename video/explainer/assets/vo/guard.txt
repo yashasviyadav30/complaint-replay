@@ -1,1 +1,0 @@
-Then the same twin replays the same complaint on the fixed code. If the evidence that proved the bug is gone, the fix is proven. Finally, the steps that triggered the bug are saved as a test. That test must pass on the fixed code and fail on the old code. Only then is the case marked Guarded.

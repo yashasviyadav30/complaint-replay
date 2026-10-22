@@ -15,6 +15,8 @@ if case.get("error"):
 for e in replay.get("evidence", []):
     if e["id"] in replay.get("cited", []):
         print("  cited", e["kind"], e["detail"][:170])
+        for fn in (replay.get("ran") or {}).get(str(e["step"]), [])[:8]:
+            print("     ran", fn)
 print("  fix files", sorted({e.get("file") for e in (fix.get("edits") or [])}), "| errors", fix.get("errors"))
 if fix.get("shown"):
     real = case.get("bench", {}).get("real_files", [])

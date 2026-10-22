@@ -26,6 +26,8 @@ SETTLE_TIMEOUT_S = 20
 # ponytail: payment-like paths by name; a per-app list of non-idempotent endpoints is the upgrade.
 PAYMENT_PATH = re.compile(r"checkout|order|pay|purchase|transfer|booking", re.I)
 DUPLICATE_WINDOW_S = 5
+LIBRARY_PATH = re.compile(r"/node_modules/|/@vite/|/@react-refresh|/\.vite/deps/|/@fs/|chunk-|vendor", re.I)
+MAX_RAN = 40
 VOLATILE = re.compile(r"key|nonce|token|time|stamp|^id$|_id$", re.I)  # fields that differ between two tries
 
 
@@ -89,12 +91,18 @@ CHOSEN_JS = """
 READY_TIMEOUT_S = 20
 FOCUS_JS = r"""() => { const a = document.activeElement;
   if (!a || a === document.body) return 'nothing';
-  const name = (a.getAttribute('aria-label') || a.innerText || a.value || a.placeholder || '').trim().replace(/\s+/g, ' ');
+  // A field is named by its <label> or aria-labelledby: without them the keyboard twin saw only "input ''" and never
+  // knew it had reached the category field (cloud case 8570).
+  const labelled = (a.getAttribute('aria-labelledby') || '').split(/\s+/).map((id) => document.getElementById(id))
+    .filter(Boolean).map((e) => e.innerText).join(' ');
+  const name = (a.getAttribute('aria-label') || labelled || (a.labels && a.labels[0] && a.labels[0].innerText)
+    || a.innerText || a.value || a.placeholder || a.title || '').trim().replace(/\s+/g, ' ');
   return `${a.tagName.toLowerCase()} '${name.slice(0, 60)}'`; }"""
 # An open dialog or menu sheet: taps behind it land on its backdrop, as designed.
 DIALOG_OPEN_JS = """() => [...document.querySelectorAll('[role=dialog], [role=alertdialog], [aria-modal=true], dialog[open]')]
   .some((e) => e.getBoundingClientRect().width > 0)"""
 MAX_KEY_REPEAT = 15
+MAX_TAB_TO = 120  # a long page; past this the control is not reachable by Tab at all
 # A slow user (older, or reading an SMS on another screen) reads before each step and types key by key. A real
 # OTP or session that expires before they finish locks them out; a developer typing fast never sees it.
 SLOW_THINK_S = 6.0
@@ -223,6 +231,8 @@ class Session:
         self.ready_text = ready_text
         self.evidence: list[Evidence] = []
         self.step = 0
+        self.ran: dict[int, list[str]] = {}  # step -> app functions that ran during it ("src/utils.ts normalize")
+        self._cdp = None  # Chrome's profiler, for that coverage; Safari's engine has none
         self._seen: set[tuple[str, str]] = set()
         self._inflight = 0
         self._requests = 0  # every request the page sent, for "tapped, nothing happened"
@@ -262,6 +272,13 @@ class Session:
         await context.route("**/*", self._route)
         self.page = await context.new_page()
         self._listen()
+        if self.condition.engine == "chromium":
+            try:
+                self._cdp = await context.new_cdp_session(self.page)
+                await self._cdp.send("Profiler.enable")
+                await self._cdp.send("Profiler.startPreciseCoverage", {"callCount": True, "detailed": False})
+            except Exception:  # coverage is a clue for the fixer, never a reason to stop a replay
+                self._cdp = None
         if self.condition.cpu_slowdown > 1 and self.condition.engine == "chromium":  # a Chrome DevTools feature
             cdp = await context.new_cdp_session(self.page)
             await cdp.send("Emulation.setCPUThrottlingRate", {"rate": self.condition.cpu_slowdown})
@@ -535,6 +552,7 @@ class Session:
     async def act(self, action: dict) -> str:
         """Run one action. Returns 'ok' or a short error the model can react to."""
         self.step += 1
+        await self._coverage()  # zero the counters: what runs from here on is this step's
         if action.get("type") == "tab":  # the model often writes {"type": "tab"} for the Tab key (cloud case 8570)
             action = {**action, "type": "press", "key": "Tab"}
         page, kind = self.page, action.get("type")
@@ -618,6 +636,8 @@ class Session:
                 await page.mouse.wheel(0, -600 if action.get("direction") == "up" else 600)
             elif kind == "wait":
                 await asyncio.sleep(min(int(action.get("ms", 1000)), 10_000) / 1000)
+            elif kind == "tab_to":
+                return await self._tab_to(str(action.get("name", "")).strip())
             elif kind == "back":  # the browser's Back button, pressed mid-payment more often than anyone admits
                 await page.go_back(wait_until="load", timeout=30_000)
             elif kind == "reload":  # "it's stuck, let me refresh"
@@ -650,6 +670,7 @@ class Session:
                         "(a menu or dialog may have opened; look for (new) controls)")
             return f"error: {str(e).splitlines()[0][:200]}"
         await self.settle()
+        self.ran[self.step] = await self._coverage()
         if kind == "press":
             # Where the key took the focus: told only "ok", the keyboard twin pressed Tab ~200 times without
             # ever pressing Enter (cloud case 8570).
@@ -712,6 +733,39 @@ class Session:
             return await self.page.evaluate(ALERTS_JS)
         except Exception:
             return []
+
+    async def _tab_to(self, name: str) -> str:
+        """Press Tab until the focus reaches the control named `name`, as a keyboard user does; the count says how far
+        it was. Guessed Tab counts left the keyboard twin wandering for fifty steps (cloud case 8570)."""
+        if not name:
+            return "error: say which control to reach: {\"type\": \"tab_to\", \"name\": \"...\"}"
+        for presses in range(1, MAX_TAB_TO + 1):
+            await self.page.keyboard.press("Tab")
+            focus = await self.page.evaluate(FOCUS_JS)
+            if name.lower() in focus.lower():
+                return f"ok, focus is now on {focus} after {presses} Tab presses"
+        return (f"error: Tab never reached '{name}' in {MAX_TAB_TO} presses: a keyboard user cannot get there "
+                "(it may need a mouse, or it is not on this screen)")
+
+    async def _coverage(self) -> list[str]:
+        """App functions that ran since the last call ("path/file.ts functionName"), libraries left out.
+        Actual 8733: the amount was lost in a helper the fixer never looked at; this names it."""
+        if not self._cdp:
+            return []
+        try:
+            scripts = (await self._cdp.send("Profiler.takePreciseCoverage"))["result"]
+        except Exception:
+            return []
+        origin = urlparse(self.base_url).netloc
+        ran: list[str] = []
+        for script in scripts:
+            url = urlparse(script.get("url", ""))
+            if url.netloc != origin or LIBRARY_PATH.search(url.path) or is_ours(script["url"]):
+                continue
+            for fn in script["functions"]:
+                if fn["functionName"] and fn["ranges"] and fn["ranges"][0]["count"] > 0:
+                    ran.append(f"{url.path.lstrip('/')} {fn['functionName']}")
+        return list(dict.fromkeys(ran))[:MAX_RAN]
 
     async def _typing_into(self) -> bool:
         try:

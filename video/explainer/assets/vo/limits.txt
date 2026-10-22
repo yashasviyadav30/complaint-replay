@@ -1,1 +1,0 @@
-To be honest about the limits: it works on web apps, not native mobile apps. Fixing works best for small, local bugs. And these are seven bugs planted on purpose, so this is a working demonstration, not a broad benchmark. Before submitting, two things remain: a Nebius Token Factory key, which the rules require, and the final video, under three minutes.
