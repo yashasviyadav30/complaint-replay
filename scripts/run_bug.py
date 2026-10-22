@@ -1,7 +1,7 @@
 """One planted bug, end to end from the command line: reproduce -> fix -> prove.
 
-Run: uv run python pipeline.py 1          (bug id from replay/bugs.py)
-     uv run python pipeline.py 4 iphone   (the same bug, replayed as another ready-made user)
+Run: uv run python scripts/run_bug.py 1          (bug id from replay/bugs.py)
+     uv run python scripts/run_bug.py 4 iphone   (the same bug, replayed as another ready-made user)
 Writes results/cases/bug-<id>.json, the same case format the dashboard shows.
 """
 
@@ -13,13 +13,15 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from replay.bugs import BUGS_BY_ID, inject, reset_workspace
-from replay.conditions import CONDITIONS
-from replay.investigate import investigate
-from replay.llm import Chat, make_client, pick_model
-from replay.project import running_app
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+from replay.bugs import BUGS_BY_ID, inject, reset_workspace  # noqa: E402
+from replay.conditions import CONDITIONS  # noqa: E402
+from replay.investigate import investigate  # noqa: E402
+from replay.llm import Chat, make_client, pick_model  # noqa: E402
+from replay.project import running_app  # noqa: E402
 
-CASES_DIR = Path(__file__).parent / "results" / "cases"
+CASES_DIR = ROOT / "results" / "cases"
 
 
 def save(case: dict) -> None:

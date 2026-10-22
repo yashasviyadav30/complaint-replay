@@ -1,6 +1,6 @@
 """Repeat every planted bug through the full chain and report real success rates.
 
-Run: uv run python bench.py 3      (runs per bug; writes results/bench.json and results/bench.md)
+Run: uv run python scripts/bench_demo.py 3      (runs per bug; writes results/bench.json and results/bench.md)
 Also replays each bug's complaint on the clean shop to count false alarms.
 """
 
@@ -12,14 +12,16 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from pipeline import run_bug
-from replay.agent import replay
-from replay.bugs import BUGS, reset_workspace
-from replay.conditions import CONDITIONS
-from replay.llm import Chat, llm_matcher, llm_policy, make_client, pick_model
-from replay.project import running_app
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+from run_bug import run_bug  # noqa: E402
+from replay.agent import replay  # noqa: E402
+from replay.bugs import BUGS, reset_workspace  # noqa: E402
+from replay.conditions import CONDITIONS  # noqa: E402
+from replay.llm import Chat, llm_matcher, llm_policy, make_client, pick_model  # noqa: E402
+from replay.project import running_app  # noqa: E402
 
-OUT = Path(__file__).parent / "results"
+OUT = ROOT / "results"
 DEPTH = {"reproduced": 1, "fixing": 1, "proving": 1, "fix_unproven": 1, "fix_failed": 1, "fixed": 2, "guarded": 3}
 
 

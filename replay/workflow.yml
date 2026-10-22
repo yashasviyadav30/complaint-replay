@@ -15,7 +15,7 @@ on:
         description: What the user said, in their own words
         required: true
       user:
-        description: "Who to replay as: slow_3g_android, iphone, hindi, arabic, elderly, keyboard, screen_reader, flaky_network, fast_desktop"
+        description: "Who to replay as: slow_3g_android, iphone, hindi, arabic, elderly, keyboard, screen_reader, flaky_network, train, fast_desktop"
         default: slow_3g_android
   pull_request:
   push:

@@ -67,6 +67,8 @@ export default function App() {
   }, [project]);
 
   useEffect(() => {
+    // Polling the service is syncing with an outside system; state is set only after each request resolves.
+    // oxlint-disable-next-line react/set-state-in-effect
     refresh();
     if (DEMO) return; // recorded data never changes
     const timer = setInterval(refresh, POLL_MS);

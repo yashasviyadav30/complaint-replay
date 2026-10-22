@@ -5,6 +5,16 @@ description = "Reproduce user complaints under their real conditions, fix them w
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.13"
+authors = [{ name = "yashasviyadav30" }]
+keywords = ["bug-reproduction", "playwright", "accessibility", "github-actions", "llm-agents", "nemotron", "mcp"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Software Development :: Testing",
+]
 dependencies = [
     "fastapi>=0.143.0",
     "fasttext-predict>=0.9.2.4",
@@ -16,6 +26,11 @@ dependencies = [
     "tzdata>=2026.5",
     "uvicorn[standard]>=0.54.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/yashasviyadav30/complaint-replay"
+Demo = "https://yashasviyadav30.github.io/complaint-replay/"
+Issues = "https://github.com/yashasviyadav30/complaint-replay/issues"
 
 [project.scripts]
 crp = "replay.cli:main"

@@ -22,11 +22,11 @@ jobs:
       - name: Install both browser engines, as customers do
         run: uv run crp setup
       - name: iPhone in Safari's engine (Pay button off a 393 px screen)
-        run: uv run python pipeline.py 4 iphone
+        run: uv run python scripts/run_bug.py 4 iphone
       - name: Older user at their own pace (OTP expires after 10 s)
-        run: uv run python pipeline.py 16
+        run: uv run python scripts/run_bug.py 16
       - name: Signal drops mid-payment (retry charges twice)
-        run: uv run python pipeline.py 17
+        run: uv run python scripts/run_bug.py 17
       - if: always()
         uses: actions/upload-artifact@v4
         with:

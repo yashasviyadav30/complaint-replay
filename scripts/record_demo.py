@@ -78,7 +78,7 @@ async def film(case_timeout_s: int) -> None:
         board = await ctx.new_page()
         await board.goto(SERVICE)
         await board.wait_for_timeout(2500)
-        await board.click("text=Break It")  # the visible press
+        await board.click("text=Turn on a bug")  # the visible press
         await board.wait_for_timeout(2000)
         plant_coupon_bug()  # make sure the secret bug is the coupon one, the only one a desktop user can hit
 
