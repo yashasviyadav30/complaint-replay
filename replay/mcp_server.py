@@ -36,9 +36,12 @@ async def replay_complaint(complaint: str, user: str = "", device: str = "", net
     """Replay a user's complaint in a real browser, as that user, and report what broke.
 
     user: a ready-made user, one of the names in `crp replay --help` (e.g. screen_reader, keyboard, hindi).
-    device: a phone or computer name (see find_devices); network: wifi, 4g, 3g, slow_3g, ...
+    device: a phone or computer name (see find_devices); network: wifi, 4g, 3g, slow-3g, 2g, satellite, flaky,
+    tunnel, drops.
     url: a running site to replay; empty starts the app from complaint-replay.toml.
-    fix: also write a fix, prove it with the same steps, and save a guard test (no pull request).
+    fix: also write a fix, prove it with the same steps, and build a guard test (no pull request). The fix is made
+    in a temporary copy of the repo: apply the printed diff yourself, and save the case file's `guard.test` as
+    .complaint-replay/guards/<case id>.json.
     Takes a few minutes. Returns the verdict, the machine evidence ("*" marks the proof), and the case file,
     which holds every step and the film (a captioned GIF of the steps).
     """

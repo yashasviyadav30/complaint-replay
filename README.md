@@ -112,6 +112,10 @@ claude mcp add complaint-replay -- crp mcp          # Cursor and other MCP clien
 The agent gets `replay_complaint`, `run_guards` and `find_devices`, so it can reproduce a bug as the user, change the
 code, and rerun the guard until it passes.
 
+[`skill/complaint-replay/SKILL.md`](skill/complaint-replay/SKILL.md) is an agent skill for these tools. It tells the
+agent when to replay, how to pick the user from a report's wording, how to read each verdict, and how to bring a fix
+and its guard into the repo. Copy the folder into `.claude/skills/` (or your agent's skills folder) to use it.
+
 ### Server, widget and dashboard (optional)
 
 ```bash
